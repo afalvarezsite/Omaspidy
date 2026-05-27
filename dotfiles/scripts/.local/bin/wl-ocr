@@ -7,7 +7,7 @@ TMP_IMG="/tmp/wl-ocr-img.png"
 TMP_TXT="/tmp/wl-ocr-txt"
 
 # Seleccionar region y guardar imagen
-if grim -g "$(slurp)" "$TMP_IMG"; then
+if grim -g "$(slurp -b 0c0d1280 -c ff1e43ff -s 00000000 -w 2)" "$TMP_IMG"; then
     # Notificar inicio de proceso
     notify-send -t 2000 "OCR" "Procesando imagen..."
     

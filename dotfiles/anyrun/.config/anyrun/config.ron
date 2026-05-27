@@ -1,0 +1,25 @@
+// config.ron
+// Configuración de Anyrun (Rust-based launcher)
+
+Config(
+  // Posición: top, center, bottom
+  position: Top,
+
+  // Fracción de la pantalla que Anyrun ocupa horizontalmente
+  width: Fraction(0.3),
+
+  // Desplazamiento desde la parte superior (si position es Top)
+  y_fraction: 0.2,
+
+  // Ocultar al perder el foco
+  hide_on_focus_lost: true,
+
+  // Cierra anyrun con un clic fuera
+  close_on_click: true,
+
+  // Plugins a cargar
+  // Según Tools_utils_other.md: estrictamente libapplications.so
+  plugins: [
+    "libapplications.so",
+  ],
+)

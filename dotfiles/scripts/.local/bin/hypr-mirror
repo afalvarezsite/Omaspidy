@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# hypr-mirror: Alternar entre modo extendido y modo espejo en Hyprland.
+# Asume que el monitor principal es eDP-1. Detecta dinamicamente HDMI-A-1 o DP-1.
+
+# Definir la pantalla principal del portatil
+LAPTOP_MON="eDP-1"
+
+# Intentar detectar el monitor externo activo
+EXT_MON=$(hyprctl monitors -j | grep -o '"name": "[^"]*"' | cut -d'"' -f4 | grep -v "$LAPTOP_MON" | head -n1)
+
+if [[ -z "$EXT_MON" ]]; then
+    notify-send -u normal "Monitor" "No se ha detectado ningun monitor externo conectado."
+    exit 1
+fi
+
+# Comprobar el estado actual buscando la palabra "mirror" en la configuracion activa de monitores
+IS_MIRROR=$(hyprctl monitors -j | grep -A 10 "\"name\": \"$EXT_MON\"" | grep "mirrorOf")
+
+if [[ "$IS_MIRROR" == *"\"\""* ]] || [[ -z "$IS_MIRROR" ]]; then
+    # Actualmente en modo extendido -> Cambiar a modo espejo
+    hyprctl keyword monitor "$EXT_MON, preferred, auto, 1, mirror, $LAPTOP_MON"
+    notify-send -t 2000 "Pantalla" "Modo Espejo Activado"
+else
+    # Actualmente en modo espejo -> Cambiar a modo extendido
+    hyprctl keyword monitor "$EXT_MON, preferred, auto, 1"
+    notify-send -t 2000 "Pantalla" "Modo Extendido Activado"
+fi

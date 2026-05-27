@@ -1,0 +1,109 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 40,
+    "margin-top": 10,
+    "margin-left": 15,
+    "margin-right": 15,
+    "spacing": 5,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/window"
+    ],
+    "modules-center": [
+        "clock"
+    ],
+    "modules-right": [
+        "network",
+        "pulseaudio",
+        "battery",
+        "tray",
+        "custom/power"
+    ],
+
+    "hyprland/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "active-only": false,
+        "on-click": "activate",
+        "persistent-workspaces": {
+            "*": 5
+        },
+        "format": "{icon}",
+        "format-icons": {
+            "default": "󰯰",
+            "active": "󰯰",
+            "urgent": "󰯰"
+        }
+    },
+
+    "hyprland/window": {
+        "format": "{title}",
+        "max-length": 40,
+        "rewrite": {
+            "": "Escritorio Libre",
+            "(.*) - Mozilla Firefox": "󰈹 $1",
+            "(.*) - nvim": " $1",
+            "Alacritty": " Terminal"
+        }
+    },
+
+    "clock": {
+        "locale": "es_ES.UTF-8",
+        "format": "{:%H:%M}",
+        "format-alt": "{:%A, %d de %B}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>"
+    },
+
+    "network": {
+        "format-wifi": " {signalStrength}%",
+        "format-ethernet": "󰈀 Conectado",
+        "tooltip-format": "{essid} vía {gwaddr} ",
+        "format-linked": "󰈀 (Sin IP)",
+        "format-disconnected": "⚠ Desconectado",
+        "format-alt": "{ifname}: {ipaddr}/{cidr}",
+        "on-click-right": "alacritty --class floating_tui -e nmtui"
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-bluetooth": "󰂰 {volume}%",
+        "format-bluetooth-muted": "󰂲 Mute",
+        "format-muted": "󰝟 Mute",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "swayosd-client --output-volume mute-toggle",
+        "on-click-right": "alacritty --class floating_tui -e pulsemixer"
+    },
+
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-alt": "{time} {icon}",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+
+    "tray": {
+        "icon-size": 18,
+        "spacing": 10
+    },
+
+    "custom/power": {
+        "format": "⏻",
+        "tooltip": false,
+        "on-click": "alacritty --class floating_tui -e sys-power"
+    }
+}

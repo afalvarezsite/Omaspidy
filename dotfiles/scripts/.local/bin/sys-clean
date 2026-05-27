@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# sys-clean: Utilidad de mantenimiento y limpieza del sistema.
+# Dependencias: pacman, paru, sudo
+
+echo "=== Mantenimiento de Arch Linux ==="
+
+# Limpiar cache de Pacman manteniendo las ultimas 2 versiones de los paquetes
+if command -v paccache &> /dev/null; then
+    echo "-> Limpiando cache de paquetes de Pacman..."
+    sudo paccache -r -k 2
+else
+    echo "-> paccache no encontrado. Asegurate de tener pacman-contrib instalado."
+fi
+
+# Eliminar paquetes huerfanos (paquetes instalados como dependencias que ya no se necesitan)
+echo "-> Buscando paquetes huerfanos..."
+ORPHANS=$(pacman -Qtdq)
+if [[ -n "$ORPHANS" ]]; then
+    echo "Eliminando huerfanos: $ORPHANS"
+    sudo pacman -Rns $ORPHANS
+else
+    echo "No se encontraron paquetes huerfanos."
+fi
+
+# Limpiar cache de Paru/Yay (AUR)
+if command -v paru &> /dev/null; then
+    echo "-> Limpiando cache de AUR (paru)..."
+    paru -Sc --noconfirm
+fi
+
+# Vaciar cachés de usuario residuales de ~/.cache que suelen engordar mucho
+echo "-> Vaciando ~/.cache/thumbnails..."
+rm -rf "$HOME/.cache/thumbnails/*"
+echo "-> Vaciando carpetas temporales de yay/paru..."
+rm -rf "$HOME/.cache/paru/clone/*"
+rm -rf "$HOME/.cache/yay/*"
+
+echo "=== Mantenimiento Completado ==="

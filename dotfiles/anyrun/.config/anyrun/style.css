@@ -1,0 +1,69 @@
+/* 
+ * Anyrun Spider-Man Theme (Red & Black)
+ * Glassmorphic, modern, extremely snappy look
+ */
+
+* {
+  transition: 200ms ease-out;
+  font-family: "Hack Nerd Font";
+  font-size: 1.3rem;
+}
+
+#window {
+  /* Fondo completamente transparente para el contenedor global */
+  background: transparent;
+}
+
+#match,
+#entry,
+#plugin,
+#main {
+  /* Fondo transparente heredado */
+  background: transparent;
+}
+
+box#main {
+  /* Contenedor principal de Anyrun */
+  background: rgba(12, 13, 18, 0.92);
+  border: 2px solid #e60026;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0px 0px 15px rgba(230, 0, 38, 0.3);
+}
+
+entry#entry {
+  /* Barra de busqueda */
+  background: rgba(22, 23, 31, 0.95);
+  border: 1px solid #ff3b5c;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 8px 16px;
+  color: #f8f9fa;
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
+}
+
+list#main {
+  /* Lista de resultados */
+  background: transparent;
+}
+
+/* Items individuales en la lista */
+#match {
+  padding: 8px;
+  border-radius: 8px;
+  color: #f8f9fa;
+  margin: 2px 0;
+}
+
+/* Hover / Seleccionado en la lista */
+#match:selected {
+  background: rgba(230, 0, 38, 0.4);
+  border: 1px solid #ff3b5c;
+  color: #ffffff;
+  box-shadow: 0px 0px 10px rgba(255, 59, 92, 0.5);
+}
+
+/* Texto de la aplicacion / descripcion */
+#match label {
+  color: inherit;
+}

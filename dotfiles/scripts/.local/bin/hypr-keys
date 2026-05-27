@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+# Ruta de prueba (Apunta directamente al repositorio de dotfiles)
+CONFIG_FILE="$HOME/Documentos/ArchInstallGuide/dotfiles/hypr/.config/hypr/conf.d/keybinds.conf"
+
+# Ruta para produccion (Descomentar al instalar con stow)
+# CONFIG_FILE="$HOME/.config/hypr/conf.d/keybinds.conf"
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "[ERROR] No se encontro el archivo: $CONFIG_FILE"
+    read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+    exit 1
+fi
+
+grep -E '^bind' "$CONFIG_FILE" \
+    | sed -E 's/^bind[a-z]*\s*=\s*//' \
+    | awk -F', ' '{
+        mod = $1;
+        key = $2;
+        action = $3;
+        target = "";
+        
+        for (i=4; i<=NF; i++) {
+            target = target (i==4 ? "" : ", ") $i
+        }
+        
+        # Formatear el modificador
+        gsub(/\$mainMod/, "SUPER", mod);
+        gsub(/SUPER SHIFT/, "SUPER + SHIFT", mod);
+        
+        if (mod == "") {
+            combo = key;
+        } else {
+            combo = mod " + " key;
+        }
+        
+        # Formatear la accion para que sea User-Friendly
+        if (action == "exec") {
+            desc = target;
+        } else if (action == "workspace") {
+            desc = "Ir al Espacio de Trabajo " target;
+        } else if (action == "movetoworkspace") {
+            desc = "Mover Ventana al Espacio " target;
+        } else if (action == "killactive") {
+            desc = "Cerrar Ventana";
+        } else if (action == "togglefloating") {
+            desc = "Ventana Flotante (On/Off)";
+        } else if (action == "fullscreen") {
+            desc = "Pantalla Completa";
+        } else if (action == "exit") {
+            desc = "Salir de Hyprland";
+        } else if (action == "movefocus") {
+            desc = "Mover Foco -> " target;
+        } else {
+            desc = action " " target;
+        }
+        
+        # Limpiar comandos complejos y variables
+        gsub(/\$terminal/, "Terminal", desc);
+        gsub(/\$fileManager/, "Gestor de Archivos", desc);
+        gsub(/\$menu/, "Lanzador de Apps", desc);
+        
+        # Reemplazar llamadas especificas con descripciones humanas
+        if (desc ~ /hypr-keys/) desc = "Menu de Atajos de Teclado";
+        else if (desc ~ /bluetuith/) desc = "Menu de Bluetooth";
+        else if (desc ~ /nmtui/) desc = "Menu de Red / WiFi";
+        else if (desc ~ /pulsemixer/) desc = "Menu de Audio";
+        else if (desc ~ /btop/) desc = "Monitor de Sistema";
+        else if (desc ~ /clipse/) desc = "Historial de Portapapeles";
+        else if (desc ~ /slurp/ && desc ~ /satty/) desc = "Capturar Area de Pantalla";
+        else if (desc ~ /satty/) desc = "Capturar Pantalla Completa";
+        else if (desc ~ /gpu-screen-recorder/) desc = "Grabar Pantalla (On/Off)";
+        else if (desc ~ /output-volume raise/) desc = "Subir Volumen";
+        else if (desc ~ /output-volume lower/) desc = "Bajar Volumen";
+        else if (desc ~ /output-volume mute-toggle/) desc = "Mutear Audio";
+        else if (desc ~ /brightness raise/) desc = "Subir Brillo";
+        else if (desc ~ /brightness lower/) desc = "Bajar Brillo";
+        else if (desc ~ /hyprlock/) desc = "Bloquear Pantalla";
+        
+        # Imprimir con un separador claro
+        printf "%s = %s\n", combo, desc;
+    }' \
+    | column -t -s '=' \
+    | fzf \
+        --prompt="> Buscar: " \
+        --pointer=">" \
+        --layout=reverse \
+        --border=rounded \
+        --margin=2% \
+        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+        --header="  ATAJO DE TECLADO            ACCION" \
+        --bind "enter:execute(echo {} | wl-copy)+abort" \
+        --info=inline

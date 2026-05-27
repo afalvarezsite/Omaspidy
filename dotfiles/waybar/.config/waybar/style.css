@@ -1,0 +1,139 @@
+/* Minimalist Spider-Man Theme for Waybar (Pill Design) */
+
+@define-color bg-dark   #0c0d12;
+@define-color bg-light  rgba(22, 23, 31, 0.85);
+@define-color fg        #f8f9fa;
+@define-color red       #e60026;
+@define-color red-glow  #ff3b5c;
+@define-color inactive  #474b5c;
+
+* {
+    font-family: "Hack Nerd Font";
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+}
+
+/* Modulos convertidos en pildoras flotantes (Pills) */
+#workspaces,
+#window,
+#clock,
+#network,
+#pulseaudio,
+#battery,
+#tray,
+#custom-power {
+    background: @bg-light;
+    color: @fg;
+    border: 1px solid alpha(@red, 0.4);
+    border-radius: 20px; /* Bordes super redondeados */
+    padding: 0 16px;
+    margin: 0 4px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Hover general para pildoras interactivas */
+#network:hover,
+#pulseaudio:hover,
+#battery:hover,
+#custom-power:hover,
+#clock:hover {
+    background: alpha(@red, 0.2);
+    border-color: @red-glow;
+    box-shadow: 0px 0px 12px alpha(@red-glow, 0.4);
+    color: #ffffff;
+}
+
+/* Workspaces Específico */
+#workspaces {
+    padding: 0 6px;
+}
+
+#workspaces button {
+    color: @inactive;
+    padding: 0 8px;
+    margin: 4px 2px;
+    border-radius: 12px;
+    background: transparent;
+    transition: all 0.3s ease;
+    font-size: 16px;
+}
+
+#workspaces button:hover {
+    color: @fg;
+    background: alpha(@red, 0.3);
+    text-shadow: 0px 0px 5px @fg;
+}
+
+#workspaces button.active {
+    color: @red;
+    background: transparent;
+    text-shadow: 0px 0px 10px @red-glow;
+}
+
+#workspaces button.urgent {
+    color: @red-glow;
+    background: transparent;
+}
+
+/* Window (Titulo) Minimalista */
+#window {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: @fg;
+    font-weight: normal;
+}
+
+/* Reloj Central Destacado */
+#clock {
+    color: @fg;
+    font-size: 15px;
+    font-weight: 800;
+    background: @bg-dark;
+    border: 2px solid @red;
+    box-shadow: 0px 0px 15px alpha(@red, 0.5);
+}
+
+/* Alertas de Bateria */
+#battery.charging, #battery.plugged {
+    color: #00e676;
+    border-color: #00e676;
+}
+
+#battery.critical:not(.charging) {
+    background-color: @red;
+    color: @bg-dark;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/* Custom Power Button (Rojo y llamativo) */
+#custom-power {
+    color: @red-glow;
+    padding: 0 18px;
+}
+
+#custom-power:hover {
+    background: @red;
+    color: @bg-dark;
+    border-color: @red;
+}
+
+@keyframes blink {
+    to {
+        background-color: @bg-dark;
+        color: @red;
+        border-color: @red;
+    }
+}

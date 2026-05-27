@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Opciones con iconos Nerd Font
+OPTIONS="  Bloquear Pantalla\n󰤄  Suspender\n󰗽  Cerrar Sesion\n󰜉  Reiniciar\n⏻  Apagar"
+
+# FZF con la paleta visual Spider-Man (Rojo Neon y Negro)
+SELECTION=$(echo -e "$OPTIONS" | fzf \
+    --prompt=" 🕷️ Menu de Energia  " \
+    --pointer="  " \
+    --layout=reverse \
+    --border=rounded \
+    --margin=5% \
+    --padding=2% \
+    --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+    --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+    --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+    --header="Selecciona una accion para el sistema:" \
+    --info=hidden)
+
+# Ejecutar la accion seleccionada
+case "$SELECTION" in
+    *"Bloquear Pantalla")
+        hyprlock
+        ;;
+    *"Suspender")
+        systemctl suspend
+        ;;
+    *"Cerrar Sesion")
+        hyprctl dispatch exit
+        ;;
+    *"Reiniciar")
+        systemctl reboot
+        ;;
+    *"Apagar")
+        systemctl poweroff
+        ;;
+esac

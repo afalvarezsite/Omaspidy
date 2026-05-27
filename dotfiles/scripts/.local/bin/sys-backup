@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# sys-backup: Wrapper para crear snapshots seguros con Snapper.
+# Dependencias: snapper, sudo
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "Este script necesita privilegios de superusuario."
+    exec sudo "$0" "$@"
+fi
+
+echo "=== Creacion de Snapshot (BTRFS / Snapper) ==="
+read -r -p "Introduce una descripcion para este snapshot: " DESC
+
+if [[ -z "$DESC" ]]; then
+    echo "Operacion cancelada. La descripcion no puede estar vacia."
+    exit 1
+fi
+
+echo "Generando snapshot del sistema raiz (/) ..."
+snapper -c root create -c timeline -d "$DESC"
+
+if [[ $? -eq 0 ]]; then
+    echo "Snapshot creado correctamente."
+    # Listar los ultimos 3 snapshots para verificacion
+    snapper -c root ls | tail -n 4
+else
+    echo "Hubo un error al crear el snapshot."
+    exit 1
+fi

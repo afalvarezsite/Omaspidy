@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# wl-ocr: Extrae texto de un recorte de pantalla usando Tesseract OCR y lo copia al portapapeles.
+# Dependencias: grim, slurp, tesseract, wl-clipboard, mako/notify-send
+
+# Archivo temporal para la imagen
+TMP_IMG="/tmp/wl-ocr-img.png"
+TMP_TXT="/tmp/wl-ocr-txt"
+
+# Seleccionar region y guardar imagen
+if grim -g "$(slurp)" "$TMP_IMG"; then
+    # Notificar inicio de proceso
+    notify-send -t 2000 "OCR" "Procesando imagen..."
+    
+    # Extraer texto (tesseract aniade la extension .txt al archivo de salida automaticamente)
+    tesseract -l eng+spa "$TMP_IMG" "$TMP_TXT" > /dev/null 2>&1
+    
+    # Comprobar si se genero el archivo de texto
+    if [[ -f "${TMP_TXT}.txt" ]]; then
+        # Copiar al portapapeles
+        cat "${TMP_TXT}.txt" | wl-copy
+        
+        # Notificar exito
+        notify-send -t 3000 "OCR Completado" "Texto copiado al portapapeles"
+        
+        # Limpiar temporales
+        rm -f "$TMP_IMG" "${TMP_TXT}.txt"
+    else
+        notify-send -u critical "Error OCR" "Tesseract no pudo procesar la imagen"
+    fi
+else
+    # El usuario cancelo el recorte
+    exit 0
+fi

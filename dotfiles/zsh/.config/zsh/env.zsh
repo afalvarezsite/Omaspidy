@@ -14,7 +14,19 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 
 # Añadir binarios locales y de Cargo al PATH
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+export PATH="$PATH:$HOME/.local/bin:$HOME/Documentos/ArchInstallGuide/dotfiles/scripts/.local/bin"
+
+# ==============================================================================
+# CONFIGURACIÓN DE FORGIT (TEMA SPIDER-MAN DISCRETO)
+# ==============================================================================
+# Opciones personalizadas de fzf para forgit (colores y diseño redondeado)
+export FORGIT_FZF_DEFAULT_OPTS="
+  --color='fg:7,bg:-1,hl:9'
+  --color='fg+:15,bg+:8,hl+:9'
+  --color='info:8,prompt:9,pointer:12,marker:12,spinner:12,header:8'
+  --layout='reverse'
+  --border='rounded'
+"
 
 # Historial
 export HISTFILE="$XDG_STATE_HOME/zsh/history"

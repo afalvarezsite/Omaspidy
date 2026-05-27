@@ -1,34 +1,57 @@
 # aliases.zsh
-# Alias y reemplazos modernos de CLI
+# Alias y reemplazos modernos de la CLI (Escritos en Rust/Go)
 
-# Navegación y utilidades básicas
+# --- Navegacion Básica ---
 alias c="clear"
 alias q="exit"
 alias mkdir="mkdir -p"
 
-# Modern CLI Replacements (Tools_utils_other.md)
+# --- Modern CLI Replacements ---
+# ls -> eza (Mejor color y estructura)
 alias ls="eza --icons=always --color=always --group-directories-first"
 alias ll="eza -al --icons=always --color=always --group-directories-first"
 alias lt="eza --tree --level=2 --icons=always --color=always"
 
+# cat -> bat (Cat con resaltado de sintaxis)
 alias cat="bat --style=plain"
+
+# grep -> ripgrep (Búsqueda ultra-rápida)
 alias grep="rg"
+
+# find -> fd (Búsqueda amigable)
 alias find="fd"
+
+# du -> dust (Analizador de espacio visual)
 alias du="dust"
+
+# df -> duf (Espacio en disco visual)
 alias df="duf"
-alias top="btop"
+
+# ps -> procs (Monitor de procesos moderno)
 alias ps="procs"
+
+# top/htop -> btop (Monitor de recursos interactivo)
+alias top="btop"
+alias htop="btop"
+
+# diff -> delta (Visor de diferencias para git/diff)
+alias diff="delta"
+
+# man -> tealdeer (Páginas man con ejemplos cortos)
 alias man="tldr"
 
-# Git (muchos otros alias se manejan mediante la configuración de git o plugins de zsh)
+# --- Git & Forgit ---
+# Utilizar las interfaces interactivas de forgit en lugar de los comandos estandar
 alias g="git"
 alias gs="git status"
-alias ga="git add"
+alias ga='forgit::add'
 alias gc="git commit -m"
 alias gp="git push"
 alias gl="git pull"
-alias gd="git diff"
+alias gd='forgit::diff'
+alias glo='forgit::log'
+alias gcb='forgit::checkout::branch'
 
-# Utilidades de sistema
+# --- Mantenimiento Arch ---
 alias update="paru -Syu"
-alias sys-backup="sudo lifeboat" # Wrapper o uso directo de systemd-boot-lifeboat
+alias orphans="pacman -Qtdq"

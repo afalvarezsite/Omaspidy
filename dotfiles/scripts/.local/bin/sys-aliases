@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# Rutas al archivo de alias
+# Ruta de prueba (Apunta directamente al repositorio de dotfiles)
+ALIASES_FILE="$HOME/Documentos/ArchInstallGuide/dotfiles/zsh/.config/zsh/aliases.zsh"
+
+# Ruta para produccion (Descomentar al instalar con stow)
+# ALIASES_FILE="$HOME/.config/zsh/aliases.zsh"
+
+if [[ ! -f "$ALIASES_FILE" ]]; then
+    echo "[ERROR] No se encontro el archivo: $ALIASES_FILE"
+    read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+    exit 1
+fi
+
+grep -E '^alias ' "$ALIASES_FILE" \
+    | sed -E 's/^alias //' \
+    | awk -F'=' '{
+        name = $1;
+        cmd = "";
+        
+        # El comando puede contener "=", asi que lo reconstruimos
+        for (i=2; i<=NF; i++) {
+            cmd = cmd (i==2 ? "" : "=") $i
+        }
+        
+        # Limpiar comillas iniciales y finales
+        gsub(/^"|"$/, "", cmd);
+        gsub(/^'\''|'\''$/, "", cmd);
+        
+        # Formato de salida
+        printf "%s = %s\n", name, cmd;
+    }' \
+    | column -t -s '=' \
+    | fzf \
+        --prompt="> Buscar Alias: " \
+        --pointer=">" \
+        --layout=reverse \
+        --border=rounded \
+        --margin=2% \
+        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+        --header="  ALIAS               COMANDO" \
+        --bind "enter:execute(echo {} | awk '{print \$1}' | wl-copy)+abort" \
+        --info=inline

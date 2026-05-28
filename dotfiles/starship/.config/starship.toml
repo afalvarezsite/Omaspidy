@@ -4,6 +4,7 @@
 format = """
 [╭─](bold #ff1e43)\
 $os\
+${custom.distrobox}\
 $directory\
 $git_branch\
 $git_status\
@@ -76,3 +77,11 @@ format = "[ 󰌠 $version]($style)"
 [golang]
 style = "bold #00e5ff"
 format = "[  $version]($style)"
+
+[custom.distrobox]
+description = "Show distrobox container name"
+command = "echo $container"
+when = "test -n \"$container\""
+style = "bold #00e5ff"
+format = "[ 🕷️ $output]($style)"
+

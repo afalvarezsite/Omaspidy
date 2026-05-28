@@ -1,20 +1,46 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# SPIDER-MAN ARCH LINUX BOOTSTRAPPER
+# OMASPIDY: SPIDER-MAN ARCH LINUX BOOTSTRAPPER
 # Instala el entorno Hyprland + CLI Rust + Tema Rojinegro desde cero.
 # ==============================================================================
 
-# --- Colores de Salida ---
+# --- Colores de Salida (Paleta Spider-Man Premium) ---
 RED='\033[1;31m'
 GREEN='\033[1;32m'
 BLUE='\033[1;34m'
 YELLOW='\033[1;33m'
+WHITE='\033[1;37m'
 NC='\033[0m'
+BOLD='\033[1m'
 
 msg() { echo -e "${BLUE}::${NC} $1"; }
 msg_ok() { echo -e "${GREEN}==>${NC} $1"; }
 msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
 msg_warn() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+
+show_banner() {
+  local paso="$1"
+  local desc="$2"
+  
+  clear
+  echo -e "${RED}"
+  echo "  ██████╗ ███╗   ███╗ █████╗ ███████╗██████╗ ██╗██████╗ ██╗   ██╗"
+  echo " ██╔═══██╗████╗ ████║██╔══██╗██╔════╝██╔══██╗██║██╔══██╗╚██╗ ██╔╝"
+  echo " ██║   ██║██╔████╔██║███████║███████╗██████╔╝██║██║  ██║ ╚████╔╝ "
+  echo " ██║   ██║██║╚██╔╝██║██╔══██║╚════██║██╔═══╝ ██║██║  ██║  ╚██╔╝  "
+  echo " ╚██████╔╝██║ ╚═╝ ██║██║  ██║███████║██║     ██║██████╔╝   ██║   "
+  echo "  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═════╝    ╚═╝   "
+  echo -e "${NC}"
+  echo -e "         ${BOLD}🕷️  OH MY SPIDY - Ecosistema Arch Linux Premium  🕷️${NC}"
+  echo -e "     ${WHITE}─────────────────────────────────────────────────────────${NC}"
+  
+  if [ -n "$paso" ] && [ -n "$desc" ]; then
+    echo ""
+    echo -e "  ${RED}[ PASO $paso / 8 ]${NC} ${BOLD}$desc${NC}"
+    echo -e "  ${WHITE}─────────────────────────────────────────────────────────${NC}"
+  fi
+  echo ""
+}
 
 # --- Comprobación de Seguridad ---
 if [ "$EUID" -eq 0 ]; then
@@ -23,7 +49,10 @@ if [ "$EUID" -eq 0 ]; then
   exit 1
 fi
 
-msg_warn "Este script instalará todo el ecosistema (Hyprland, Drivers Intel, Zsh, Herramientas Rust)."
+# Mostrar banner de presentación inicial
+show_banner "" ""
+
+msg_warn "Este script instalará todo el ecosistema (Hyprland, Drivers Intel, Zsh, Herramientas Rust, Repositorios CachyOS)."
 read -p "¿Deseas continuar con la instalación? [s/N]: " confirm
 if [[ ! "$confirm" =~ ^[sS]$ ]]; then
     msg "Instalación cancelada."
@@ -61,6 +90,7 @@ else
 fi
 
 # --- 1. Sincronización base y Paru ---
+show_banner "1" "Configurando repositorios CachyOS, actualizando e instalando Paru..."
 msg "Pidiendo permisos de administrador para la instalación inicial..."
 
 # Configuración de los repositorios optimizados de CachyOS e instalación del Kernel
@@ -86,6 +116,7 @@ else
 fi
 
 # --- 2. Paquetes Base (Repositorios Oficiales) ---
+show_banner "2" "Instalando paquetes base del repositorio oficial de Arch Linux..."
 msg "Instalando paquetes del repositorio oficial de Arch..."
 CORE_PKGS=(
     # Drivers Intel Meteor Lake y Hardware Base
@@ -113,6 +144,7 @@ CORE_PKGS=(
 paru -S --needed --noconfirm "${CORE_PKGS[@]}"
 
 # --- 3. Paquetes AUR (-git y específicos) ---
+show_banner "3" "Instalando herramientas y utilidades adicionales desde AUR..."
 msg "Instalando paquetes de AUR..."
 AUR_PKGS=(
     anyrun-git
@@ -127,6 +159,7 @@ AUR_PKGS=(
 paru -S --needed --noconfirm "${AUR_PKGS[@]}"
 
 # --- 4. Configuración del Greetd (Login TUI) ---
+show_banner "4" "Configurando gestor de login visual (greetd + tuigreet)..."
 msg "Configurando greetd (tuigreet) con tema Spider-Man..."
 sudo mkdir -p /etc/greetd
 cat << 'EOF' | sudo tee /etc/greetd/config.toml > /dev/null
@@ -141,6 +174,7 @@ EOF
 sudo usermod -aG video greeter
 
 # --- 5. Configuración de Snapper y Backups Automáticos ---
+show_banner "5" "Configurando políticas de backups y snapshots automáticos BTRFS..."
 msg "Configurando Snapshots automáticos de BTRFS..."
 if [[ ! -f /etc/snapper/configs/root ]]; then
     sudo snapper -c root create-config / || msg_warn "Snapper config 'root' ya existe o hubo un error."
@@ -159,6 +193,7 @@ sudo systemctl enable --now snapper-timeline.timer
 sudo systemctl enable --now snapper-cleanup.timer
 
 # --- 6. Configuración de Dotfiles (Stow) ---
+show_banner "6" "Enlazando configuraciones personales de tus dotfiles con Stow..."
 msg "Desplegando configuraciones con Stow..."
 # Limpiamos configs por defecto que puedan hacer conflicto
 rm -f "$HOME/.zshrc" "$HOME/.bashrc"
@@ -173,6 +208,7 @@ stow alacritty anyrun hypr mako nvim scripts starship waybar zsh git
 msg_ok "Configuraciones desplegadas."
 
 # --- 7. Habilitación de Servicios ---
+show_banner "7" "Activando servicios systemd esenciales (Bluetooth, Red, Snapper)..."
 msg "Habilitando servicios systemd..."
 sudo systemctl enable --now thermald
 sudo systemctl enable --now NetworkManager
@@ -181,6 +217,7 @@ sudo systemctl enable greetd
 msg_ok "Servicios activados."
 
 # --- 7.5. Configuración de systemd-boot con Kernel CachyOS ---
+show_banner "8" "Optimizando cargador de arranque systemd-boot y post-instalación..."
 msg "Verificando y configurando cargador de arranque systemd-boot con linux-cachyos..."
 if [ -d "/boot/loader/entries" ]; then
     # Obtener el UUID de la partición raíz montada en /

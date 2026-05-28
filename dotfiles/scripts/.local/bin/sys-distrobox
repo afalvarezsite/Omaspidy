@@ -1,0 +1,373 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-DISTROBOX: Gestor Interactivo de Contenedores de Pruebas y Pentesting
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# ==============================================================================
+
+# --- Colores y Estilos ---
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+BLUE='\033[1;34m'
+YELLOW='\033[1;33m'
+CYAN='\033[1;36m'
+MAGENTA='\033[1;35m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+# --- Funciones de Mensajería ---
+msg() { echo -e "${BLUE}::${NC} $1"; }
+msg_ok() { echo -e "${GREEN}==>${NC} $1"; }
+msg_warn() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
+msg_title() {
+    clear
+    echo -e "${RED} 🕷️  OH MY SPIDY - DISTROBOX MANAGER  🕷️${NC}"
+    echo -e "${WHITE} ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+}
+
+# --- Comprobación de Dependencias ---
+check_deps() {
+    local missing=()
+    for dep in distrobox podman fzf; do
+        if ! command -v "$dep" &>/dev/null; then
+            missing+=("$dep")
+        fi
+    done
+    if [ ${#missing[@]} -ne 0 ]; then
+        msg_err "Faltan las siguientes dependencias: ${missing[*]}"
+        msg "Por favor, ejecute el instalador o instálelas manualmente: paru -S distrobox podman fzf"
+        exit 1
+    fi
+}
+
+# --- Obtener Contenedores Disponibles ---
+get_boxes() {
+    # Formato de salida: nombre | imagen | estado
+    distrobox list --no-color 2>/dev/null | tail -n +2 | awk -F'|' '{
+        gsub(/[[:space:]]+/, "", $2);
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", $3);
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", $4);
+        print $2 " [" $3 "] - (" $4 ")"
+    }'
+}
+
+# --- 1. Entrar a un Contenedor ---
+enter_box() {
+    msg_title
+    msg "Obteniendo lista de contenedores..."
+    local boxes
+    boxes=$(get_boxes)
+    
+    if [ -z "$boxes" ]; then
+        msg_warn "No hay contenedores creados todavía."
+        read -p "¿Deseas crear uno ahora? [s/N]: " confirm
+        if [[ "$confirm" =~ ^[sS]$ ]]; then
+            create_box
+        fi
+        return
+    fi
+    
+    local selection
+    selection=$(echo -e "$boxes" | fzf \
+        --prompt="   Selecciona un contenedor ❯ " \
+        --pointer="" \
+        --marker="󰄬" \
+        --layout=reverse \
+        --border=rounded \
+        --margin=2% \
+        --padding=1,2 \
+        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+        --header="Selecciona el entorno al que deseas ingresar:" \
+        --info=hidden)
+        
+    if [ -n "$selection" ]; then
+        local box_name
+        box_name=$(echo "$selection" | awk '{print $1}')
+        msg_ok "Entrando al contenedor: $box_name..."
+        echo -e "${CYAN}Nota: Escribe 'exit' para volver al sistema anfitrión.${NC}"
+        echo ""
+        distrobox enter "$box_name"
+    fi
+}
+
+# --- 2. Crear / Inicializar Contenedor ---
+create_box() {
+    msg_title
+    local options="1)   Ubuntu Test Box (Ubuntu Latest - Pruebas Generales)\n2)   Arch Test Box (Arch Linux - Desarrollo Secundario)\n3)   Kali Pentesting Box (Kali Rolling - Herramientas Hacking)\n4) 🚀 Inicializar Todos (Configuración Completa)\n5) 📦  Imagen Personalizada (Custom Docker/OCI Image)"
+    
+    local selection
+    selection=$(echo -e "$options" | fzf \
+        --prompt=" 󰏖  Selecciona plantilla ❯ " \
+        --pointer="" \
+        --layout=reverse \
+        --border=rounded \
+        --margin=2% \
+        --padding=1,2 \
+        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+        --header="Selecciona la plantilla de contenedor a crear:" \
+        --info=hidden)
+        
+    case "$selection" in
+        *Ubuntu*)
+            setup_single_box "ubuntu-test" "docker.io/library/ubuntu:latest"
+            ;;
+        *Arch*)
+            setup_single_box "arch-test" "docker.io/library/archlinux:latest"
+            ;;
+        *Kali*)
+            setup_single_box "kali-pentest" "docker.io/kali-linux/kali-rolling:latest"
+            echo -e "${YELLOW}💡 CONSEJO PARA KALI LINUX:${NC}"
+            echo -e "Una vez dentro del contenedor, ejecuta el siguiente comando para instalar las herramientas:"
+            echo -e "  ${BOLD}sudo apt update && sudo apt install -y kali-linux-headless${NC}"
+            echo ""
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            ;;
+        *Todos*)
+            setup_single_box "ubuntu-test" "docker.io/library/ubuntu:latest"
+            setup_single_box "arch-test" "docker.io/library/archlinux:latest"
+            setup_single_box "kali-pentest" "docker.io/kali-linux/kali-rolling:latest"
+            echo -e "${GREEN}✔ Ecosistema inicializado por completo.${NC}"
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            ;;
+        *Custom*|*Personalizada*)
+            echo -e "${CYAN}--- Configuración de Imagen Personalizada ---${NC}"
+            read -p "Introduce el nombre para el contenedor (ej: alpine-test): " custom_name
+            if [ -z "$custom_name" ]; then
+                msg_err "El nombre no puede estar vacío."
+                read -n 1 -s -r -p "Presiona cualquier tecla para volver..."
+                return
+            fi
+            read -p "Introduce la URI/Tag de la imagen (ej: docker.io/library/alpine:latest): " custom_image
+            if [ -z "$custom_image" ]; then
+                msg_err "La URI de la imagen no puede estar vacía."
+                read -n 1 -s -r -p "Presiona cualquier tecla para volver..."
+                return
+            fi
+            echo ""
+            setup_single_box "$custom_name" "$custom_image"
+            echo ""
+            read -n 1 -s -r -p "Proceso de creación finalizado. Presiona cualquier tecla para continuar..."
+            ;;
+    esac
+}
+
+setup_single_box() {
+    local name="$1"
+    local img="$2"
+    msg_ok "Creando contenedor '$name' desde '$img'..."
+    distrobox create --name "$name" --image "$img" --pull --yes
+}
+
+# --- 3. Actualizar Contenedores ---
+upgrade_boxes() {
+    msg_title
+    msg "Iniciando actualización completa de paquetes de todos los contenedores..."
+    distrobox upgrade --all
+    echo ""
+    read -n 1 -s -r -p "Actualización finalizada. Presiona cualquier tecla para volver..."
+}
+
+# --- 4. Exportar Aplicación al Host ---
+export_app() {
+    msg_title
+    local boxes
+    boxes=$(get_boxes)
+    
+    if [ -z "$boxes" ]; then
+        msg_warn "No hay contenedores creados."
+        read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+        return
+    fi
+    
+    local selection
+    selection=$(echo -e "$boxes" | fzf \
+        --prompt=" 󱠟  Selecciona origen ❯ " \
+        --pointer="" \
+        --layout=reverse \
+        --border=rounded \
+        --margin=2% \
+        --padding=1,2 \
+        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+        --header="¿Desde qué contenedor deseas exportar el comando/app?" \
+        --info=hidden)
+        
+    if [ -n "$selection" ]; then
+        local box_name
+        box_name=$(echo "$selection" | awk '{print $1}')
+        
+        echo ""
+        echo -e "${BOLD}¿Qué tipo de recurso deseas exportar?${NC}"
+        echo -e "1) Aplicación Gráfica (Creará entrada en tu menú Anyrun)"
+        echo -e "2) Binario de Terminal (Creará link directo en ~/.local/bin)"
+        read -p "Selecciona una opción [1/2]: " type_choice
+        
+        local type_flag=""
+        if [ "$type_choice" = "1" ]; then
+            type_flag="--app"
+        elif [ "$type_choice" = "2" ]; then
+            type_flag="--bin"
+        else
+            msg_err "Opción no válida."
+            return
+        fi
+        
+        read -p "Introduce el nombre del comando/app a exportar (ej: wireshark o nmap): " app_name
+        if [ -n "$app_name" ]; then
+            msg_ok "Exportando $app_name desde $box_name..."
+            distrobox enter "$box_name" -- distrobox-export "$type_flag" "$app_name"
+            echo ""
+            read -n 1 -s -r -p "Operación completada. Presiona cualquier tecla para continuar..."
+        fi
+    fi
+}
+
+# --- 5. Reiniciar/Detener Contenedores ---
+stop_box() {
+    msg_title
+    local boxes
+    boxes=$(get_boxes)
+    
+    if [ -z "$boxes" ]; then
+        msg_warn "No hay contenedores creados."
+        read -n 1 -s -r -p "Presiona cualquier tecla..."
+        return
+    fi
+    
+    local selection
+    selection=$(echo -e "$boxes" | fzf \
+        --prompt=" 󰦛  Detener contenedor ❯ " \
+        --pointer="" \
+        --layout=reverse \
+        --border=rounded \
+        --margin=2% \
+        --padding=1,2 \
+        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+        --header="Selecciona el contenedor que deseas detener:" \
+        --info=hidden)
+        
+    if [ -n "$selection" ]; then
+        local box_name
+        box_name=$(echo "$selection" | awk '{print $1}')
+        msg_ok "Deteniendo $box_name..."
+        distrobox stop "$box_name" --yes
+        msg_ok "Contenedor detenido."
+        sleep 1
+    fi
+}
+
+# --- 6. Eliminar Contenedor ---
+delete_box() {
+    msg_title
+    local boxes
+    boxes=$(get_boxes)
+    
+    if [ -z "$boxes" ]; then
+        msg_warn "No hay contenedores creados."
+        read -n 1 -s -r -p "Presiona cualquier tecla..."
+        return
+    fi
+    
+    local selection
+    selection=$(echo -e "$boxes" | fzf \
+        --prompt=" 󰅖  Eliminar contenedor ❯ " \
+        --pointer="" \
+        --layout=reverse \
+        --border=rounded \
+        --margin=2% \
+        --padding=1,2 \
+        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+        --header="ATENCIÓN: Se perderán los datos internos no guardados en el Home del host." \
+        --info=hidden)
+        
+    if [ -n "$selection" ]; then
+        local box_name
+        box_name=$(echo "$selection" | awk '{print $1}')
+        read -p "¿Estás absolutamente seguro de eliminar '$box_name'? [s/N]: " confirm
+        if [[ "$confirm" =~ ^[sS]$ ]]; then
+            msg_warn "Borrando $box_name..."
+            distrobox rm -f "$box_name"
+            msg_ok "Contenedor eliminado."
+            sleep 1
+        fi
+    fi
+}
+
+# --- 7. Limpieza de Podman ---
+prune_system() {
+    msg_title
+    msg_warn "Esta acción purgará contenedores y cachés huérfanas de Podman para liberar espacio en disco."
+    read -p "¿Deseas continuar? [s/N]: " confirm
+    if [[ "$confirm" =~ ^[sS]$ ]]; then
+        msg "Purgando recursos no utilizados de Podman..."
+        podman system prune -a --volumes -f
+        msg_ok "Limpieza completada."
+        echo ""
+    fi
+    read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+}
+
+# --- Ciclo Principal (Menú Interactiva) ---
+main() {
+    check_deps
+    while true; do
+        msg_title
+        local menu_options="󰌢  Entrar a un Contenedor\n󰏖  Crear / Inicializar Ecosistema\n󰚚  Actualizar Todos los Contenedores\n󱠟  Exportar Aplicación al Host\n󰦛  Detener Contenedor\n󰅖  Eliminar Contenedor\n󰃢  Limpieza del Sistema (Podman Prune)\n󰌑  Salir"
+        
+        local choice
+        choice=$(echo -e "$menu_options" | fzf \
+            --prompt="  ❯ " \
+            --pointer="" \
+            --marker="󰄬" \
+            --layout=reverse \
+            --border=rounded \
+            --margin=2% \
+            --padding=1,2 \
+            --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
+            --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
+            --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
+            --header="Selecciona una acción para gestionar Distrobox:" \
+            --info=hidden)
+            
+        case "$choice" in
+            *"Entrar a un Contenedor")
+                enter_box
+                ;;
+            *"Crear / Inicializar Ecosistema")
+                create_box
+                ;;
+            *"Actualizar Todos los Contenedores")
+                upgrade_boxes
+                ;;
+            *"Exportar Aplicación al Host")
+                export_app
+                ;;
+            *"Detener Contenedor")
+                stop_box
+                ;;
+            *"Eliminar Contenedor")
+                delete_box
+                ;;
+            *"Limpieza del Sistema")
+                prune_system
+                ;;
+            *"Salir"|*)
+                clear
+                exit 0
+                ;;
+        esac
+    done
+}
+
+main "$@"

@@ -142,6 +142,9 @@ CORE_PKGS=(
     
     # Contenedores y Aislamiento (Pruebas y Pentesting)
     distrobox podman
+    
+    # Nuevas Herramientas Optimizadas (Rust/Go/C)
+    fastfetch gdu xh jaq lazygit mise trippy bandwhich
 )
 
 paru -S --needed --noconfirm "${CORE_PKGS[@]}"
@@ -157,6 +160,7 @@ AUR_PKGS=(
     bluetuith-bin
     systemd-boot-lifeboat
     localsend-go-bin
+    oxker-bin
 )
 
 paru -S --needed --noconfirm "${AUR_PKGS[@]}"

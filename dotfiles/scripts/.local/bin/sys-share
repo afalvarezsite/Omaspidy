@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# sys-share: Interfaz TUI para LocalSend (localsend-go)
+# Permite enviar y recibir archivos de forma nativa desde la terminal.
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    --color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\"
+    --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\"
+    --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+CONFIG_FILE="$HOME/.config/sys-share.conf"
+DEFAULT_DIR="$HOME/Descargas"
+
+# Cargar configuracion si existe
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+fi
+
+if ! command -v localsend-go &> /dev/null; then
+    echo -e "\033[1;31m[ERROR]\033[0m localsend-go no está instalado. Ejecuta 'paru -S localsend-go-bin'."
+    read -r
+    exit 1
+fi
+
+# Bucle principal para no salir a menos que el usuario lo pida
+while true; do
+    MENU="1. 󰇚 Recibir Archivo(s)\n2. 󰈮 Enviar Archivo(s)\n3. 󰒓 Configurar Ruta de Descargas"
+    SELECCION=$(echo -e "$MENU" | fzf --prompt="  ❯ " --header="LocalSend: Intercambio TUI (Esc o /exit para salir)")
+
+    # Salir del bucle si pulsa Escape, Ctrl+C o si la selección está vacía
+    if [ -z "$SELECCION" ] || [[ "$SELECCION" == *"/exit"* ]]; then
+        break
+    fi
+
+    case "$SELECCION" in
+        *Recibir*)
+            clear
+            if [ ! -d "$DEFAULT_DIR" ]; then DEFAULT_DIR="$HOME"; fi
+            echo -e "\033[1;31m[LocalSend]\033[0m Modo Recepción Activo."
+            echo -e "Guardando archivos en: \033[1;36m$DEFAULT_DIR\033[0m\n"
+            
+            cd "$DEFAULT_DIR" || exit
+            localsend-go recv
+            ;;
+            
+        *Enviar*)
+            if command -v fd &> /dev/null; then
+                ARCHIVOS=$(fd -t f . ~ 2>/dev/null | fzf --prompt="  ❯ " --header="LocalSend: Elegir Archivos (TAB=multi)" --multi)
+            else
+                ARCHIVOS=$(find ~ -type f 2>/dev/null | fzf --prompt="  ❯ " --header="LocalSend: Elegir Archivos (TAB=multi)" --multi)
+            fi
+            
+            if [ -n "$ARCHIVOS" ]; then
+                clear
+                unset ARGS
+                while IFS= read -r file; do
+                    ARGS+=("$file")
+                done <<< "$ARCHIVOS"
+                
+                # Ejecutamos localsend-go de forma nativa para que use su propia interfaz TUI (BubbleTea) 
+                # de selección de dispositivos sin interferencias.
+                localsend-go send "${ARGS[@]}"
+                
+                # Pequeña pausa para ver si el envío fue exitoso antes de recargar el menú principal
+                sleep 2
+            fi
+            ;;
+            
+        *Configurar*)
+            if command -v fd &> /dev/null; then
+                NUEVA_RUTA=$(fd -t d . ~ 2>/dev/null | fzf --prompt="  ❯ " --header="LocalSend: Selecciona Nueva Carpeta | Actual: $DEFAULT_DIR")
+            else
+                NUEVA_RUTA=$(find ~ -maxdepth 4 -type d 2>/dev/null | fzf --prompt="  ❯ " --header="LocalSend: Selecciona Nueva Carpeta | Actual: $DEFAULT_DIR")
+            fi
+            
+            if [ -n "$NUEVA_RUTA" ]; then
+                echo "DEFAULT_DIR=\"$NUEVA_RUTA\"" > "$CONFIG_FILE"
+                DEFAULT_DIR="$NUEVA_RUTA"
+            fi
+            ;;
+    esac
+done

@@ -273,6 +273,6 @@ Una vez completada la ejecución del script, el sistema se reiniciará automáti
 
 Al entrar a Hyprland:
 - Abre la consola con `Super + Enter`.
-- Presiona `Super + K` para desplegar el catálogo de atajos interactivo en FZF.
+- Presiona `Super + G` para desplegar el catálogo de atajos interactivo en FZF.
 - Presiona `Super + S` para lanzar la utilidad de intercambio de archivos nativa LocalSend (`sys-share`).
 - Ejecuta `sys-clean` en cualquier momento para mantener el sistema libre de huérfanos y paquetes temporales residuales.

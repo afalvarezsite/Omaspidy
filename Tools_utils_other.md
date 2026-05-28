@@ -14,7 +14,19 @@ Specifically tailored and optimized for the **Intel Core Ultra 7 155H** + **Inte
 - **Processor Microcode:** `intel-ucode` (Essential security and stability microcode patches for Intel Core Ultra)
 - **Graphics Drivers (Mesa):**
   - **OpenGL/Vulkan:** `mesa` + `vulkan-intel` + `lib32-vulkan-intel` (High performance userspace driver for Arc Graphics/Xe-LPG)
-  - **Kernel Driver:** Built-in `i915` (mature) or `xe` (new high-performance driver, fully supported in `linux-cachyos`)
+  - **Kernel Driver:** El kernel oficial usa el driver `i915` por defecto o el nuevo driver de alto rendimiento `xe` (diseñado específicamente desde cero para arquitecturas Xe-HPG/Xe-LPG como Intel Arc en Meteor Lake). En el kernel `linux-cachyos` ya viene completamente soportado y optimizado de forma nativa.
+    > [!TIP]
+    > **Cómo forzar el driver `xe` de alto rendimiento para exprimir tus gráficos al máximo (Intel Arc):**
+    > 1. Crea el archivo de configuración de modprobe `/etc/modprobe.d/xe.conf`:
+    >    ```ini
+    >    options i915 force_probe=!7d05
+    >    options xe force_probe=7d05
+    >    ```
+    >    *(Nota: `7d05` es el ID PCI típico para la gráfica integrada Intel Arc Xe-LPG del Core Ultra 7 155H. Asegúrate de verificar tu ID ejecutando `lspci -nn | grep VGA`)*.
+    > 2. Regenera tu initramfs para aplicar el cambio en el arranque:
+    >    ```bash
+    >    sudo mkinitcpio -P
+    >    ```
 - **Hardware Video Acceleration:** `intel-media-driver` + `libva-utils` (Enables full hardware AV1, H.265/HEVC, VP9, and H.264 video decoding/encoding)
 - **Audio Firmware:** `sof-firmware` + `alsa-ucm-conf` (Crucial for Intel Smart Sound Technology to recognize internal microphones and speakers)
 - **Thermal & Hybrid Core Management:**

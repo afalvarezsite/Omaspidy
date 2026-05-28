@@ -7,22 +7,23 @@ if [[ "$EUID" -ne 0 ]]; then
     exec sudo "$0" "$@"
 fi
 
-echo "=== Creacion de Snapshot (BTRFS / Snapper) ==="
-read -r -p "Introduce una descripcion para este snapshot: " DESC
+echo -e "\033[1;31m  Creacion de Snapshot (BTRFS / Snapper) \033[0m"
+echo -ne "\033[1;36mIntroduce una descripcion para este snapshot: \033[0m"
+read -r DESC
 
 if [[ -z "$DESC" ]]; then
-    echo "Operacion cancelada. La descripcion no puede estar vacia."
+    echo -e "\033[1;31mOperacion cancelada. La descripcion no puede estar vacia.\033[0m"
     exit 1
 fi
 
-echo "Generando snapshot del sistema raiz (/) ..."
+echo -e "\033[1;36mGenerando snapshot del sistema raiz (/) ...\033[0m"
 snapper -c root create -c timeline -d "$DESC"
 
 if [[ $? -eq 0 ]]; then
-    echo "Snapshot creado correctamente."
+    echo -e "\033[1;32mSnapshot creado correctamente.\033[0m"
     # Listar los ultimos 3 snapshots para verificacion
     snapper -c root ls | tail -n 4
 else
-    echo "Hubo un error al crear el snapshot."
+    echo -e "\033[1;31mHubo un error al crear el snapshot.\033[0m"
     exit 1
 fi

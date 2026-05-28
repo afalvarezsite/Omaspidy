@@ -2,37 +2,37 @@
 # sys-clean: Utilidad de mantenimiento y limpieza del sistema.
 # Dependencias: pacman, paru, sudo
 
-echo "=== Mantenimiento de Arch Linux ==="
+echo -e "\033[1;31m  Mantenimiento de Arch Linux \033[0m"
 
 # Limpiar cache de Pacman manteniendo las ultimas 2 versiones de los paquetes
 if command -v paccache &> /dev/null; then
-    echo "-> Limpiando cache de paquetes de Pacman..."
+    echo -e "\033[1;36m-> Limpiando cache de paquetes de Pacman...\033[0m"
     sudo paccache -r -k 2
 else
-    echo "-> paccache no encontrado. Asegurate de tener pacman-contrib instalado."
+    echo -e "\033[1;33m-> paccache no encontrado. Asegurate de tener pacman-contrib instalado.\033[0m"
 fi
 
 # Eliminar paquetes huerfanos (paquetes instalados como dependencias que ya no se necesitan)
-echo "-> Buscando paquetes huerfanos..."
+echo -e "\033[1;36m-> Buscando paquetes huerfanos...\033[0m"
 ORPHANS=$(pacman -Qtdq)
 if [[ -n "$ORPHANS" ]]; then
-    echo "Eliminando huerfanos: $ORPHANS"
+    echo -e "\033[1;35mEliminando huerfanos: $ORPHANS\033[0m"
     sudo pacman -Rns $ORPHANS
 else
-    echo "No se encontraron paquetes huerfanos."
+    echo -e "\033[1;32mNo se encontraron paquetes huerfanos.\033[0m"
 fi
 
 # Limpiar cache de Paru/Yay (AUR)
 if command -v paru &> /dev/null; then
-    echo "-> Limpiando cache de AUR (paru)..."
+    echo -e "\033[1;36m-> Limpiando cache de AUR (paru)...\033[0m"
     paru -Sc --noconfirm
 fi
 
 # Vaciar cachés de usuario residuales de ~/.cache que suelen engordar mucho
-echo "-> Vaciando ~/.cache/thumbnails..."
+echo -e "\033[1;36m-> Vaciando ~/.cache/thumbnails...\033[0m"
 rm -rf "$HOME/.cache/thumbnails/*"
-echo "-> Vaciando carpetas temporales de yay/paru..."
+echo -e "\033[1;36m-> Vaciando carpetas temporales de yay/paru...\033[0m"
 rm -rf "$HOME/.cache/paru/clone/*"
 rm -rf "$HOME/.cache/yay/*"
 
-echo "=== Mantenimiento Completado ==="
+echo -e "\033[1;31m  Mantenimiento Completado \033[0m"

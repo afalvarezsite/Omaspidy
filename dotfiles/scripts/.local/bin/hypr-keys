@@ -82,11 +82,13 @@ grep -E '^bind' "$CONFIG_FILE" \
     }' \
     | column -t -s '=' \
     | fzf \
-        --prompt="> Buscar: " \
-        --pointer=">" \
+        --prompt="  ❯ " \
+        --pointer="" \
+        --marker="󰄬" \
         --layout=reverse \
         --border=rounded \
         --margin=2% \
+        --padding=1,2 \
         --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
         --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
         --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \

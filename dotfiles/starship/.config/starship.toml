@@ -28,7 +28,7 @@ format = "[󰣇 ]($style)"
 [directory]
 style = "bold #e60026"
 format = "[ $path ]($style)"
-read_only = " 🔒"
+read_only = " 󰌾"
 truncation_length = 3
 truncate_to_repo = false
 
@@ -54,16 +54,16 @@ format = "[ $symbol$status]($style)"
 
 [cmd_duration]
 style = "bold #474b5c"
-format = "[ ⏱ $duration]($style)"
+format = "[ 󱎫 $duration]($style)"
 
 [jobs]
 style = "bold #00e5ff"
-format = "[ ✦ $number]($style)"
+format = "[ 󰒋 $number]($style)"
 
 [direnv]
 disabled = false
 style = "bold #ffd600"
-format = "[ ▼ $loaded]($style)"
+format = "[ 󱞣 $loaded]($style)"
 
 [nodejs]
 style = "bold #00e676"

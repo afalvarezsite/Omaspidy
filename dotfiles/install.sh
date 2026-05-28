@@ -202,9 +202,26 @@ sudo systemctl enable --now snapper-cleanup.timer
 # --- 6. Configuración de Dotfiles (Stow) ---
 show_banner "6" "Enlazando configuraciones personales de tus dotfiles con Stow..."
 msg "Desplegando configuraciones con Stow..."
-# Limpiamos configs por defecto que puedan hacer conflicto
-rm -f "$HOME/.zshrc" "$HOME/.bashrc"
-rm -rf "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim"
+# Limpiamos configs por defecto que puedan hacer conflicto de forma no destructiva (Respaldando)
+BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%s)"
+msg_backup=false
+
+for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim"; do
+    if [ -e "$item" ] || [ -L "$item" ]; then
+        if [ "$msg_backup" = false ]; then
+            msg "Se han detectado configuraciones previas en tu sistema."
+            msg "Creando respaldos de seguridad en: $BACKUP_DIR"
+            mkdir -p "$BACKUP_DIR"
+            msg_backup=true
+        fi
+        # Si es un symlink (ej. Stow de una instalacion previa), se borra directamente
+        if [ -L "$item" ]; then
+            rm -f "$item"
+        else
+            mv "$item" "$BACKUP_DIR/"
+        fi
+    fi
+done
 
 # Entrar en la carpeta dotfiles dentro del repositorio dinámico
 cd "$DOTFILES_DIR/dotfiles" || { msg_err "No se pudo acceder a la carpeta de dotfiles en $DOTFILES_DIR/dotfiles"; exit 1; }

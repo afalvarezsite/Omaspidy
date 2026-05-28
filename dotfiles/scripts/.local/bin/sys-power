@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Opciones con iconos Nerd Font
-OPTIONS="  Bloquear Pantalla\n󰤄  Suspender\n󰗽  Cerrar Sesion\n󰜉  Reiniciar\n⏻  Apagar"
+# Opciones con iconos Nerd Font (Apagar primero)
+OPTIONS="  Apagar\n  Bloquear Pantalla\n󰤄  Suspender\n󰗽  Cerrar Sesion\n󰜉  Reiniciar"
 
 # FZF con la paleta visual Spider-Man (Rojo Neon y Negro)
 SELECTION=$(echo -e "$OPTIONS" | fzf \

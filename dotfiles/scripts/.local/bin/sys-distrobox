@@ -22,7 +22,7 @@ msg_warn() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
 msg_title() {
     clear
-    echo -e "${RED} 🕷️  OH MY SPIDY - DISTROBOX MANAGER  🕷️${NC}"
+    echo -e "${RED} 󰠚  OH MY SPIDY - DISTROBOX MANAGER  󰠚${NC}"
     echo -e "${WHITE} ─────────────────────────────────────────────────────────${NC}"
     echo ""
 }
@@ -97,7 +97,7 @@ enter_box() {
 # --- 2. Crear / Inicializar Contenedor ---
 create_box() {
     msg_title
-    local options="1)   Ubuntu Test Box (Ubuntu Latest - Pruebas Generales)\n2)   Arch Test Box (Arch Linux - Desarrollo Secundario)\n3)   Kali Pentesting Box (Kali Rolling - Herramientas Hacking)\n4) 🚀 Inicializar Todos (Configuración Completa)\n5) 📦  Imagen Personalizada (Custom Docker/OCI Image)"
+    local options="1)   Ubuntu Test Box (Ubuntu Latest - Pruebas Generales)\n2)   Arch Test Box (Arch Linux - Desarrollo Secundario)\n3)   Kali Pentesting Box (Kali Rolling - Herramientas Hacking)\n4)   Inicializar Todos (Configuración Completa)\n5) 󰏗  Imagen Personalizada (Custom Docker/OCI Image)"
     
     local selection
     selection=$(echo -e "$options" | fzf \
@@ -122,7 +122,7 @@ create_box() {
             ;;
         *Kali*)
             setup_single_box "kali-pentest" "docker.io/kali-linux/kali-rolling:latest"
-            echo -e "${YELLOW}💡 CONSEJO PARA KALI LINUX:${NC}"
+            echo -e "${YELLOW}󰌵  CONSEJO PARA KALI LINUX:${NC}"
             echo -e "Una vez dentro del contenedor, ejecuta el siguiente comando para instalar las herramientas:"
             echo -e "  ${BOLD}sudo apt update && sudo apt install -y kali-linux-headless${NC}"
             echo ""
@@ -132,7 +132,7 @@ create_box() {
             setup_single_box "ubuntu-test" "docker.io/library/ubuntu:latest"
             setup_single_box "arch-test" "docker.io/library/archlinux:latest"
             setup_single_box "kali-pentest" "docker.io/kali-linux/kali-rolling:latest"
-            echo -e "${GREEN}✔ Ecosistema inicializado por completo.${NC}"
+            echo -e "${GREEN}  Ecosistema inicializado por completo.${NC}"
             read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
             ;;
         *Custom*|*Personalizada*)

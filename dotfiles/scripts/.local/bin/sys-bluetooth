@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-BLUETOOTH: Selector Rápido para Conectar/Desconectar Bluetooth Emparejados
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# ==============================================================================
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    --color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\"
+    --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\"
+    --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+# Comprobar si bluetooth está activo
+if ! systemctl is-active --quiet bluetooth; then
+    echo -e "\033[1;31m[ERROR]\033[0m El servicio Bluetooth no está activo."
+    read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+    exit 1
+fi
+
+# Obtener dispositivos emparejados
+PAIRED_DEVICES=$(bluetoothctl devices)
+
+if [ -z "$PAIRED_DEVICES" ]; then
+    echo -e "\033[1;33m[Bluetooth]\033[0m No hay dispositivos emparejados en el sistema."
+    read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+    exit 0
+fi
+
+echo -e "\033[1;36mObteniendo estado de los dispositivos Bluetooth...\033[0m"
+
+LIST=""
+while read -r dev; do
+    if [ -n "$dev" ]; then
+        MAC=$(echo "$dev" | awk '{print $2}')
+        NAME=$(echo "$dev" | cut -d' ' -f3-)
+        
+        # Consultar info de conexión de forma ultra-rápida (cacheada)
+        if bluetoothctl info "$MAC" | grep -q "Connected: yes"; then
+            ICON="󰂱"
+            STATUS="Conectado"
+            MARK="󰄬"
+        else
+            ICON="󰂲"
+            STATUS="Desconectado"
+            MARK=" "
+        fi
+        
+        # Determinar icono específico según el nombre del dispositivo
+        DEV_ICON="󰂯"
+        if [[ "$NAME" =~ [Hh]eadphone|[Hh]eadset|[Aa]uriculares|[Ww]h-|[Ww]F- ]]; then
+            DEV_ICON="󰋋"
+        elif [[ "$NAME" =~ [Kk]eyboard|[Te]clado ]]; then
+            DEV_ICON="󰌌"
+        elif [[ "$NAME" =~ [Mm]ouse|[Rr]atón ]]; then
+            DEV_ICON="󰍽"
+        elif [[ "$NAME" =~ [Pp]hone|[Mm]óvil|[Cc]elular ]]; then
+            DEV_ICON="󰏲"
+        fi
+        
+        LIST+="$MAC = [$MARK] $DEV_ICON  $NAME ($STATUS)\n"
+    fi
+done <<< "$PAIRED_DEVICES"
+
+SELECTION=$(echo -e "$LIST" | grep -v '^$' | fzf \
+    --prompt=" 󰂯 Dispositivos Bluetooth ❯ " \
+    --header="Selecciona un dispositivo para alternar su conexión (ENTER):")
+
+if [ -z "$SELECTION" ]; then
+    exit 0
+fi
+
+DEVICE_MAC=$(echo "$SELECTION" | cut -d'=' -f1 | sed 's/[[:space:]]//g')
+DEVICE_INFO=$(echo "$SELECTION" | cut -d']' -f2- | sed 's/^[[:space:]]*//')
+DEVICE_NAME=$(echo "$DEVICE_INFO" | sed 's/ (Conectado)$//; s/ (Desconectado)$//' | cut -d' ' -f2-)
+
+if [[ "$SELECTION" == *"Conectado"* ]]; then
+    # Desconectar
+    notify-send -t 2000 -i bluetooth "Bluetooth" "Desconectando $DEVICE_NAME..."
+    if bluetoothctl disconnect "$DEVICE_MAC" &>/dev/null; then
+        notify-send -t 3500 -i bluetooth-disabled "Bluetooth" "Dispositivo desconectado:\n$DEVICE_NAME"
+    else
+        notify-send -u critical -i dialog-error "Bluetooth" "Error al desconectar:\n$DEVICE_NAME"
+    fi
+else
+    # Conectar
+    notify-send -t 2000 -i bluetooth "Bluetooth" "Conectando a $DEVICE_NAME..."
+    if bluetoothctl connect "$DEVICE_MAC" &>/dev/null; then
+        notify-send -t 3500 -i bluetooth-active "Bluetooth" "Dispositivo conectado:\n$DEVICE_NAME"
+    else
+        notify-send -u critical -i dialog-error "Bluetooth" "Error al conectar:\n$DEVICE_NAME"
+    fi
+fi

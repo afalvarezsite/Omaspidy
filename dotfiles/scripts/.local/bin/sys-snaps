@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-SNAPS: Gestor e Inspector de Snapshots BTRFS / Snapper
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# ==============================================================================
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    --color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\"
+    --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\"
+    --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+# Forzar ejecución como Root/Sudo para poder interactuar con snapper
+if [[ "$EUID" -ne 0 ]]; then
+    exec sudo "$0" "$@"
+fi
+
+# Bucle principal
+while true; do
+    echo -e "\033[1;36mObteniendo lista de Snapshots BTRFS (Snapper)...\033[0m"
+    
+    # Listar y formatear snapshots
+    LIST=$(snapper -c root ls | tail -n +3 | grep -v 'current' | awk -F'|' '{
+      id = $1; gsub(/^[[:space:]]+|[[:space:]]+$/, "", id);
+      type = $2; gsub(/^[[:space:]]+|[[:space:]]+$/, "", type);
+      date = $4; gsub(/^[[:space:]]+|[[:space:]]+$/, "", date);
+      desc = $7; gsub(/^[[:space:]]+|[[:space:]]+$/, "", desc);
+      
+      if (id != "" && id != "0") {
+        # Icono según el tipo
+        icon = "󰄲"
+        if (type == "pre") icon = "󰁯 Pre"
+        else if (type == "post") icon = "󰁱 Post"
+        else icon = "󰄲 Single"
+        
+        printf "%s = #%-4s %-27s %-8s  %s\n", id, id, date, icon, desc
+      }
+    }' | tac) # Invertir orden para ver los más nuevos arriba
+    
+    if [ -z "$LIST" ]; then
+        echo -e "\033[1;33m[Snapper]\033[0m No se encontraron snapshots de usuario."
+        read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+        exit 0
+    fi
+    
+    SELECTION=$(echo -e "$LIST" | fzf \
+        --prompt=" 󰄲  Snapshots BTRFS ❯ " \
+        --header="Selecciona un Snapshot para administrar (ESC para salir):")
+        
+    if [ -z "$SELECTION" ]; then
+        clear
+        exit 0
+    fi
+    
+    SNAP_ID=$(echo "$SELECTION" | cut -d'=' -f1 | sed 's/[[:space:]]//g')
+    SNAP_INFO=$(echo "$SELECTION" | cut -d'=' -f2- | sed 's/^[[:space:]]*//')
+    
+    # Submenú para el snapshot seleccionado
+    SUBMENU="1. 󰈮  Ver Archivos Modificados (Diff / Status)\n2. 󰅖  Eliminar este Snapshot\n3. 󰁯  Restaurar Sistema a este Estado (Rollback)\n4. 󰌑  Volver Atrás"
+    ACTION=$(echo -e "$SUBMENU" | fzf \
+        --prompt=" 󰄲  Snapshot #$SNAP_ID ❯ " \
+        --header="Selecciona una acción para: $SNAP_INFO")
+        
+    case "$ACTION" in
+        *Status*|*Modificados*)
+            clear
+            echo -e "\033[1;31m=== Archivos Modificados en Snapshot #$SNAP_ID ===\033[0m"
+            echo -e "Cargando diferencias (esto puede tardar unos segundos)..."
+            echo ""
+            # Mostrar los archivos modificados usando snapper status
+            snapper -c root status "$SNAP_ID"..0 | less
+            ;;
+            
+        *Eliminar*)
+            read -p "¿Estás absolutamente seguro de eliminar el Snapshot #$SNAP_ID? [s/N]: " confirm
+            if [[ "$confirm" =~ ^[sS]$ ]]; then
+                echo -e "\033[1;36mEliminando snapshot #$SNAP_ID...\033[0m"
+                if snapper -c root delete "$SNAP_ID"; then
+                    echo -e "\033[1;32m  Snapshot #$SNAP_ID eliminado correctamente.\033[0m"
+                else
+                    echo -e "\033[1;31m  Error al eliminar el snapshot.\033[0m"
+                fi
+                sleep 1.5
+            fi
+            ;;
+            
+        *Rollback*)
+            clear
+            echo -e "\033[1;31m  ¡ATENCIÓN! OPERACIÓN DE ALTO RIESGO \033[0m"
+            echo -e "Estás a punto de restaurar el sistema completo (/) al estado del Snapshot #$SNAP_ID."
+            echo -e "Esto creará una copia clonada de este snapshot y la establecerá como la raíz activa."
+            echo ""
+            echo -e "\033[1;33mPara restaurar el sistema, se requieren privilegios completos.\033[0m"
+            read -p "¿Confirmas la restauración del sistema? [s/N]: " confirm
+            if [[ "$confirm" =~ ^[sS]$ ]]; then
+                echo -e "\033[1;36mEjecutando Snapper Rollback...\033[0m"
+                # Ejecutar rollback
+                ROLLBACK_OUT=$(snapper -c root rollback "$SNAP_ID" 2>&1)
+                if [[ $? -eq 0 ]]; then
+                    echo -e "\033[1;32m  Rollback completado con éxito.\033[0m"
+                    echo -e "$ROLLBACK_OUT"
+                    echo ""
+                    echo -e "\033[1;33mEl sistema ha sido restaurado. Por favor, REINICIA para aplicar los cambios.\033[0m"
+                    read -p "¿Deseas reiniciar el ordenador ahora mismo? [s/N]: " reboot_confirm
+                    if [[ "$reboot_confirm" =~ ^[sS]$ ]]; then
+                        systemctl reboot
+                    fi
+                else
+                    echo -e "\033[1;31m  Error al realizar el rollback:\033[0m"
+                    echo "$ROLLBACK_OUT"
+                    echo ""
+                    read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+                fi
+            fi
+            ;;
+            
+        *)
+            # Volver al menú
+            ;;
+    esac
+done

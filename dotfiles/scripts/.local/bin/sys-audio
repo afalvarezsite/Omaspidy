@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-AUDIO: Selector Rápido de Dispositivos de Audio PipeWire
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# ==============================================================================
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    --color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\"
+    --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\"
+    --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+# Menú principal
+MENU="1. 󰓃  Dispositivos de Salida (Altavoces/Auriculares)\n2. 󰍬  Dispositivos de Entrada (Micrófonos)"
+SELECTION=$(echo -e "$MENU" | fzf --prompt="  Selector de Audio ❯ " --header="Selecciona tipo de dispositivo a configurar:")
+
+if [ -z "$SELECTION" ]; then
+    exit 0
+fi
+
+TYPE=""
+if [[ "$SELECTION" == *"Salida"* ]]; then
+    TYPE="SINK"
+    PROMPT=" 󰓃  Salidas de Audio ❯ "
+    HEADER="Selecciona salida predeterminada (Altavoces/Auriculares):"
+else
+    TYPE="SOURCE"
+    PROMPT=" 󰍬  Entradas de Audio ❯ "
+    HEADER="Selecciona entrada predeterminada (Micrófono):"
+fi
+
+# Obtener dispositivos según tipo de forma dinámica
+DEVICES=$(wpctl status | awk -v type="$TYPE" '
+  /Sinks:/ {in_sinks=1; next}
+  /Sources:/ {in_sinks=0; in_sources=1; next}
+  /Filters:/ {in_sources=0}
+  in_sinks && type == "SINK" && /[0-9]+\./ {
+    is_active = ($0 ~ /\*/) ? "󰄬" : " "
+    match($0, /[0-9]+\./)
+    id = substr($0, RSTART, RLENGTH - 1)
+    name = substr($0, RSTART + RLENGTH)
+    sub(/[[:space:]]*\[vol:.*/, "", name)
+    sub(/^[[:space:]]+/, "", name)
+    # Iconos según el nombre del dispositivo
+    icon = "󰓃"
+    if (name ~ /[Hh]eadphone|[Hh]eadset|[Aa]uriculares|[Bb]luetooth/) icon = "󰋋"
+    else if (name ~ /[Hh]dmi|[Hh]DMI|[Dd]isplay[Pp]ort/) icon = "󰍹"
+    print id " = [" is_active "] " icon "  " name
+  }
+  in_sources && type == "SOURCE" && /[0-9]+\./ {
+    is_active = ($0 ~ /\*/) ? "󰄬" : " "
+    match($0, /[0-9]+\./)
+    id = substr($0, RSTART, RLENGTH - 1)
+    name = substr($0, RSTART + RLENGTH)
+    sub(/[[:space:]]*\[vol:.*/, "", name)
+    sub(/^[[:space:]]+/, "", name)
+    icon = "󰍬"
+    if (name ~ /[Ww]ebcam|[Cc]ámara|[Vv]ideo/) icon = "󰄀"
+    print id " = [" is_active "] " icon "  " name
+  }
+')
+
+if [ -z "$DEVICES" ]; then
+    echo -e "\033[1;31m[ERROR]\033[0m No se encontraron dispositivos de audio del tipo seleccionado."
+    read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+    exit 1
+fi
+
+DEVICE_SELECTION=$(echo -e "$DEVICES" | fzf --prompt="$PROMPT" --header="$HEADER")
+
+if [ -n "$DEVICE_SELECTION" ]; then
+    DEVICE_ID=$(echo "$DEVICE_SELECTION" | cut -d'=' -f1 | sed 's/[[:space:]]//g')
+    DEVICE_NAME=$(echo "$DEVICE_SELECTION" | cut -d']' -f2- | sed 's/^[[:space:]]*//')
+    
+    # Establecer como predeterminado
+    if wpctl set-default "$DEVICE_ID"; then
+        notify-send -t 3500 -i audio-speakers "Audio" "Dispositivo predeterminado cambiado a:\n$DEVICE_NAME"
+    else
+        notify-send -u critical -i dialog-error "Audio" "Error al cambiar al dispositivo:\n$DEVICE_NAME"
+    fi
+fi

@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-WIFI: Selector y Conector Interactivo de Redes Wi-Fi
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# ==============================================================================
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    --color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\"
+    --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\"
+    --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+# Comprobar si NetworkManager está activo
+if ! systemctl is-active --quiet NetworkManager; then
+    echo -e "\033[1;31m[ERROR]\033[0m NetworkManager no está activo."
+    read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+    exit 1
+fi
+
+# Asegurarse de que el Wi-Fi esté encendido
+nmcli radio wifi on
+
+echo -e "\033[1;36mEscaneando redes Wi-Fi a tu alrededor...\033[0m"
+
+# Escanear y obtener lista formateada de redes activas basadas en la señal numérica
+WIFI_LIST=$(nmcli -t -f ACTIVE,SSID,SIGNAL,SECURITY,CHAN device wifi list | awk -F':' '
+  NF >= 5 {
+    active = ($1 == "yes" || $1 == "*") ? "󰄬" : " "
+    ssid = $2
+    sig = $3 + 0
+    security = ($4 ~ /WPA|WEP/) ? "" : "  "
+    chan = $5
+    
+    if (ssid != "") {
+      # Asignar iconos de Nerd Fonts (material design wifi) según fuerza numérica
+      if (sig >= 80) bars = "󰤨"
+      else if (sig >= 55) bars = "󰤥"
+      else if (sig >= 30) bars = "󰤢"
+      else if (sig >= 10) bars = "󰤟"
+      else bars = "󰤯"
+      
+      print ssid " = [" active "] " bars "  " security "  (Canal " chan ")"
+    }
+  }
+' | sort -u)
+
+if [ -z "$WIFI_LIST" ]; then
+    echo -e "\033[1;31m[ERROR]\033[0m No se detectó ninguna red Wi-Fi."
+    read -n 1 -s -r -p "Presiona cualquier tecla para reescanear o salir..."
+    exit 0
+fi
+
+SELECTION=$(echo -e "$WIFI_LIST" | fzf \
+    --prompt=" 󰤨  Conectar Wi-Fi ❯ " \
+    --header="Selecciona una red inalámbrica ( = Protegida):")
+
+if [ -z "$SELECTION" ]; then
+    exit 0
+fi
+
+SSID=$(echo "$SELECTION" | cut -d'=' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+# Comprobar si ya existe una conexión guardada para evitar pedir contraseña
+if nmcli connection show | grep -q "^$SSID[[:space:]]"; then
+    notify-send -t 2000 -i network-wireless "Wi-Fi" "Conectando a red guardada '$SSID'..."
+    if nmcli connection up id "$SSID" &>/dev/null; then
+        notify-send -t 3500 -i network-wireless "Wi-Fi" "Conectado con éxito a:\n$SSID"
+    else
+        notify-send -u critical -i dialog-error "Wi-Fi" "Error al conectar a la red guardada:\n$SSID"
+    fi
+else
+    # Red nueva
+    if [[ "$SELECTION" == *""* ]]; then
+        # Red protegida -> Pedir contraseña interactiva en la terminal
+        echo -e "\n\033[1;36m La red '$SSID' está protegida.\033[0m"
+        read -s -p "Introduce la contraseña: " PASSWORD
+        echo ""
+        
+        if [ -z "$PASSWORD" ]; then
+            echo -e "\033[1;31m[ERROR]\033[0m La contraseña no puede estar vacía."
+            exit 1
+        fi
+        
+        notify-send -t 2000 -i network-wireless "Wi-Fi" "Conectando a '$SSID'..."
+        if nmcli device wifi connect "$SSID" password "$PASSWORD" &>/dev/null; then
+            notify-send -t 3500 -i network-wireless "Wi-Fi" "Conectado con éxito a:\n$SSID"
+        else
+            notify-send -u critical -i dialog-error "Wi-Fi" "Error al conectar o contraseña incorrecta para:\n$SSID"
+        fi
+    else
+        # Red abierta
+        notify-send -t 2000 -i network-wireless "Wi-Fi" "Conectando a red abierta '$SSID'..."
+        if nmcli device wifi connect "$SSID" &>/dev/null; then
+            notify-send -t 3500 -i network-wireless "Wi-Fi" "Conectado con éxito a la red abierta:\n$SSID"
+        else
+            notify-send -u critical -i dialog-error "Wi-Fi" "Error al conectar a la red abierta:\n$SSID"
+        fi
+    fi
+fi

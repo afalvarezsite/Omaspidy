@@ -1,0 +1,8 @@
+# keymap.toml
+# Atajos de teclado personalizados para Yazi
+
+[manager]
+prepend_keymap = [
+    # Integración TUI con LocalSend
+    { on = [ "S" ], run = 'shell "alacritty --class floating_tui -e localsend-go send \"$@\"" --confirm', desc = "Enviar a otro dispositivo (LocalSend)" }
+]

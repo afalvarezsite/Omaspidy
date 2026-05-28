@@ -1,0 +1,49 @@
+# yazi.toml 
+# Configuracion base para Yazi (Optimizacion y Navegacion TUI)
+
+[manager]
+ratio = [ 1, 4, 3 ]
+sort_by = "alphabetical"
+sort_sensitive = false
+sort_reverse = false
+sort_dir_first = true
+linemode = "none"
+show_hidden = false
+show_symlink = true
+scrolloff = 5
+
+[preview]
+tab_size = 4
+max_width = 1920
+max_height = 1080
+swap_buffers = false
+cache_dir = ""
+image_filter = "triangle"
+image_quality = 75
+sixel_fraction = 15
+ueberzug_scale = 1
+ueberzug_offset = [ 0, 0, 0, 0 ]
+
+[opener]
+edit = [
+    { run = '${EDITOR:=vi} "$@"', desc = "$EDITOR", block = true, for = "unix" },
+]
+play = [
+    { run = 'mpv "$@"', orphan = true, for = "unix" },
+]
+open = [
+    { run = 'xdg-open "$@"', desc = "Open", for = "linux" },
+]
+
+[open]
+rules = [
+    { name = "*.json", use = "edit" },
+    { name = "*.md", use = "edit" },
+    { name = "*.toml", use = "edit" },
+    { name = "*.conf", use = "edit" },
+    { mime = "text/*", use = "edit" },
+    { mime = "video/*", use = "play" },
+    { mime = "audio/*", use = "play" },
+    { mime = "inode/x-empty", use = "edit" },
+    { name = "*", use = "open" },
+]

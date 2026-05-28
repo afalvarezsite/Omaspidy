@@ -1,0 +1,82 @@
+# theme.toml 
+# Paleta de colores Spider-Man (Rojo Neón y Negro) para Yazi
+
+[manager]
+cwd = { fg = "#ff1e43", italic = true }
+hovered = { fg = "#ffffff", bg = "#e60026", bold = true }
+preview_hovered = { bg = "#16171f" }
+
+find_keyword = { fg = "#00e5ff", bold = true, italic = true }
+find_position = { fg = "#ff3b5c", bg = "reset", italic = true }
+
+marker_copied = { fg = "#00e676", bg = "#00e676" }
+marker_cut = { fg = "#ff1e43", bg = "#ff1e43" }
+marker_selected = { fg = "#00e5ff", bg = "#00e5ff" }
+
+border_symbol = "│"
+border_style = { fg = "#474b5c" }
+
+[status]
+separator_open = ""
+separator_close = ""
+
+# Modo normal (rojo)
+mode_normal = { bg = "#e60026", fg = "#ffffff", bold = true }
+# Modo seleccion (cyan neon)
+mode_select = { bg = "#00e5ff", fg = "#0c0d12", bold = true }
+# Modo no establecido (magenta)
+mode_unset = { bg = "#ff4081", fg = "#0c0d12", bold = true }
+
+progress_label = { fg = "#ffffff", bold = true }
+progress_normal = { fg = "#e60026", bg = "#16171f" }
+progress_error = { fg = "#ff1e43", bg = "#16171f" }
+
+[select]
+border = { fg = "#ff1e43" }
+active = { fg = "#ffffff", bg = "#e60026", bold = true }
+inactive = { fg = "#f8f9fa" }
+
+[input]
+border = { fg = "#ff1e43" }
+title = { fg = "#e60026", bold = true }
+value = { fg = "#f8f9fa" }
+selected = { bg = "#e60026" }
+
+[completion]
+border = { fg = "#ff1e43" }
+active = { bg = "#e60026", fg = "#ffffff" }
+inactive = { fg = "#f8f9fa" }
+
+[help]
+on = { fg = "#ff1e43", bold = true }
+exec = { fg = "#00e5ff" }
+desc = { fg = "#f8f9fa" }
+hovered = { bg = "#16171f", bold = true }
+footer = { fg = "#474b5c" }
+
+[filetype]
+rules = [
+    # Imágenes (Cyan)
+    { mime = "image/*", fg = "#00e5ff" },
+    # Videos (Magenta)
+    { mime = "video/*", fg = "#d500f9" },
+    # Audio (Rosa)
+    { mime = "audio/*", fg = "#ff4081" },
+    # Archivos comprimidos (Amarillo)
+    { mime = "application/zip", fg = "#ffd600" },
+    { mime = "application/gzip", fg = "#ffd600" },
+    { mime = "application/x-tar", fg = "#ffd600" },
+    { mime = "application/x-bzip*", fg = "#ffd600" },
+    { mime = "application/x-7z-compressed", fg = "#ffd600" },
+    { mime = "application/x-rar", fg = "#ffd600" },
+    # Documentos
+    { mime = "application/pdf", fg = "#ff1e43" },
+    # Scripts y código
+    { name = "*.sh", fg = "#00e676", bold = true },
+    { name = "*.py", fg = "#00e5ff", bold = true },
+    { name = "*.rs", fg = "#ff3b5c", bold = true },
+    { name = "*.c", fg = "#54a0ff", bold = true },
+    { name = "*.cpp", fg = "#54a0ff", bold = true },
+    # Por defecto
+    { name = "*", fg = "#f8f9fa" }
+]

@@ -59,6 +59,12 @@ Specifically tailored and optimized for the **Intel Core Ultra 7 155H** + **Inte
 - **Screen Temperature (Blue Light):** **hyprsunset** (Official Hyprland application to adjust screen temperature / blue light filter)
 - **AUR Helper:** **paru** (Feature-rich, blazing fast Arch User Repository helper written in **Rust** for beautiful and safe package building)
 - **Containerized Environments:** **distrobox** + **podman** (Highly optimized tool to run any Linux distribution inside a container seamlessly integrated with your host's Wayland, PipeWire, and GPU acceleration; keeps the host Arch system 100% clean and pristine)
+  - **Interactive CLI Manager:** **sys-distrobox** (A custom-built Spider-Man themed TUI helper using `fzf` for launching, creating, upgrading, exporting applications, and managing containers in a unified, beautiful CLI interface)
+  - **Quick Shell Aliases:**
+    - `dbs` ➡️ Launch the interactive manager (`sys-distrobox`)
+    - `kali` ➡️ Enter the **Kali Pentesting Box** directly
+    - `ubuntu` ➡️ Enter the **Ubuntu Test Box** directly
+    - `archbox` ➡️ Enter the **Arch Linux Test Box** directly
 
 ## 📟 Optimized TUI & System Services
 The most optimized, fast, and community-preferred Terminal User Interfaces (TUI):
@@ -93,4 +99,40 @@ My essential Zsh plugins for a better terminal experience:
 - **starship:** Ultra-fast, customizable, cross-shell Rust prompt
 - **keychain:** Standard manager for `ssh-agent` and `gpg-agent` (Prompts for SSH/GPG passphrases only once per boot and shares agents across all terminal instances)
 - **fzf-tab:** Zsh plugin that replaces the default tab-completion menu with a beautiful interactive **fzf** window for searching/selecting paths and arguments
+
+---
+
+## 📦 Distrobox & Podman Containerization Guide
+A powerful, zero-overhead workflow using rootless Podman containers to run test setups, development nodes, and pentesting utilities without polluting the host Arch Linux OS.
+
+### 🚀 Key Features
+- **System Isolation:** Host system remains 100% pristine.
+- **Deep Integration:** Automatic sharing of:
+  - **Wayland / X11** display servers (run GUI programs like Wireshark or Burp Suite seamlessly).
+  - **PipeWire** audio channels.
+  - **GPU acceleration** (Intel Arc graphics Xe-LPG cores).
+  - **Home Directory:** Host files are natively accessible at `$HOME` inside the container.
+
+### 🎮 The `sys-distrobox` CLI Manager
+Instead of writing long commands, use the interactive TUI tool `sys-distrobox` (aliased to `dbs`):
+- Run `dbs` to open the custom fzf-powered menu.
+- **Predefined environments:**
+  1. `kali-pentest` (`kali`): Kali Linux container ready for auditing.
+  2. `ubuntu-test` (`ubuntu`): Standard Ubuntu testing playground.
+  3. `arch-test` (`archbox`): Secondary Arch Linux environment.
+
+###   Kali Pentesting Integration
+To fully initialize the security auditing environment:
+1. Launch `kali` or select it in `dbs`.
+2. Once inside, install the base pentesting suite:
+   ```bash
+   sudo apt update && sudo apt install -y kali-linux-headless
+   ```
+3. Run GUI auditing tools natively, e.g., `wireshark` or `burpsuite`.
+
+### 󱠟 Exporting Applications to Host
+You can export apps or scripts from any container so they can be launched directly from your host terminal or `anyrun` app launcher:
+- **Graphical App:** `distrobox-export --app wireshark` (exposes Wireshark in Hyprland launchers)
+- **CLI Binary:** `distrobox-export --bin nmap` (symlinks `nmap` inside `~/.local/bin/nmap` on the host)
+- *Note:* Our `dbs` manager has a built-in helper menu to do this for you!
 

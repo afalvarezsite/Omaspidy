@@ -139,6 +139,9 @@ CORE_PKGS=(
     # Utilidades Varias y Fuentes
     neovim ttf-hack-nerd wl-clipboard tesseract tesseract-data-spa grim slurp satty
     greetd greetd-tuigreet nmtui pulsemixer snapper snap-pac
+    
+    # Contenedores y Aislamiento (Pruebas y Pentesting)
+    distrobox podman
 )
 
 paru -S --needed --noconfirm "${CORE_PKGS[@]}"
@@ -208,13 +211,26 @@ stow alacritty anyrun hypr mako nvim scripts starship waybar zsh git
 msg_ok "Configuraciones desplegadas."
 
 # --- 7. Habilitación de Servicios ---
-show_banner "7" "Activando servicios systemd esenciales (Bluetooth, Red, Snapper)..."
+show_banner "7" "Activando servicios systemd esenciales e integrando Podman..."
 msg "Habilitando servicios systemd..."
 sudo systemctl enable --now thermald
 sudo systemctl enable --now NetworkManager
 sudo systemctl enable --now bluetooth
 sudo systemctl enable greetd
 msg_ok "Servicios activados."
+
+# Configuración de Podman rootless (mapeo de subuids/subgids)
+msg "Verificando configuración de Podman rootless para el usuario..."
+if ! grep -q "^$USER:" /etc/subuid 2>/dev/null || ! grep -q "^$USER:" /etc/subgid 2>/dev/null; then
+    msg "Configurando rangos de subuids/subgids para contenedores rootless..."
+    # Asignar un rango estándar de UIDs/GIDs si no están ya configurados (estándar: 100000-165535)
+    sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "$USER" || {
+        msg_warn "No se pudieron configurar automáticamente los subuids/subgids. Si tienes problemas con podman, ejecuta manualmente: sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $USER"
+    }
+    msg_ok "Mapeos de subuid y subgid configurados para el usuario $USER."
+else
+    msg_ok "Mapeos de subuid y subgid ya existentes para el usuario $USER."
+fi
 
 # --- 7.5. Configuración de systemd-boot con Kernel CachyOS ---
 show_banner "8" "Optimizando cargador de arranque systemd-boot y post-instalación..."

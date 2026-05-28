@@ -50,6 +50,8 @@ Specifically tailored and optimized for the **Intel Core Ultra 7 155H** + **Inte
 - **AI Pair Programmer:** **Antigravity** (Powerful agentic AI coding assistant)
   - **IDE Integration:** For smart code completions, contextual pair programming, and direct edits in Neovim.
   - **CLI Tool:** For launching autonomous coding tasks, terminal executions, and agentic workflows from the shell.
+- **Git TUI Client:** **lazygit** (The ultimate Go-based interactive Git TUI, integrated seamlessly into the terminal and LazyVim development workflow; aliased to `lg`)
+- **Version Manager:** **mise** (Screamingly fast, Rust-based polyglot tool version manager, automatically loading runtime environments)
 
 ## 🛠️ Essential Utilities & System Management
 - **File Manager (CLI):** Yazi
@@ -87,6 +89,12 @@ Upgrades for standard Unix commands to improve productivity and UX:
 - `df` ➡️ **duf** (Disk Usage/Free Utility)
 - `diff` ➡️ **delta** (A viewer for git and diff output)
 - `man` ➡️ **tealdeer** (Screamingly fast Rust implementation of `tldr` for practical command examples instead of huge man pages)
+- `neofetch` ➡️ **fastfetch** (Hyper-fast system information fetcher written in C; aliased to `fetch` / `neofetch`)
+- `jq` ➡️ **jaq** (Rust-based extremely fast, correct, and secure clone of jq; aliased to `jq`)
+- `curl` ➡️ **xh** (Blazing fast, modern, and beautiful HTTP request tool in Rust; aliased to `http`)
+- `ncdu` ➡️ **gdu** (Go-based highly concurrent, extremely fast interactive disk usage analyzer)
+- **trippy** (Highly interactive traceroute and ping TUI in Rust; aliased to `traceroute`)
+- **bandwhich** (Real-time network usage and bandwidth monitor sorted by process/port in Rust; aliased to `bandwidth`)
 
 ## 🐚 Zsh Configuration
 My essential Zsh plugins for a better terminal experience:
@@ -116,6 +124,7 @@ A powerful, zero-overhead workflow using rootless Podman containers to run test 
 ### 🎮 The `sys-distrobox` CLI Manager
 Instead of writing long commands, use the interactive TUI tool `sys-distrobox` (aliased to `dbs`):
 - Run `dbs` to open the custom fzf-powered menu.
+- **Podman Container Monitor:** **oxker** (Rust-based lightweight TUI monitor for containers, natively integrated and launchable directly from the `dbs` main menu).
 - **Predefined environments:**
   1. `kali-pentest` (`kali`): Kali Linux container ready for auditing.
   2. `ubuntu-test` (`ubuntu`): Standard Ubuntu testing playground.

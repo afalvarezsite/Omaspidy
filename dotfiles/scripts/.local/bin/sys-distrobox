@@ -323,7 +323,7 @@ main() {
     check_deps
     while true; do
         msg_title
-        local menu_options="󰌢  Entrar a un Contenedor\n󰏖  Crear / Inicializar Ecosistema\n󰚚  Actualizar Todos los Contenedores\n󱠟  Exportar Aplicación al Host\n󰦛  Detener Contenedor\n󰅖  Eliminar Contenedor\n󰃢  Limpieza del Sistema (Podman Prune)\n󰌑  Salir"
+        local menu_options="󰌢  Entrar a un Contenedor\n󰏖  Crear / Inicializar Ecosistema\n󰙨  Monitorear Contenedores (Oxker TUI)\n󰚚  Actualizar Todos los Contenedores\n󱠟  Exportar Aplicación al Host\n󰦛  Detener Contenedor\n󰅖  Eliminar Contenedor\n󰃢  Limpieza del Sistema (Podman Prune)\n󰌑  Salir"
         
         local choice
         choice=$(echo -e "$menu_options" | fzf \
@@ -346,6 +346,17 @@ main() {
                 ;;
             *"Crear / Inicializar Ecosistema")
                 create_box
+                ;;
+            *"Monitorear Contenedores")
+                if command -v oxker &>/dev/null; then
+                    msg_ok "Iniciando Oxker TUI (Cierra con 'q')..."
+                    oxker
+                else
+                    msg_err "Oxker TUI no está instalado en el sistema."
+                    msg "Puedes instalarlo ejecutando tu script de instalación o manualmente con: paru -S oxker-bin"
+                    echo ""
+                    read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+                fi
                 ;;
             *"Actualizar Todos los Contenedores")
                 upgrade_boxes

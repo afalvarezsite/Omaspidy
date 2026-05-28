@@ -9,6 +9,11 @@ source "$ZDOTDIR/plugins.zsh"
 # Inicializar Zoxide (cd inteligente)
 eval "$(zoxide init zsh)"
 
+# Inicializar Mise (Gestor de versiones políglota en Rust)
+if command -v mise &> /dev/null; then
+    eval "$(mise activate zsh)"
+fi
+
 # Inicializar Starship prompt (Cargar al final para no ralentizar plugins)
 eval "$(starship init zsh)"
 

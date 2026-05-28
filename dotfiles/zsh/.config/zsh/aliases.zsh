@@ -66,3 +66,12 @@ alias dbs="sys-distrobox"  # Lanzador interactivo TUI con fzf
 alias kali="distrobox enter kali-pentest"
 alias ubuntu="distrobox enter ubuntu-test"
 alias archbox="distrobox enter arch-test"
+
+# --- Nuevos Reemplazos Modernos y Usabilidad (Rust/Go/C) ---
+alias neofetch="fastfetch"                   # Reemplazo de neofetch por fastfetch en C
+alias fetch="fastfetch"                      # Atajo rápido para información del sistema
+alias jq="jaq"                               # Reemplazo en Rust de jq para análisis de JSON
+alias http="xh"                              # Cliente HTTP interactivo y veloz
+alias lg="lazygit"                           # La TUI definitiva de Git
+alias traceroute="trip"                      # Reemplazo interactivo de traceroute por Trippy
+alias bandwidth="sudo bandwhich"             # Monitor de ancho de banda por proceso (requiere sudo)

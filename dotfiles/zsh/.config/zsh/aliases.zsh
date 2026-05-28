@@ -55,3 +55,14 @@ alias gcb='forgit::checkout::branch'
 # --- Mantenimiento Arch ---
 alias update="paru -Syu"
 alias orphans="pacman -Qtdq"
+
+# --- Distrobox y Podman (Entornos Contenedorizados de Pruebas y Pentesting) ---
+alias db="distrobox"
+alias dbl="distrobox list"
+alias dbe="distrobox enter"
+alias dbr="distrobox rm"
+alias dbc="distrobox create"
+alias dbs="sys-distrobox"  # Lanzador interactivo TUI con fzf
+alias kali="distrobox enter kali-pentest"
+alias ubuntu="distrobox enter ubuntu-test"
+alias archbox="distrobox enter arch-test"

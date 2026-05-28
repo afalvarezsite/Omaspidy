@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
-# Ruta de prueba (Apunta directamente al repositorio de dotfiles)
-CONFIG_FILE="$HOME/Documentos/ArchInstallGuide/dotfiles/hypr/.config/hypr/conf.d/keybinds.conf"
+# Buscar primero en la ruta de producción (~/.config/hypr/conf.d/keybinds.conf)
+CONFIG_FILE="$HOME/.config/hypr/conf.d/keybinds.conf"
 
-# Ruta para produccion (Descomentar al instalar con stow)
-# CONFIG_FILE="$HOME/.config/hypr/conf.d/keybinds.conf"
+# Si no existe en la ruta de producción, intentar resolver dinámicamente relativa al script
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+    # Mapeo al repositorio: scripts/.local/bin -> subir 3 niveles a la raíz del stow pack
+    REPO_DIR="$(cd "$SCRIPT_DIR/../../.." &>/dev/null && pwd)"
+    if [[ -d "$REPO_DIR/hypr/.config/hypr" ]]; then
+        CONFIG_FILE="$REPO_DIR/hypr/.config/hypr/conf.d/keybinds.conf"
+    fi
+fi
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
     echo "[ERROR] No se encontro el archivo: $CONFIG_FILE"
@@ -63,8 +70,12 @@ grep -E '^bind' "$CONFIG_FILE" \
         # Reemplazar llamadas especificas con descripciones humanas
         if (desc ~ /hypr-keys/) desc = "Menu de Atajos de Teclado";
         else if (desc ~ /bluetuith/) desc = "Menu de Bluetooth";
+        else if (desc ~ /sys-bluetooth/) desc = "Selector Rapido de Bluetooth";
         else if (desc ~ /nmtui/) desc = "Menu de Red / WiFi";
+        else if (desc ~ /sys-wifi/) desc = "Selector Rapido de WiFi";
         else if (desc ~ /pulsemixer/) desc = "Menu de Audio";
+        else if (desc ~ /sys-audio/) desc = "Selector Rapido de Audio";
+        else if (desc ~ /sys-snaps/) desc = "Gestor de Snapshots BTRFS";
         else if (desc ~ /btop/) desc = "Monitor de Sistema";
         else if (desc ~ /clipse/) desc = "Historial de Portapapeles";
         else if (desc ~ /slurp/ && desc ~ /satty/) desc = "Capturar Area de Pantalla";

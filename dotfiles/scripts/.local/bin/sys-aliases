@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 
-# Rutas al archivo de alias
-# Ruta de prueba (Apunta directamente al repositorio de dotfiles)
-ALIASES_FILE="$HOME/Documentos/ArchInstallGuide/dotfiles/zsh/.config/zsh/aliases.zsh"
+# Buscar primero en la ruta de producción (~/.config/zsh/aliases.zsh)
+ALIASES_FILE="$HOME/.config/zsh/aliases.zsh"
 
-# Ruta para produccion (Descomentar al instalar con stow)
-# ALIASES_FILE="$HOME/.config/zsh/aliases.zsh"
+# Si no existe en la ruta de producción, intentar resolver dinámicamente relativa al script
+if [[ ! -f "$ALIASES_FILE" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+    # Mapeo al repositorio: scripts/.local/bin -> subir 3 niveles a la raíz del stow pack
+    REPO_DIR="$(cd "$SCRIPT_DIR/../../.." &>/dev/null && pwd)"
+    if [[ -d "$REPO_DIR/zsh/.config/zsh" ]]; then
+        ALIASES_FILE="$REPO_DIR/zsh/.config/zsh/aliases.zsh"
+    fi
+fi
 
 if [[ ! -f "$ALIASES_FILE" ]]; then
     echo "[ERROR] No se encontro el archivo: $ALIASES_FILE"

@@ -17,7 +17,7 @@ if [[ -z "$DESC" ]]; then
 fi
 
 echo -e "\033[1;36mGenerando snapshot del sistema raiz (/) ...\033[0m"
-snapper -c root create -c timeline -d "$DESC"
+snapper -c root create --type single -d "$DESC"
 
 if [[ $? -eq 0 ]]; then
     echo -e "\033[1;32mSnapshot creado correctamente.\033[0m"

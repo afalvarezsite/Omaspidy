@@ -14,7 +14,7 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 
 # Añadir binarios locales y de Cargo al PATH
-export PATH="$PATH:$HOME/.local/bin:$HOME/Documentos/ArchInstallGuide/dotfiles/scripts/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 
 # ==============================================================================
 # CONFIGURACIÓN DE FORGIT (TEMA SPIDER-MAN DISCRETO)

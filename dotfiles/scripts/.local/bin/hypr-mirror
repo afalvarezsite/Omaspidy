@@ -2,8 +2,9 @@
 # hypr-mirror: Alternar entre modo extendido y modo espejo en Hyprland.
 # Asume que el monitor principal es eDP-1. Detecta dinamicamente HDMI-A-1 o DP-1.
 
-# Definir la pantalla principal del portatil
-LAPTOP_MON="eDP-1"
+# Intentar detectar dinámicamente la pantalla principal del portátil (normalmente comienza con eDP-)
+LAPTOP_MON=$(hyprctl monitors -j | grep -o '"name": "eDP-[^"]*"' | cut -d'"' -f4 | head -n1)
+LAPTOP_MON="${LAPTOP_MON:-eDP-1}" # Fallback si no se detecta o no está activo
 
 # Intentar detectar el monitor externo activo
 EXT_MON=$(hyprctl monitors -j | grep -o '"name": "[^"]*"' | cut -d'"' -f4 | grep -v "$LAPTOP_MON" | head -n1)

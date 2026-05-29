@@ -157,3 +157,43 @@ You can export apps or scripts from any container so they can be launched direct
 - **CLI Binary:** `distrobox-export --bin nmap` (symlinks `nmap` inside `~/.local/bin/nmap` on the host)
 - *Note:* Our `dbs` manager has a built-in helper menu to do this for you!
 
+
+## 󰦃  Secure Boot & UKI Signing (sbctl Guide)
+To protect your kernel and initramfs from boot-level manipulation, we implement custom Secure Boot signing using **`sbctl`** (a user-friendly, modern tool to manage UEFI keys) and our interactive manager **`sys-secureboot`**.
+
+### 󰃬  1. Put your UEFI into "Setup Mode"
+To allow the OS to register custom Secure Boot keys, you must first clear the factory default keys in your motherboard's firmware:
+1. Reboot your system and enter your BIOS/UEFI settings (typically pressing `F2`, `Del` or `F12` during boot).
+2. Navigate to the **Security** or **Boot** tab and locate the **Secure Boot** section.
+3. If Secure Boot is enabled, **disable it** temporarily.
+4. Locate the option to change the Key Management type from *Standard* to **Custom**, or select **"Clear Secure Boot Keys"** / **"Reset to Setup Mode"**.
+   - *Note:* This puts the system into **Setup Mode**, allowing it to accept custom OS keys.
+5. Save your changes and boot back into your Arch Linux system.
+
+### 󰌆  2. Run the `sys-secureboot` Wizard
+Instead of manually typing long commands, launch our custom interactive wizard:
+```bash
+sudo sys-secureboot
+```
+*(This tool is located inside your stowed dotfiles at `~/.local/bin/sys-secureboot`)*.
+
+The wizard provides a clean, step-by-step TUI driven by `fzf` to:
+1. **Verify Status:** Checks if your UEFI is correctly in **Setup Mode** (ready to receive keys).
+2. **Generate Keys:** Automatically generates your custom signature keys under `/usr/share/secureboot/`.
+3. **Enrol Keys:** Registers your new keys into the UEFI NVRAM. 
+   > [!IMPORTANT]
+   > We run `sbctl enroll-keys -m` to **include Microsoft keys**. This is highly critical to prevent motherboard option ROM blockouts (e.g. from external graphics cards or screens) and allow stable dual-boot environments.
+4. **Sign Bootloader & UKI:** Automatically detects and signs:
+   - Systemd-boot bootloader (`/boot/EFI/systemd/systemd-bootx64.efi`)
+   - Fallback loader (`/boot/EFI/BOOT/BOOTX64.EFI`)
+   - Your Unified Kernel Image (`/boot/EFI/Linux/arch-linux-cachyos.efi`)
+   - *Note:* The script uses `sbctl sign -s` which **saves** the file path to its database. This ensures pacman hooks will **automatically re-sign the UKI** during any future kernel updates!
+5. **Verify Signatures:** Displays all successfully registered and signed files.
+
+### 󰦃  3. Re-enable Secure Boot
+Once all files are signed and keys are enrolled:
+1. Reboot once more into your BIOS/UEFI.
+2. Re-enable **Secure Boot**.
+3. Boot back into your system and check the status: `sbctl status` (it should display Secure Boot as `active` and `setup_mode` as `false`).
+
+

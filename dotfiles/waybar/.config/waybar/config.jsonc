@@ -17,6 +17,8 @@
     "modules-right": [
         "network",
         "pulseaudio",
+        "custom/hyprsunset",
+        "custom/powerprofile",
         "battery",
         "tray",
         "custom/power"
@@ -99,6 +101,33 @@
     "tray": {
         "icon-size": 18,
         "spacing": 10
+    },
+
+    "custom/hyprsunset": {
+        "format": "{icon} {text}",
+        "format-icons": {
+            "active": "󰖔",
+            "inactive": "󰖨"
+        },
+        "return-type": "json",
+        "exec": "sys-sunset --waybar",
+        "interval": 5,
+        "signal": 9,
+        "on-click": "sys-sunset --toggle"
+    },
+
+    "custom/powerprofile": {
+        "format": "{icon} {text}",
+        "format-icons": {
+            "performance": "",
+            "balanced": "󰾆",
+            "power-saver": "󰌢"
+        },
+        "return-type": "json",
+        "exec": "sys-power-profile --waybar",
+        "interval": 30,
+        "signal": 8,
+        "on-click": "alacritty --class floating_tui -e sys-power-profile"
     },
 
     "custom/power": {

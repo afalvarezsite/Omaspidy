@@ -26,6 +26,8 @@ window#waybar {
 #clock,
 #network,
 #pulseaudio,
+#custom-powerprofile,
+#custom-hyprsunset,
 #battery,
 #tray,
 #custom-power {
@@ -42,6 +44,8 @@ window#waybar {
 /* Hover general para pildoras interactivas */
 #network:hover,
 #pulseaudio:hover,
+#custom-powerprofile:hover,
+#custom-hyprsunset:hover,
 #battery:hover,
 #custom-power:hover,
 #clock:hover {
@@ -128,6 +132,31 @@ window#waybar {
     background: @red;
     color: @bg-dark;
     border-color: @red;
+}
+
+/* Custom Power Profile States (Dinámicos Premium) */
+#custom-powerprofile.performance {
+    color: @red-glow;
+    text-shadow: 0px 0px 8px @red-glow;
+}
+
+#custom-powerprofile.power-saver {
+    color: #00e676;
+    text-shadow: 0px 0px 8px alpha(#00e676, 0.4);
+}
+
+#custom-powerprofile.balanced {
+    color: @fg;
+}
+
+/* Custom Hyprsunset (Filtro Nocturno) States */
+#custom-hyprsunset.active {
+    color: #ffd600;
+    text-shadow: 0px 0px 8px alpha(#ffd600, 0.5);
+}
+
+#custom-hyprsunset.inactive {
+    color: @fg;
 }
 
 @keyframes blink {

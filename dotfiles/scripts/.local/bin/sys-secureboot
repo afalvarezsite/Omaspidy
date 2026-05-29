@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-SECUREBOOT: Asistente Interactivo de Firma Digital Secure Boot (sbctl)
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# Iconos: Estrictamente Nerd Fonts (Sin Emojis)
+# ==============================================================================
+
+# Colores visuales Spider-Man
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+BLUE='\033[1;34m'
+YELLOW='\033[1;33m'
+CYAN='\033[1;36m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+msg() { echo -e "${BLUE}::${NC} $1"; }
+msg_ok() { echo -e "${GREEN}==>${NC} $1"; }
+msg_warn() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+show_banner() {
+    clear
+    echo -e "${RED}"
+    echo "  ███████╗██████╗  ██████╗████████╗██╗     "
+    echo "  ██╔════╝██╔══██╗██╔════╝╚══██╔══╝██║     "
+    echo "  ███████╗██████╔╝██║        ██║   ██║     "
+    echo "  ╚════██║██╔══██╗██║        ██║   ██║     "
+    echo "  ███████║██████╔╝╚██████╗   ██║   ███████╗"
+    echo "  ╚══════╝╚═════╝  ╚═════╝   ╚═╝   ╚══════╝"
+    echo -e "${NC}"
+    echo -e "       ${BOLD}󰦃  SECURE BOOT MANAGER (sbctl)  󰦃${NC}"
+    echo -e "${WHITE}  ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+}
+
+# Comprobaciones iniciales
+if [ "$EUID" -ne 0 ]; then
+    msg_err "Este script requiere permisos de administrador para interactuar con la UEFI y sbctl."
+    msg "Por favor, ejecútalo usando sudo: sudo sys-secureboot"
+    exit 1
+fi
+
+if ! command -v sbctl &>/dev/null; then
+    msg_err "El paquete 'sbctl' no se encuentra instalado en el sistema."
+    msg "Puedes instalarlo ejecutando: pacman -S sbctl"
+    exit 1
+fi
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    --color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\"
+    --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\"
+    --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt=' 󰦃 ❯ ' --pointer='' --marker='󰄬'
+"
+
+while true; do
+    show_banner
+    
+    # Obtener estado actual rápido de sbctl
+    STATUS_OUT=$(sbctl status --json 2>/dev/null)
+    SB_ACTIVE=$(echo "$STATUS_OUT" | grep -o '"secure_boot":[^,]*' | cut -d: -f2 | tr -d ' "')
+    SETUP_MODE=$(echo "$STATUS_OUT" | grep -o '"setup_mode":[^,]*' | cut -d: -f2 | tr -d ' "')
+    
+    echo -e "  ${BOLD}Estado Actual del Firmware UEFI:${NC}"
+    if [ "$SB_ACTIVE" = "true" ]; then
+        echo -e "  󰦃  Secure Boot: ${GREEN}ACTIVO / PROTEGIDO${NC}"
+    else
+        echo -e "  󰦃  Secure Boot: ${RED}DESACTIVADO / INSEGURO${NC}"
+    fi
+    
+    if [ "$SETUP_MODE" = "true" ]; then
+        echo -e "  󰃬  Setup Mode:  ${YELLOW}SÍ (Listo para enrolar claves)${NC}"
+    else
+        echo -e "  󰃬  Setup Mode:  ${WHITE}NO (Claves ya bloqueadas)${NC}"
+    fi
+    echo -e "${WHITE}  ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+
+    OPTIONS="1. 󰦃  Verificar estado completo (sbctl status)\n2. 󰌆  Generar claves de firma personalizadas\n3. 󰞀  Enrolar claves en placa UEFI (Incluye Microsoft)\n4. 󰓅  Firmar UKI y componentes de arranque\n5. 󰄬  Verificar archivos firmados\n6. 󰜉  Salir"
+
+    SELECTION=$(echo -e "$OPTIONS" | fzf --prompt=" Selecciona una opción ❯ " --header="Asistente de Arranque Seguro:")
+
+    if [ -z "$SELECTION" ] || [[ "$SELECTION" == *"Salir"* ]]; then
+        msg "Saliendo del asistente Secure Boot."
+        break
+    fi
+
+    case "$SELECTION" in
+        *"Verificar estado"*)
+            show_banner
+            msg "Ejecutando: sbctl status"
+            echo ""
+            sbctl status
+            echo ""
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            ;;
+            
+        *"Generar claves"*)
+            show_banner
+            msg "Generando nuevas claves de firma Secure Boot en /usr/share/secureboot/..."
+            echo ""
+            if sbctl create-keys; then
+                msg_ok "Claves personalizadas generadas con éxito."
+            else
+                msg_err "Error al generar las claves."
+            fi
+            echo ""
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            ;;
+            
+        *"Enrolar claves"*)
+            show_banner
+            msg_warn "¡ATENCIÓN! Para enrolar tus claves personalizadas:"
+            echo -e "  1. Debes haber entrado a la BIOS/UEFI de tu placa previamente."
+            echo -e "  2. Debes configurar el Secure Boot en ${BOLD}'Setup Mode'${NC} (o 'Custom Mode' y borrar las claves predeterminadas)."
+            echo -e "  3. Usaremos la bandera ${BOLD}-m${NC} para incluir las claves de Microsoft."
+            echo -e "     ${CYAN}Esto evita incompatibilidades con GPUs externas y permite arranque dual.${NC}"
+            echo ""
+            read -p "¿Estás listo para enrolar las claves en la UEFI ahora? [s/N]: " confirm
+            if [[ "$confirm" =~ ^[sS]$ ]]; then
+                echo ""
+                if sbctl enroll-keys -m; then
+                    msg_ok "Claves enroladas exitosamente en el firmware UEFI."
+                else
+                    msg_err "Error al enrolar las claves. Verifica que la UEFI esté en 'Setup Mode'."
+                fi
+            else
+                msg "Operación cancelada."
+            fi
+            echo ""
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            ;;
+            
+        *"Firmar UKI"*)
+            show_banner
+            msg "Registrando y firmando los componentes de arranque para systemd-boot..."
+            echo ""
+            
+            # Buscar UKI de cachyos
+            UKI_PATH="/boot/EFI/Linux/arch-linux-cachyos.efi"
+            if [ ! -f "$UKI_PATH" ]; then
+                # Buscar otros posibles nombres si no existe el de cachyos
+                UKI_PATH=$(find /boot -name "*.efi" | grep -i "linux" | head -n 1)
+            fi
+            
+            # Firmar los binarios esenciales guardando la firma para regeneraciones automáticas (-s)
+            ERR=0
+            
+            msg "Firmando cargadores de arranque..."
+            if [ -f "/boot/EFI/BOOT/BOOTX64.EFI" ]; then
+                sbctl sign -s /boot/EFI/BOOT/BOOTX64.EFI || ERR=1
+            fi
+            
+            if [ -f "/boot/EFI/systemd/systemd-bootx64.efi" ]; then
+                sbctl sign -s /boot/EFI/systemd/systemd-bootx64.efi || ERR=1
+            fi
+            
+            if [ -n "$UKI_PATH" ] && [ -f "$UKI_PATH" ]; then
+                msg "Firmando UKI detectado en: $UKI_PATH..."
+                sbctl sign -s "$UKI_PATH" || ERR=1
+            else
+                msg_warn "No se pudo localizar el archivo UKI (.efi) de Linux automáticamente en /boot."
+            fi
+            
+            echo ""
+            if [ $ERR -eq 0 ]; then
+                msg_ok "¡Todos los archivos esenciales han sido firmados!"
+                msg_ok "Las rutas han sido guardadas. Se firmarán automáticamente al actualizar el kernel."
+            else
+                msg_err "Hubo errores al firmar algunos componentes. Revisa los mensajes superiores."
+            fi
+            echo ""
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            ;;
+            
+        *"Verificar archivos"*)
+            show_banner
+            msg "Listando archivos de arranque registrados en la base de datos de firmas:"
+            echo ""
+            sbctl list-files
+            echo ""
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            ;;
+    esac
+done

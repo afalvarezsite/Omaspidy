@@ -117,4 +117,21 @@ if pgrep -x mako &>/dev/null; then
     makoctl reload &>/dev/null
 fi
 
+# --- Señal de recarga de tema para sesiones Zsh ya abiertas ---
+# env.zsh monitoriza el mtime de este archivo con un hook precmd
+_SIGNAL_DIR="$HOME/.cache/zsh"
+mkdir -p "$_SIGNAL_DIR"
+
+# Recargar el skin para extraer el nuevo FZF_THEME
+# shellcheck source=/dev/null
+source "$SKINS_DIR/${SKIN}.sh"
+
+# Escribir las nuevas variables FZF al archivo de señal
+cat > "$_SIGNAL_DIR/theme_signal.zsh" << SIGNAL_EOF
+# Generado automáticamente por sys-theme — NO EDITAR
+export FZF_DEFAULT_OPTS="--layout=reverse --border=rounded --padding=1,2 --margin=2% --prompt=' ❯ ' --pointer='' --marker='󰄬' $FZF_THEME"
+SIGNAL_EOF
+
 msg_ok "Skin ${SKIN_SELECT#*. } aplicada con éxito en todo tu ecosistema."
+msg "  Los colores de FZF se actualizarán en las terminales abiertas en el próximo prompt."
+

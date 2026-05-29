@@ -288,3 +288,13 @@ Al entrar a Hyprland:
 - **Compartir Archivos:** Presiona `Super + S` para lanzar la utilidad de intercambio de archivos nativa LocalSend (`sys-share`).
 - **Mantenimiento y Limpieza:** Ejecuta `sys-clean` interactivo con FZF en cualquier momento para mantener el sistema libre de huérfanos y paquetes temporales residuales.
 - **Capturas de Pantalla:** Usa `Print` (para área con ratón) o `Shift + Print` (pantalla completa) para llamar a `sys-screenshot`, que pintará dinámicamente el área de selección en base a la skin actual.
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia **GNU GPL v3** (GNU General Public License v3). Esto significa que es de código abierto y libre:
+- **Libre modificación y distribución**: Puedes modificar, copiar y distribuir todo el código y scripts.
+- **Copyleft (Misma Licencia Obligatoria)**: Cualquier derivado o modificación que distribuyas **debe mantenerse obligatoriamente bajo esta misma licencia (GPL v3)**, asegurando que el proyecto y sus mejoras permanezcan siempre libres y abiertos para la comunidad.
+- Consulta el archivo [LICENSE](LICENSE) adjunto para ver los términos legales completos.
+

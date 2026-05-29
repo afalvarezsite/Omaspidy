@@ -1,0 +1,169 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "small",
+        "color": {
+            "1": "red",
+            "2": "red"
+        },
+        "padding": {
+            "top": 2,
+            "left": 2
+        }
+    },
+    "display": {
+        "separator": "  ",
+        "color": {
+            "keys": "red"
+        },
+        "bar": {
+            "char": {
+                "elapsed": "█",
+                "total": "░"
+            },
+            "width": 12
+        },
+        "percent": {
+            "type": 3
+        }
+    },
+    "modules": [
+        {
+            "type": "title",
+            "color": {
+                "user": "red",
+                "at": "white",
+                "host": "red"
+            }
+        },
+        {
+            "type": "custom",
+            "format": "{#90}─────────────────────────────────────────"
+        },
+        {
+            "type": "os",
+            "key": "╭─  SO       ",
+            "keyColor": "red"
+        },
+        {
+            "type": "kernel",
+            "key": "├─  Kernel   ",
+            "keyColor": "red"
+        },
+        {
+            "type": "uptime",
+            "key": "├─ 󱎫 Activo   ",
+            "keyColor": "red"
+        },
+        {
+            "type": "packages",
+            "key": "├─ 󰏖 Paquetes ",
+            "keyColor": "red",
+            "combined": true
+        },
+        {
+            "type": "shell",
+            "key": "├─  Shell    ",
+            "keyColor": "red"
+        },
+        {
+            "type": "terminal",
+            "key": "├─  Terminal ",
+            "keyColor": "red"
+        },
+        {
+            "type": "wm",
+            "key": "╰─ 󰇄 Entorno  ",
+            "keyColor": "red"
+        },
+        {
+            "type": "custom",
+            "format": "{#90}─────────────────────────────────────────"
+        },
+        {
+            "type": "theme",
+            "key": "╭─ 󰉼 Tema     ",
+            "keyColor": "red"
+        },
+        {
+            "type": "icons",
+            "key": "├─ 󰀻 Iconos   ",
+            "keyColor": "red"
+        },
+        {
+            "type": "cursor",
+            "key": "├─ 󰇀 Cursor   ",
+            "keyColor": "red"
+        },
+        {
+            "type": "font",
+            "key": "├─  Sys.font   ",
+            "keyColor": "red"
+        },
+        {
+            "type": "terminalfont",
+            "key": "╰─  T.font   ",
+            "keyColor": "red"
+        },
+        {
+            "type": "custom",
+            "format": "{#90}─────────────────────────────────────────"
+        },
+        {
+            "type": "cpu",
+            "key": "╭─ 󰍛 CPU      ",
+            "keyColor": "red"
+        },
+        {
+            "type": "gpu",
+            "key": "├─ 󰢮 GPU      ",
+            "keyColor": "red"
+        },
+        {
+            "type": "memory",
+            "key": "├─  RAM      ",
+            "keyColor": "red"
+        },
+        {
+            "type": "swap",
+            "key": "├─ 󰓡 Swap     ",
+            "keyColor": "red"
+        },
+        {
+            "type": "disk",
+            "key": "├─  Disco    ",
+            "keyColor": "red",
+            "folders": "/"
+        },
+        {
+            "type": "battery",
+            "key": "╰─  Batería  ",
+            "keyColor": "red"
+        },
+        {
+            "type": "custom",
+            "format": "{#90}─────────────────────────────────────────"
+        },
+        {
+            "type": "localip",
+            "key": "╭─ 󰩟 Local    ",
+            "keyColor": "red",
+            "format": "{ipv4} ({ifname})"
+        },
+        {
+            "type": "wifi",
+            "key": "╰─  Red      ",
+            "keyColor": "red",
+            "format": "{ssid}"
+        },
+        {
+            "type": "custom",
+            "format": "{#90}─────────────────────────────────────────"
+        },
+        {
+            "type": "colors",
+            "symbol": "circle",
+            "paddingLeft": 2
+        }
+    ]
+}

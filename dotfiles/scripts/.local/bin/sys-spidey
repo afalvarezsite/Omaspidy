@@ -28,6 +28,9 @@ OPTIONS="  sys-distrobox      (Gestor de Contenedores TUI - dbs)
 󰆓  sys-backup         (Crear Snapshot Manual de Recuperación)
   sys-share          (Compartir Archivos en Red - LocalSend)
   sys-clean          (Limpieza y Mantenimiento de Huérfanos)
+󰚰  sys-update         (Actualización Completa del Ecosistema)
+󰑈  sys-record         (Grabación de Pantalla con VA-API)
+  sys-health         (Diagnóstico de Servicios del Sistema)
 󰖔  sys-sunset         (Alternar Filtro Nocturno / Luz Azul)
   hypr-keys          (Catálogo de Atajos Interactivos)
 󰍺  hypr-mirror        (Duplicador de Pantalla en Espejo)
@@ -54,6 +57,10 @@ case "$CMD_NAME" in
         ;;
     "hypr-mirror")
         hypr-mirror &
+        exit 0
+        ;;
+    "sys-record")
+        sys-record --toggle &
         exit 0
         ;;
     "sys-secureboot")

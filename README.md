@@ -263,7 +263,7 @@ curl -sSL https://raw.githubusercontent.com/yourusername/ArchInstallGuide/main/d
 > REPO_URL="https://github.com/tu-usuario/ArchInstallGuide.git" curl -sSL https://raw.githubusercontent.com/tu-usuario/ArchInstallGuide/main/dotfiles/install.sh | bash
 > ```
 
-El script detectará de forma inteligente la ejecución remota, configurará los **repositorios optimizados de CachyOS** para descargar binarios compilados específicamente para el conjunto de instrucciones de tu procesador (`x86-64-v3` / AVX2), actualizará todo el sistema a este estándar optimizado e instalará el **kernel de alto rendimiento `linux-cachyos`** (generando automáticamente su entrada en `systemd-boot` con las flags `mitigations=off intel_pstate=active` activadas por defecto). Finalmente, clonará tu repositorio de dotfiles completo en `$HOME/.dotfiles` y ejecutará la instalación de todo el entorno gráfico (Hyprland, drivers Intel, herramientas modernas y dotfiles enlazados mediante Stow).
+El script detectará de forma inteligente la ejecución remota, configurará los **repositorios optimizados de CachyOS** para descargar binarios compilados específicamente para el conjunto de instrucciones de tu procesador (`x86-64-v3` / AVX2), actualizará todo el sistema a este estándar optimizado e instalará el **kernel de alto rendimiento `linux-cachyos`** (generando automáticamente su entrada en `systemd-boot` con las flags `mitigations=off intel_pstate=active` activadas por defecto). Además, cuenta con un **sistema de captura global de errores defensivo** (`set -Euo pipefail`) y está integrado con auditorías continuas mediante **ShellCheck** en GitHub Actions. Finalmente, clonará tu repositorio de dotfiles completo en `$HOME/.dotfiles` y ejecutará la instalación de todo el entorno gráfico (Hyprland, drivers Intel, herramientas modernas y dotfiles enlazados mediante Stow).
 
 ---
 
@@ -272,7 +272,10 @@ El script detectará de forma inteligente la ejecución remota, configurará los
 Una vez completada la ejecución del script, el sistema se reiniciará automáticamente y serás recibido por la pantalla de login gráfico de **`greetd` (tuigreet)** completamente tematizada. 
 
 Al entrar a Hyprland:
-- Abre la consola con `Super + Enter`.
-- Presiona `Super + G` para desplegar el catálogo de atajos interactivo en FZF.
-- Presiona `Super + S` para lanzar la utilidad de intercambio de archivos nativa LocalSend (`sys-share`).
-- Ejecuta `sys-clean` en cualquier momento para mantener el sistema libre de huérfanos y paquetes temporales residuales.
+- **Consola:** Abre la terminal con `Super + Enter`.
+- **Selector de Skins Dinámico (`sys-theme`):** Ejecuta `sys-theme` para alternar de forma interactiva y al vuelo el esquema estético completo de tu ecosistema (bordes de Hyprland, Waybar, Mako, Starship y FZF) entre *Spider-Man Classic* (Rojinegro), *Symbiote Suit* (Negro profundo/Blanco) o *Miles Morales* (Matte Black/Púrpura).
+- **Copias de Seguridad BTRFS (`sys-replicate`):** Ejecuta `sys-replicate` para formatear de forma segura unidades USB externas a BTRFS (con altos estándares antiformateo accidental) y replicar incrementalmente tus snapshots locales de Snapper de forma ultrarrápida (`btrfs send | receive`).
+- **Guía de Atajos:** Presiona `Super + G` para desplegar el catálogo de atajos interactivo en FZF (`hypr-keys`).
+- **Compartir Archivos:** Presiona `Super + S` para lanzar la utilidad de intercambio de archivos nativa LocalSend (`sys-share`).
+- **Mantenimiento y Limpieza:** Ejecuta `sys-clean` interactivo con FZF en cualquier momento para mantener el sistema libre de huérfanos y paquetes temporales residuales.
+- **Capturas de Pantalla:** Usa `Print` (para área con ratón) o `Shift + Print` (pantalla completa) para llamar a `sys-screenshot`, que pintará dinámicamente el área de selección en base a la skin actual.

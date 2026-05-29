@@ -46,12 +46,11 @@ Specifically tailored and optimized for the **Intel Core Ultra 7 155H** + **Inte
 - **Notification Daemon:** **mako** (Lightweight, fast, and highly customizable Wayland-native notification daemon)
 - **Screen Locker:** **hyprlock** (Fast, secure, and beautiful official Hyprland screen locker)
 - **Idle Manager:** **hypridle** (Official, highly optimized system idle management daemon)
-- **Wallpaper Daemon:** **hyprpaper** (Official, GPU-accelerated, ultra-lightweight wallpaper utility)
-- **Screenshot Tool:** **grim** + **slurp** + **hyprpicker** paired with **satty** (A modern, blazing-fast Rust-based screenshot editor with beautiful annotations and clipboard-first workflow)
+- **Wallpaper Daemon:** **hyprpaper** (Official, GPU-accelerated, ultra-lightweight wallpaper utility; mantiene la estática de escritorio estricta solicitada por el usuario)
+- **Screenshot Tool:** **sys-screenshot** wrapping **grim** + **slurp** paired with **satty** (Asistente de capturas que detecta dinámicamente los colores de tu tema activo para pintar el borde del área de selección de forma coordinada)
 - **Screen Recorder:** **gpu-screen-recorder** (Screamingly fast GPU-accelerated screen recorder with virtually 0% CPU impact, using Intel VA-API for zero-latency 60FPS recordings on Intel Arc)
 - **On-Screen Display (OSD):** **SwayOSD** (A modern, blazing-fast OSD daemon written in **Rust** using GTK4 to show beautiful, lightweight volume and brightness indicators on keypresses)
-
-
+- **Dynamic Skin centralizer:** **sys-theme** (Selector de aspecto visual interactivo vía `fzf` para alternar entre los estilos *Spider-Man Classic*, *Symbiote Suit* y *Miles Morales* recargando componentes al vuelo mediante señales `USR2`)
 
 ## 🔤 Typography & Fonts
 - **Main Font:** **Hack Nerd Font** (or **JetBrains Mono NL Nerd Font**)
@@ -69,6 +68,7 @@ Specifically tailored and optimized for the **Intel Core Ultra 7 155H** + **Inte
 - **File Manager (CLI):** Yazi
 - **Fuzzy Finder:** fzf
 - **System Backups:** Snapper + snap-pac + **systemd-boot-lifeboat** (Automated BTRFS snapshots with automatic boot entries in systemd-boot for easy system rollback/recovery)
+- **Backup Replicator:** **sys-replicate** (Utilidad TUI 100% interactiva en `fzf` para formatear y preparar unidades USB externas a BTRFS con altos estándares de seguridad y realizar copias incrementales rápidas mediante `btrfs send | receive`)
 - **Backlight Control:** **brightnessctl** (Lightweight, permission-safe CLI tool for screen and keyboard backlight)
 - **Screen Temperature (Blue Light):** **hyprsunset** (Official Hyprland application to adjust screen temperature / blue light filter)
 - **AUR Helper:** **paru** (Feature-rich, blazing fast Arch User Repository helper written in **Rust** for beautiful and safe package building)
@@ -81,7 +81,7 @@ Specifically tailored and optimized for the **Intel Core Ultra 7 155H** + **Inte
     - `archbox` ➡️ Enter the **Arch Linux Test Box** directly
 
 ## 📟 Optimized TUI & System Services
-The most optimized, fast, and community-preferred Terminal User Interfaces (TUI):
+The most optimized, fast, and community-preferred Terminal User Interfaces (TUI) con soporte de temas dinámicos:
 - **Network Management:** **NetworkManager** managed via **nmtui** (The standard, robust terminal UI for Wi-Fi and connections)
 - **Bluetooth Management:** **bluez** managed via **bluetuith** (Modern, sleek Rust-based TUI) or **bluetoothctl** (Classic interactive tool)
 - **Audio Control:** **pulsemixer** (Beautiful and intuitive interactive terminal mixer for PipeWire/PulseAudio)
@@ -118,7 +118,7 @@ My essential Zsh plugins for a better terminal experience:
 - **forgit:** Utility tool powered by fzf for using git interactively
 - **starship:** Ultra-fast, customizable, cross-shell Rust prompt
 - **keychain:** Standard manager for `ssh-agent` and `gpg-agent` (Prompts for SSH/GPG passphrases only once per boot and shares agents across all terminal instances)
-- **fzf-tab:** Zsh plugin that replaces the default tab-completion menu with a beautiful interactive **fzf** window for searching/selecting paths and arguments
+- **fzf-tab:** Zsh plugin that replaces the default tab-completion menu with a beautiful interactive **fzf** window for searching/selecting paths and arguments (Integrado dinámicamente con los colores del tema activo)
 
 ---
 
@@ -195,5 +195,3 @@ Once all files are signed and keys are enrolled:
 1. Reboot once more into your BIOS/UEFI.
 2. Re-enable **Secure Boot**.
 3. Boot back into your system and check the status: `sbctl status` (it should display Secure Boot as `active` and `setup_mode` as `false`).
-
-

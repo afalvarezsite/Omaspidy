@@ -83,6 +83,7 @@ grep -E '^bind' "$CONFIG_FILE" \
         
         # Reemplazar llamadas especificas con descripciones humanas
         if (desc ~ /hypr-keys/) desc = "Menu de Atajos de Teclado";
+        else if (desc ~ /zen-browser/) desc = "Navegador Zen";
         else if (desc ~ /scratchpad_term/) desc = "Terminal Scratchpad (Flotante)";
         else if (desc ~ /clipse_scratchpad/) desc = "Historial de Portapapeles (Scratchpad)";
         else if (desc ~ /sys-gemini/) desc = "Asistente Gemini AI (Copilot Key)";

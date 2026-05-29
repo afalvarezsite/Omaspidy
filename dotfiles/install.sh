@@ -163,6 +163,7 @@ AUR_PKGS=(
     oxker-bin
     antigravity-cli
     bibata-cursor-theme
+    zen-browser-bin
 )
 
 paru -S --needed --noconfirm "${AUR_PKGS[@]}"
@@ -359,6 +360,12 @@ if [ -f "/etc/systemd/journald.conf" ]; then
     sudo systemctl restart systemd-journald 2>/dev/null
 fi
 
+# 5. Configurar Zen Browser como navegador por defecto para HTTP y HTTPS
+msg "Configurando Zen Browser como tu navegador web por defecto..."
+xdg-settings set default-web-browser zen-browser.desktop 2>/dev/null
+xdg-mime default zen-browser.desktop x-scheme-handler/http 2>/dev/null
+xdg-mime default zen-browser.desktop x-scheme-handler/https 2>/dev/null
+
 msg_ok "Optimización y limpieza profunda del sistema finalizada."
 
 msg_ok "=========================================================="
@@ -367,6 +374,11 @@ msg_ok "=========================================================="
 msg_ok "Tu ecosistema Arch/Hyprland 'Spider-Man' está listo."
 msg_ok "La próxima vez que reinicies, verás el login de tuigreet."
 msg_ok "Recuerda que Zinit instalará los plugins de zsh al abrir la terminal."
+echo ""
+echo -e "${YELLOW}:: AVISO GEMINI / COPILOT KEY:${NC}"
+echo -e "   Para aprovechar al máximo el atajo de la tecla Copilot (SUPER + SHIFT + F23) y"
+echo -e "   evitar pestañas duplicadas de Gemini, recuerda instalar la extensión"
+echo -e "   'Duplicate Tab Blocker' o 'Switch to Existing Tab' en Zen Browser."
 echo ""
 read -p "¿Deseas reiniciar el sistema ahora? [s/N]: " reboot_confirm
 if [[ "$reboot_confirm" =~ ^[sS]$ ]]; then

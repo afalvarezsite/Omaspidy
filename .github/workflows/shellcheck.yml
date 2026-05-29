@@ -19,3 +19,4 @@ jobs:
       with:
         scandir: './dotfiles/scripts/.local/bin'
         additional_files: './dotfiles/install.sh'
+        severity: error

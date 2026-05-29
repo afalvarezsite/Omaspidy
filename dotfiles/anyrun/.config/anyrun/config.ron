@@ -18,7 +18,7 @@ Config(
   close_on_click: true,
 
   // Plugins a cargar
-  // Según Tools_utils_other.md: estrictamente libapplications.so
+  // Según TOOLING_GUIDE.md: estrictamente libapplications.so
   plugins: [
     "libapplications.so",
   ],

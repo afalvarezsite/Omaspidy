@@ -7,6 +7,10 @@
 
 Una guía e instalador automatizado para desplegar un entorno premium **Hyprland + CLI moderna de Rust + Tema Rojinegro (Spider-Man)** ultraoptimizado para plataformas de alto rendimiento (Intel Meteor Lake, almacenamiento SSD NVMe y sistema de archivos BTRFS con subvolúmenes redundantes).
 
+> [!NOTE]
+> **📖 Guía de Herramientas y Optimización de Rendimiento:**
+> Para ver el detalle técnico completo de los componentes de hardware optimizados (como el driver `xe` de Intel Arc), alias avanzados, configuraciones del Secure Boot, contenedores de Distrobox y de todas las herramientas CLI modernas integradas, consulta la **[Guía de Herramientas del Sistema (TOOLING_GUIDE.md)](TOOLING_GUIDE.md)**.
+
 ---
 
 ## 🚀 Método de Instalación en Dos Fases

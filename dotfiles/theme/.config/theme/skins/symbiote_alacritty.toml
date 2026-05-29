@@ -1,0 +1,33 @@
+# symbiote_alacritty.toml - Symbiote Suit colors for Alacritty
+
+[colors.primary]
+background = "#050505"
+foreground = "#e8eaed"
+
+[colors.cursor]
+text = "#050505"
+cursor = "#ffffff"
+
+[colors.selection]
+text = "#050505"
+background = "#ffffff"
+
+[colors.normal]
+black   = "#121212"
+red     = "#70757a"
+green   = "#a8a8a8"
+yellow  = "#d1d1d1"
+blue    = "#7a7a7a"
+magenta = "#b0b0b0"
+cyan    = "#d5d5d5"
+white   = "#e8eaed"
+
+[colors.bright]
+black   = "#3c4043"
+red     = "#f8f9fa"
+green   = "#ffffff"
+yellow  = "#f1f3f4"
+blue    = "#9aa0a6"
+magenta = "#dadce0"
+cyan    = "#f8f9fa"
+white   = "#ffffff"

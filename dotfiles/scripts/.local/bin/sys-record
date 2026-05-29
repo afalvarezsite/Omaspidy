@@ -65,7 +65,7 @@ _stop_recording() {
 
     # Buscar el archivo más reciente creado
     local latest
-    latest=$(find "$OUTPUT_DIR" -name "Recording_*.${CONTAINER}" -newer /tmp -printf '%T@ %p\n' 2>/dev/null \
+    latest=$(find "$OUTPUT_DIR" -name "Recording_*.${CONTAINER}" -printf '%T@ %p\n' 2>/dev/null \
         | sort -rn | head -1 | cut -d' ' -f2-)
 
     if [ -n "$latest" ]; then

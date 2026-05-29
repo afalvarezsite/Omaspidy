@@ -62,8 +62,16 @@ while true; do
     
     # Obtener estado actual rápido de sbctl
     STATUS_OUT=$(sbctl status --json 2>/dev/null)
-    SB_ACTIVE=$(echo "$STATUS_OUT" | grep -o '"secure_boot":[^,]*' | cut -d: -f2 | tr -d ' "')
-    SETUP_MODE=$(echo "$STATUS_OUT" | grep -o '"setup_mode":[^,]*' | cut -d: -f2 | tr -d ' "')
+    if command -v jaq &>/dev/null; then
+        SB_ACTIVE=$(echo "$STATUS_OUT" | jaq -r '.secure_boot')
+        SETUP_MODE=$(echo "$STATUS_OUT" | jaq -r '.setup_mode')
+    elif command -v jq &>/dev/null; then
+        SB_ACTIVE=$(echo "$STATUS_OUT" | jq -r '.secure_boot')
+        SETUP_MODE=$(echo "$STATUS_OUT" | jq -r '.setup_mode')
+    else
+        SB_ACTIVE=$(echo "$STATUS_OUT" | grep -o '"secure_boot":[^,]*' | cut -d: -f2 | tr -d ' "')
+        SETUP_MODE=$(echo "$STATUS_OUT" | grep -o '"setup_mode":[^,]*' | cut -d: -f2 | tr -d ' "')
+    fi
     
     echo -e "  ${BOLD}Estado Actual del Firmware UEFI:${NC}"
     if [ "$SB_ACTIVE" = "true" ]; then

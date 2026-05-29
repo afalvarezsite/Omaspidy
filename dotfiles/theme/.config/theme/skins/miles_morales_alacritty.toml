@@ -1,0 +1,33 @@
+# miles_morales_alacritty.toml - Miles Morales colors for Alacritty
+
+[colors.primary]
+background = "#08080a"
+foreground = "#f8f9fa"
+
+[colors.cursor]
+text = "#08080a"
+cursor = "#ff1e43"
+
+[colors.selection]
+text = "#ffffff"
+background = "#ff1e43"
+
+[colors.normal]
+black   = "#141419"
+red     = "#ff1e43"
+green   = "#00e676"
+yellow  = "#ffd600"
+blue    = "#d500f9"
+magenta = "#ff5773"
+cyan    = "#00e5ff"
+white   = "#e2e8f0"
+
+[colors.bright]
+black   = "#4a4b57"
+red     = "#ff5773"
+green   = "#69f0ae"
+yellow  = "#ffff72"
+blue    = "#e040fb"
+magenta = "#ff80ab"
+cyan    = "#80f1ff"
+white   = "#ffffff"

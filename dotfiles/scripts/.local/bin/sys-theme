@@ -97,6 +97,10 @@ ln -sf "$SKINS_DIR/${SKIN}_starship.toml" "$HOME/.config/starship.toml"
 mkdir -p "$HOME/.config/mako"
 ln -sf "$SKINS_DIR/${SKIN}_mako.conf" "$HOME/.config/mako/config"
 
+# 4. Actualizar el symlink de Alacritty config
+mkdir -p "$HOME/.config/alacritty"
+ln -sf "$SKINS_DIR/${SKIN}_alacritty.toml" "$HOME/.config/alacritty/active.toml"
+
 # --- Recargas al Vuelo ---
 
 # Recargar Hyprland

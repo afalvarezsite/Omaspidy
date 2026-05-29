@@ -1,0 +1,33 @@
+# active_alacritty.toml - Default dynamic color schemes (Classic Spidey)
+
+[colors.primary]
+background = "#0c0d12"
+foreground = "#f8f9fa"
+
+[colors.cursor]
+text = "#0c0d12"
+cursor = "#ff3b5c"
+
+[colors.selection]
+text = "#ffffff"
+background = "#e60026"
+
+[colors.normal]
+black   = "#16171f"
+red     = "#e60026"
+green   = "#00e676"
+yellow  = "#ffd600"
+blue    = "#0066ff"
+magenta = "#d500f9"
+cyan    = "#00e5ff"
+white   = "#e2e8f0"
+
+[colors.bright]
+black   = "#474b5c"
+red     = "#ff3b5c"
+green   = "#69f0ae"
+yellow  = "#ffff72"
+blue    = "#54a0ff"
+magenta = "#ff4081"
+cyan    = "#80f1ff"
+white   = "#ffffff"

@@ -257,6 +257,7 @@ sudo systemctl enable --now NetworkManager
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now power-profiles-daemon
 sudo systemctl enable greetd
+sudo systemctl enable systemd-boot-lifeboat.timer
 msg_ok "Servicios activados."
 
 # Configuración de Podman rootless (mapeo de subuids/subgids)

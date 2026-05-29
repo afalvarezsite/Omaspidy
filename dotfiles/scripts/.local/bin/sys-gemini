@@ -2,16 +2,47 @@
 # sys-gemini: Centro de asistencia de IA rápida.
 # Abre la aplicación web de Gemini en el navegador por defecto, o la enfoca si ya está activa.
 # Diseñado para enlazarse con la tecla Copilot (SUPER + SHIFT + F23) en Hyprland.
+# Solución 100% nativa, ultra-ligera y blindada contra auto-emparejamientos.
 
 URL="https://gemini.google.com/app"
 
-# Buscar si hay alguna ventana de navegador activa con "Gemini" en el título usando jaq
-GEMINI_WINDOW=$(hyprctl clients -j | jaq -r '.[] | select(.title | contains("Gemini")) | .address' 2>/dev/null | head -n1)
+# Buscar dirección y espacio de trabajo de la ventana de navegador activa con "gemini" en el título
+GEMINI_INFO=$(hyprctl clients | awk '
+    /^Window/ { addr = $2 }
+    /workspace:/ { ws = $2 }
+    /class:/ { cls = tolower($2) }
+    /title:/ { 
+        line = tolower($0)
+        # Evitar emparejar el propio script o terminales por seguridad
+        if (line ~ /gemini/ && line !~ /sys-gemini/ && line !~ /antigravity/) {
+            if (cls !~ /kitty/ && cls !~ /alacritty/ && cls !~ /terminal/ && cls !~ /ghostty/) {
+                print addr, ws
+                exit
+            }
+        }
+    }
+')
 
-if [ -n "$GEMINI_WINDOW" ] && [ "$GEMINI_WINDOW" != "null" ]; then
-    # Si la pestaña ya está activa en algún navegador abierto, la enfocamos instantáneamente
-    hyprctl dispatch focuswindow "address:$GEMINI_WINDOW"
+if [ -n "$GEMINI_INFO" ]; then
+    # Separar la dirección del espacio de trabajo
+    read -r ADDRESS WORKSPACE <<< "$GEMINI_INFO"
+    
+    # Asegurar el prefijo 0x para la dirección en Hyprland
+    if [[ ! "$ADDRESS" =~ ^0x ]]; then
+        ADDRESS="0x$ADDRESS"
+    fi
+    
+    # 1. Cambiar la vista de Hyprland al espacio de trabajo correcto
+    if [ "$WORKSPACE" = "-99" ]; then
+        # Si por alguna razón está en un espacio de trabajo especial (scratchpad)
+        hyprctl dispatch togglespecialworkspace
+    else
+        hyprctl dispatch workspace "$WORKSPACE"
+    fi
+    
+    # 2. Enfocar la ventana de forma inmediata
+    hyprctl dispatch focuswindow "address:$ADDRESS"
 else
-    # Si el navegador está cerrado o la pestaña no está visible/activa, abrimos una nueva pestaña
-    xdg-open "$URL"
+    # Si la pestaña no está activa o el navegador está cerrado, abrimos una nueva pestaña de forma asíncrona sin bloquear
+    xdg-open "$URL" &>/dev/null &
 fi

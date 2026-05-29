@@ -4,6 +4,9 @@
 # Instala el entorno Hyprland + CLI Rust + Tema Rojinegro desde cero.
 # ==============================================================================
 
+# --- Configuración defensiva y manejo de errores ---
+set -Euo pipefail
+
 # --- Colores de Salida (Paleta Spider-Man Premium) ---
 RED='\033[1;31m'
 GREEN='\033[1;32m'
@@ -18,9 +21,18 @@ msg_ok() { echo -e "${GREEN}==>${NC} $1"; }
 msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
 msg_warn() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 
+failure_trap() {
+  local lineno="$1"
+  local code="$2"
+  msg_err "¡Fallo crítico en la línea $lineno del script (Código de salida: $code)!"
+  msg_err "El script de instalación se ha detenido para proteger la integridad del sistema."
+  exit "$code"
+}
+trap 'failure_trap $LINENO $?' ERR
+
 show_banner() {
-  local paso="$1"
-  local desc="$2"
+  local paso="${1:-}"
+  local desc="${2:-}"
   
   clear
   echo -e "${RED}"
@@ -225,7 +237,7 @@ msg "Desplegando configuraciones con Stow..."
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%s)"
 msg_backup=false
 
-for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim" "$HOME/.config/antigravity" "$HOME/.config/fastfetch" "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"; do
+for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim" "$HOME/.config/antigravity" "$HOME/.config/fastfetch" "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/theme"; do
     if [ -e "$item" ] || [ -L "$item" ]; then
         if [ "$msg_backup" = false ]; then
             msg "Se han detectado configuraciones previas en tu sistema."
@@ -247,7 +259,7 @@ cd "$DOTFILES_DIR/dotfiles" || { msg_err "No se pudo acceder a la carpeta de dot
 
 # Hacer stow
 msg "Creando symlinks..."
-stow alacritty anyrun hypr mako nvim scripts starship waybar zsh git antigravity lazygit bat fastfetch gtk
+stow alacritty anyrun hypr mako nvim scripts starship waybar zsh git antigravity lazygit bat fastfetch gtk theme
 msg_ok "Configuraciones desplegadas."
 
 # --- 7. Habilitación de Servicios ---
@@ -328,7 +340,7 @@ msg "Iniciando limpieza profunda del sistema para mantener un entorno ultra lige
 
 # 1. Eliminar paquetes huérfanos residuales (instalados como dependencias de compilación de AUR que ya no se necesitan)
 msg "Buscando y eliminando paquetes huérfanos (make-dependencies sobrantes)..."
-ORPHANS=$(pacman -Qtdq)
+ORPHANS=$(pacman -Qtdq 2>/dev/null || true)
 if [ -n "$ORPHANS" ]; then
     sudo pacman -Rns --noconfirm $ORPHANS
     msg_ok "Paquetes huérfanos eliminados con éxito."
@@ -362,9 +374,9 @@ fi
 
 # 5. Configurar Zen Browser como navegador por defecto para HTTP y HTTPS
 msg "Configurando Zen Browser como tu navegador web por defecto..."
-xdg-settings set default-web-browser zen-browser.desktop 2>/dev/null
-xdg-mime default zen-browser.desktop x-scheme-handler/http 2>/dev/null
-xdg-mime default zen-browser.desktop x-scheme-handler/https 2>/dev/null
+xdg-settings set default-web-browser zen-browser.desktop 2>/dev/null || true
+xdg-mime default zen-browser.desktop x-scheme-handler/http 2>/dev/null || true
+xdg-mime default zen-browser.desktop x-scheme-handler/https 2>/dev/null || true
 
 msg_ok "Optimización y limpieza profunda del sistema finalizada."
 

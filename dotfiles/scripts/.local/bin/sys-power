@@ -3,20 +3,16 @@
 # Opciones con iconos Nerd Font (Apagar primero)
 OPTIONS="  Apagar\n  Bloquear Pantalla\n󰤄  Suspender\n󰗽  Cerrar Sesion\n󰜉  Reiniciar"
 
-# FZF con la paleta visual Spider-Man (Rojo Neon y Negro)
-SELECTION=$(echo -e "$OPTIONS" | fzf \
-    --prompt="  ❯ " \
-    --pointer="" \
-    --marker="󰄬" \
-    --layout=reverse \
-    --border=rounded \
-    --margin=2% \
-    --padding=1,2 \
-    --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
-    --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
-    --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
-    --header="Selecciona una accion para el sistema:" \
-    --info=hidden)
+# Cargar variables de colores del tema activo
+source "$HOME/.config/theme/active.sh" 2>/dev/null
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    ${FZF_THEME:---color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\" --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\" --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"}
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+SELECTION=$(echo -e "$OPTIONS" | fzf --header="Selecciona una accion para el sistema:" --info=hidden)
 
 # Ejecutar la accion seleccionada
 case "$SELECTION" in

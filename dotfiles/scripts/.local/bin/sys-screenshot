@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-SCREENSHOT: Utilidad de Captura de Pantalla Integrada con Skins Dinámicos
+# Estética: Ecosistema Spider-Man Premium
+# ==============================================================================
+
+# Cargar variables del tema activo
+# shellcheck source=/dev/null
+source "$HOME/.config/theme/active.sh" 2>/dev/null || {
+    COLOR_BG_DARK="#0c0d12"
+    COLOR_PRIMARY_GLOW="#ff3b5c"
+}
+
+# Limpiar los caracteres '#' para compatibilidad de slurp
+BG_HEX="${COLOR_BG_DARK//#/}"
+PRIMARY_HEX="${COLOR_PRIMARY_GLOW//#/}"
+
+mkdir -p "$HOME/Imágenes/Screenshots"
+DATE_STR=$(date '+%Y%m%d-%H%M%S')
+OUTPUT_FILE="$HOME/Imágenes/Screenshots/satty-$DATE_STR.png"
+
+if [ "${1:-}" = "--select" ]; then
+    # Capturar área seleccionada con colores de borde y fondo acordes al skin activo
+    grim -g "$(slurp -b "${BG_HEX}80" -c "${PRIMARY_HEX}ff" -s 00000000 -w 2)" - | satty --filename - --fullscreen --output-filename "$OUTPUT_FILE"
+else
+    # Captura completa
+    grim - | satty --filename - --fullscreen --output-filename "$OUTPUT_FILE"
+fi

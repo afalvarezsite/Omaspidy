@@ -36,3 +36,12 @@ setopt append_history
 setopt share_history
 setopt hist_ignore_all_dups
 setopt hist_reduce_blanks
+
+# ==============================================================================
+# CARGA DE SKIN DE TEMA DINÁMICO (Ecosistema Spidey)
+# ==============================================================================
+if [ -f "$HOME/.config/theme/active.sh" ]; then
+    source "$HOME/.config/theme/active.sh"
+    # Exportar la configuración de colores fzf global del tema
+    export FZF_DEFAULT_OPTS="--layout=reverse --border=rounded --padding=1,2 --margin=2% --prompt=' ❯ ' --pointer='' --marker='󰄬' $FZF_THEME"
+fi

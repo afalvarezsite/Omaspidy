@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # SYS-DISTROBOX: Gestor Interactivo de Contenedores de Pruebas y Pentesting
-# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# Estética: Ecosistema Spider-Man Premium
 # ==============================================================================
+
+# Cargar variables de colores del tema activo
+# shellcheck source=/dev/null
+source "$HOME/.config/theme/active.sh" 2>/dev/null
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    ${FZF_THEME:---color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\" --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\" --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"}
+    --border=rounded --padding=1,2 --margin=2%
+    --pointer='' --marker='󰄬'
+"
 
 # --- Colores y Estilos ---
 RED='\033[1;31m'
@@ -10,8 +20,6 @@ GREEN='\033[1;32m'
 BLUE='\033[1;34m'
 YELLOW='\033[1;33m'
 CYAN='\033[1;36m'
-MAGENTA='\033[1;35m'
-WHITE='\033[1;37m'
 NC='\033[0m'
 BOLD='\033[1m'
 
@@ -23,7 +31,7 @@ msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
 msg_title() {
     clear
     echo -e "${RED} 󰠚  OH MY SPIDY - DISTROBOX MANAGER  󰠚${NC}"
-    echo -e "${WHITE} ─────────────────────────────────────────────────────────${NC}"
+    echo -e "${WHITE:-} ─────────────────────────────────────────────────────────${NC}"
     echo ""
 }
 
@@ -62,7 +70,7 @@ enter_box() {
     
     if [ -z "$boxes" ]; then
         msg_warn "No hay contenedores creados todavía."
-        read -p "¿Deseas crear uno ahora? [s/N]: " confirm
+        read -r -p "¿Deseas crear uno ahora? [s/N]: " confirm
         if [[ "$confirm" =~ ^[sS]$ ]]; then
             create_box
         fi
@@ -72,15 +80,6 @@ enter_box() {
     local selection
     selection=$(echo -e "$boxes" | fzf \
         --prompt="   Selecciona un contenedor ❯ " \
-        --pointer="" \
-        --marker="󰄬" \
-        --layout=reverse \
-        --border=rounded \
-        --margin=2% \
-        --padding=1,2 \
-        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
-        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
-        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
         --header="Selecciona el entorno al que deseas ingresar:" \
         --info=hidden)
         
@@ -102,14 +101,6 @@ create_box() {
     local selection
     selection=$(echo -e "$options" | fzf \
         --prompt=" 󰏖  Selecciona plantilla ❯ " \
-        --pointer="" \
-        --layout=reverse \
-        --border=rounded \
-        --margin=2% \
-        --padding=1,2 \
-        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
-        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
-        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
         --header="Selecciona la plantilla de contenedor a crear:" \
         --info=hidden)
         
@@ -137,13 +128,13 @@ create_box() {
             ;;
         *Custom*|*Personalizada*)
             echo -e "${CYAN}--- Configuración de Imagen Personalizada ---${NC}"
-            read -p "Introduce el nombre para el contenedor (ej: alpine-test): " custom_name
+            read -r -p "Introduce el nombre para el contenedor (ej: alpine-test): " custom_name
             if [ -z "$custom_name" ]; then
                 msg_err "El nombre no puede estar vacío."
                 read -n 1 -s -r -p "Presiona cualquier tecla para volver..."
                 return
             fi
-            read -p "Introduce la URI/Tag de la imagen (ej: docker.io/library/alpine:latest): " custom_image
+            read -r -p "Introduce la URI/Tag de la imagen (ej: docker.io/library/alpine:latest): " custom_image
             if [ -z "$custom_image" ]; then
                 msg_err "La URI de la imagen no puede estar vacía."
                 read -n 1 -s -r -p "Presiona cualquier tecla para volver..."
@@ -188,14 +179,6 @@ export_app() {
     local selection
     selection=$(echo -e "$boxes" | fzf \
         --prompt=" 󱠟  Selecciona origen ❯ " \
-        --pointer="" \
-        --layout=reverse \
-        --border=rounded \
-        --margin=2% \
-        --padding=1,2 \
-        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
-        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
-        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
         --header="¿Desde qué contenedor deseas exportar el comando/app?" \
         --info=hidden)
         
@@ -207,7 +190,7 @@ export_app() {
         echo -e "${BOLD}¿Qué tipo de recurso deseas exportar?${NC}"
         echo -e "1) Aplicación Gráfica (Creará entrada en tu menú Anyrun)"
         echo -e "2) Binario de Terminal (Creará link directo en ~/.local/bin)"
-        read -p "Selecciona una opción [1/2]: " type_choice
+        read -r -p "Selecciona una opción [1/2]: " type_choice
         
         local type_flag=""
         if [ "$type_choice" = "1" ]; then
@@ -219,7 +202,7 @@ export_app() {
             return
         fi
         
-        read -p "Introduce el nombre del comando/app a exportar (ej: wireshark o nmap): " app_name
+        read -r -p "Introduce el nombre del comando/app a exportar (ej: wireshark o nmap): " app_name
         if [ -n "$app_name" ]; then
             msg_ok "Exportando $app_name desde $box_name..."
             distrobox enter "$box_name" -- distrobox-export "$type_flag" "$app_name"
@@ -244,14 +227,6 @@ stop_box() {
     local selection
     selection=$(echo -e "$boxes" | fzf \
         --prompt=" 󰦛  Detener contenedor ❯ " \
-        --pointer="" \
-        --layout=reverse \
-        --border=rounded \
-        --margin=2% \
-        --padding=1,2 \
-        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
-        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
-        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
         --header="Selecciona el contenedor que deseas detener:" \
         --info=hidden)
         
@@ -280,21 +255,13 @@ delete_box() {
     local selection
     selection=$(echo -e "$boxes" | fzf \
         --prompt=" 󰅖  Eliminar contenedor ❯ " \
-        --pointer="" \
-        --layout=reverse \
-        --border=rounded \
-        --margin=2% \
-        --padding=1,2 \
-        --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
-        --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
-        --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
         --header="ATENCIÓN: Se perderán los datos internos no guardados en el Home del host." \
         --info=hidden)
         
     if [ -n "$selection" ]; then
         local box_name
         box_name=$(echo "$selection" | awk '{print $1}')
-        read -p "¿Estás absolutamente seguro de eliminar '$box_name'? [s/N]: " confirm
+        read -r -p "¿Estás absolutamente seguro de eliminar '$box_name'? [s/N]: " confirm
         if [[ "$confirm" =~ ^[sS]$ ]]; then
             msg_warn "Borrando $box_name..."
             distrobox rm -f "$box_name"
@@ -308,7 +275,7 @@ delete_box() {
 prune_system() {
     msg_title
     msg_warn "Esta acción purgará contenedores y cachés huérfanas de Podman para liberar espacio en disco."
-    read -p "¿Deseas continuar? [s/N]: " confirm
+    read -r -p "¿Deseas continuar? [s/N]: " confirm
     if [[ "$confirm" =~ ^[sS]$ ]]; then
         msg "Purgando recursos no utilizados de Podman..."
         podman system prune -a --volumes -f
@@ -328,15 +295,6 @@ main() {
         local choice
         choice=$(echo -e "$menu_options" | fzf \
             --prompt="  ❯ " \
-            --pointer="" \
-            --marker="󰄬" \
-            --layout=reverse \
-            --border=rounded \
-            --margin=2% \
-            --padding=1,2 \
-            --color="bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff" \
-            --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
-            --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43" \
             --header="Selecciona una acción para gestionar Distrobox:" \
             --info=hidden)
             

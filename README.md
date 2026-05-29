@@ -267,7 +267,12 @@ curl -sSL https://raw.githubusercontent.com/afalvarezsite/Omaspidy/main/dotfiles
 > REPO_URL="https://github.com/tu-usuario/Omaspidy.git" curl -sSL https://raw.githubusercontent.com/tu-usuario/Omaspidy/main/dotfiles/install.sh | bash
 > ```
 
-El script detectará de forma inteligente la ejecución remota, configurará los **repositorios optimizados de CachyOS** para descargar binarios compilados específicamente para el conjunto de instrucciones de tu procesador (`x86-64-v3` / AVX2), actualizará todo el sistema a este estándar optimizado e instalará el **kernel de alto rendimiento `linux-cachyos`** (generando automáticamente su entrada en `systemd-boot` con las flags `mitigations=off intel_pstate=active` activadas por defecto). Además, cuenta con un **sistema de captura global de errores defensivo** (`set -Euo pipefail`) y está integrado con auditorías continuas mediante **ShellCheck** en GitHub Actions. Finalmente, clonará tu repositorio de dotfiles completo en `$HOME/.dotfiles` y ejecutará la instalación de todo el entorno gráfico (Hyprland, drivers Intel, herramientas modernas y dotfiles enlazados mediante Stow).
+El script detectará de forma inteligente la ejecución remota y realizará una **detección automática de tu hardware y CPU** (AMD, Intel o genérico). Configurará los **repositorios optimizados de CachyOS** para descargar binarios compilados específicamente para el conjunto de instrucciones de tu procesador (`x86-64-v3` / AVX2), actualizará todo el sistema a este estándar e instalará el **kernel de alto rendimiento `linux-cachyos`** (generando automáticamente su entrada en `systemd-boot` con las flags `mitigations=off` por defecto). 
+
+Adicionalmente, te preguntará interactivamente si deseas aplicar las **optimizaciones ultraespecíficas para Intel Meteor Lake / Core Ultra** (instalando `intel-ucode`, `thermald`, el driver gráfico `xe` de alto rendimiento, aceleración por hardware `intel-media-driver` y habilitando active P-State scaling vía `intel_pstate=active`). Si posees AMD u otra plataforma, configurará los drivers libres genéricos correspondientes (`mesa`, `amd-ucode`, `vulkan-radeon`) de manera totalmente segura y modular.
+
+Además, cuenta con un **sistema de captura global de errores defensivo** (`set -Euo pipefail`) y está integrado con auditorías continuas mediante **ShellCheck** en GitHub Actions. Finalmente, clonará tu repositorio de dotfiles completo en `$HOME/.dotfiles` y ejecutará la instalación de todo el entorno gráfico (Hyprland, drivers óptimos, herramientas modernas y dotfiles enlazados mediante Stow).
+
 
 ---
 

@@ -64,12 +64,36 @@ fi
 # Mostrar banner de presentación inicial
 show_banner "" ""
 
-msg_warn "Este script instalará todo el ecosistema (Hyprland, Drivers Intel, Zsh, Herramientas Rust, Repositorios CachyOS)."
+msg_warn "Este script instalará todo el ecosistema (Hyprland, Drivers Intel/AMD, Zsh, Herramientas Rust, Repositorios CachyOS)."
 read -p "¿Deseas continuar con la instalación? [s/N]: " confirm
 if [[ ! "$confirm" =~ ^[sS]$ ]]; then
     msg "Instalación cancelada."
     exit 0
 fi
+
+# --- Detección y Configuración de Hardware ---
+CPU_BRAND="Generic"
+if grep -q "AuthenticAMD" /proc/cpuinfo; then
+    CPU_BRAND="AMD"
+elif grep -q "GenuineIntel" /proc/cpuinfo; then
+    CPU_BRAND="Intel"
+fi
+
+msg "Detección de CPU: Se ha detectado un procesador $CPU_BRAND."
+
+INSTALL_INTEL_OPT=false
+if [ "$CPU_BRAND" = "Intel" ]; then
+    read -p "¿Deseas aplicar las optimizaciones ultra-específicas para Intel Meteor Lake (intel-ucode, thermald, active P-state scaling, intel-media-driver)? [S/n]: " opt_intel
+    if [[ ! "$opt_intel" =~ ^[nN]$ ]]; then
+        INSTALL_INTEL_OPT=true
+    fi
+else
+    read -p "¿Deseas forzar la instalación de las optimizaciones para procesadores/gráficos Intel Meteor Lake? [s/N]: " opt_intel
+    if [[ "$opt_intel" =~ ^[sS]$ ]]; then
+        INSTALL_INTEL_OPT=true
+    fi
+fi
+
 
 # --- Clonación de Dotfiles (Soporte para ejecución vía curl) ---
 DOTFILES_DIR="$HOME/.dotfiles"
@@ -130,10 +154,31 @@ fi
 # --- 2. Paquetes Base (Repositorios Oficiales) ---
 show_banner "2" "Instalando paquetes base del repositorio oficial de Arch Linux..."
 msg "Instalando paquetes del repositorio oficial de Arch..."
+
+HW_PKGS=()
+if [ "$INSTALL_INTEL_OPT" = true ]; then
+    msg_ok "Optimizaciones específicas de Intel Meteor Lake activadas."
+    HW_PKGS=(
+        intel-ucode mesa vulkan-intel lib32-vulkan-intel intel-media-driver libva-utils
+        sof-firmware alsa-ucm-conf thermald
+    )
+else
+    msg "Configurando soporte de hardware genérico/compatible..."
+    # Mesa es esencial para la mayoría de GPUs
+    HW_PKGS+=(mesa)
+    
+    if [ "$CPU_BRAND" = "Intel" ]; then
+        HW_PKGS+=(intel-ucode vulkan-intel lib32-vulkan-intel)
+    elif [ "$CPU_BRAND" = "AMD" ]; then
+        HW_PKGS+=(amd-ucode vulkan-radeon lib32-vulkan-radeon)
+    else
+        # Fallback seguro
+        HW_PKGS+=(intel-ucode amd-ucode)
+    fi
+fi
+
 CORE_PKGS=(
-    # Drivers Intel Meteor Lake y Hardware Base
-    intel-ucode mesa vulkan-intel lib32-vulkan-intel intel-media-driver libva-utils
-    sof-firmware alsa-ucm-conf thermald
+    "${HW_PKGS[@]}"
     
     # Entorno Gráfico (Wayland/Hyprland)
     hyprland hyprpaper hyprlock hypridle waybar mako
@@ -265,7 +310,9 @@ msg_ok "Configuraciones desplegadas."
 # --- 7. Habilitación de Servicios ---
 show_banner "7" "Activando servicios systemd esenciales e integrando Podman..."
 msg "Habilitando servicios systemd..."
-sudo systemctl enable --now thermald
+if [ "$INSTALL_INTEL_OPT" = true ]; then
+    sudo systemctl enable --now thermald
+fi
 sudo systemctl enable --now NetworkManager
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now power-profiles-daemon
@@ -304,12 +351,25 @@ if [ -d "/boot/loader/entries" ]; then
     
     if [ -n "$ROOT_UUID" ]; then
         msg "Generando entrada de boot para linux-cachyos con mitigations=off..."
+        
+        local ucode_initrd=""
+        if [ "$INSTALL_INTEL_OPT" = true ] || [ "$CPU_BRAND" = "Intel" ]; then
+            ucode_initrd="initrd  /intel-ucode.img"
+        elif [ "$CPU_BRAND" = "AMD" ]; then
+            ucode_initrd="initrd  /amd-ucode.img"
+        fi
+
+        local kernel_options="root=UUID=$ROOT_UUID rw rootflags=subvol=@ mitigations=off"
+        if [ "$INSTALL_INTEL_OPT" = true ]; then
+            kernel_options="$kernel_options intel_pstate=active"
+        fi
+
         cat << EOF | sudo tee /boot/loader/entries/arch-cachyos.conf > /dev/null
 title   Arch Linux (Kernel CachyOS)
 linux   /vmlinuz-linux-cachyos
-initrd  /intel-ucode.img
-initrd  /initramfs-linux-cachyos.img
-options root=UUID=$ROOT_UUID rw rootflags=subvol=@ mitigations=off intel_pstate=active
+${ucode_initrd:+$ucode_initrd
+}initrd  /initramfs-linux-cachyos.img
+options $kernel_options
 EOF
         # Establecer la entrada cachyos por defecto
         sudo sed -i 's/^default.*/default arch-cachyos.conf/' /boot/loader/loader.conf 2>/dev/null || \

@@ -162,6 +162,7 @@ AUR_PKGS=(
     localsend-go-bin
     oxker-bin
     antigravity-cli
+    bibata-cursor-theme
 )
 
 paru -S --needed --noconfirm "${AUR_PKGS[@]}"
@@ -310,6 +311,15 @@ fi
 # --- 8. Post-Instalación ---
 msg "Cambiando la shell por defecto a Zsh..."
 chsh -s "$(which zsh)"
+
+# Optimizar almacenamiento de cursores (mantener solo Bibata-Modern-Ice)
+msg "Optimizando almacenamiento de cursores (manteniendo solo Bibata-Modern-Ice)..."
+for theme in Bibata-Modern-Amber Bibata-Modern-Amber-Right Bibata-Modern-Classic Bibata-Modern-Classic-Right Bibata-Modern-Ice-Right Bibata-Original-Amber Bibata-Original-Amber-Right Bibata-Original-Classic Bibata-Original-Classic-Right Bibata-Original-Ice Bibata-Original-Ice-Right; do
+    if [ -d "/usr/share/icons/$theme" ]; then
+        sudo rm -rf "/usr/share/icons/$theme"
+    fi
+done
+msg_ok "Limpieza de cursores finalizada. Solo se conserva Bibata-Modern-Ice."
 
 msg_ok "=========================================================="
 msg_ok "  INSTALACIÓN FINALIZADA"

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-SPIDEY: Centro de Control y Hub Centralizado de Utilidades
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# Iconos: Estrictamente Nerd Fonts (Sin Emojis)
+# ==============================================================================
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    --color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\"
+    --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\"
+    --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt=' 🕷️ ❯ ' --pointer='' --marker='󰄬'
+"
+
+# Lista de opciones con iconos Nerd Fonts formateados
+OPTIONS="  sys-distrobox     (Gestor de Contenedores TUI - dbs)
+󰦃  sys-secureboot     (Asistente de Arranque Seguro - sbctl)
+󰓅  sys-power-profile  (Selector de Perfiles de Rendimiento)
+󰓃  sys-audio          (Selector de Dispositivos de Audio)
+  sys-wifi           (Selector y Gestor de Wi-Fi)
+󰂯  sys-bluetooth      (Selector y Gestor de Bluetooth)
+󰗽  sys-power          (Menú de Energía - Apagar/Reiniciar)
+󰄬  sys-aliases        (Buscador de Alias de Terminal)
+󰃬  sys-snaps          (Explorador de Snapshots de Snapper)
+󰜉  sys-backup         (Crear Snapshot Manual de Recuperación)
+󰠚  sys-share          (Compartir Archivos en Red - LocalSend)
+󰀪  sys-clean          (Limpieza y Mantenimiento de Huérfanos)
+󰖔  sys-sunset         (Alternar Filtro Nocturno / Luz Azul)
+  hypr-keys          (Catálogo de Atajos Interactivos)
+󰍹  hypr-mirror        (Duplicador de Pantalla en Espejo)
+󰄀  wl-ocr             (Captura de Pantalla a Texto - OCR)"
+
+SELECTION=$(echo -e "$OPTIONS" | fzf --prompt=" 🕷️  Spider-Man Centro de Control ❯ " --header="Selecciona una utilidad para ejecutar:")
+
+if [ -z "$SELECTION" ]; then
+    exit 0
+fi
+
+# Extraer el comando de la selección
+CMD_NAME=$(echo "$SELECTION" | awk '{print $2}')
+
+# Determinar si ejecutar con exec (para TUIs interactivas en la misma terminal) o en background (para scripts gráficos)
+case "$CMD_NAME" in
+    "sys-sunset")
+        sys-sunset --toggle &
+        exit 0
+        ;;
+    "wl-ocr")
+        wl-ocr &
+        exit 0
+        ;;
+    "hypr-mirror")
+        hypr-mirror &
+        exit 0
+        ;;
+    "sys-secureboot")
+        # Requiere sudo, así que hacemos exec con sudo
+        exec sudo sys-secureboot
+        ;;
+    *)
+        # Exec directo para herramientas TUI interactivas
+        if command -v "$CMD_NAME" &>/dev/null; then
+            exec "$CMD_NAME"
+        else
+            echo -e "\033[1;31m[ERROR]\033[0m No se encontró el comando: $CMD_NAME"
+            read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+            exit 1
+        fi
+        ;;
+esac

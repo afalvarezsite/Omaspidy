@@ -83,5 +83,5 @@ description = "Show distrobox container name"
 command = "echo $container"
 when = "test -n \"$container\""
 style = "bold #00e5ff"
-format = "[ 🕷️ $output]($style)"
+format = "[  $output]($style)"
 

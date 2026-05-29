@@ -50,7 +50,7 @@ if [ ! -d "$THEME_DIR" ] || [ ! -d "$SKINS_DIR" ]; then
 fi
 
 # Listado de skins preconfiguradas
-OPTIONS="1. 🕷️  Spider-Man Classic (Rojo/Negro/Azul Neón)\n2. 🕸️  Symbiote Suit (Negro profundo/Blanco/Gris)\n3. ⚡  Miles Morales (Negro mate/Rojo/Púrpura)"
+OPTIONS="1.   Spider-Man Classic (Rojo/Negro/Azul Neón)\n2.   Symbiote Suit (Negro profundo/Blanco/Gris)\n3. ⚡  Miles Morales (Negro mate/Rojo/Púrpura)"
 
 show_banner
 

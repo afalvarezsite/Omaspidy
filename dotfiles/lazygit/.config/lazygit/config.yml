@@ -1,0 +1,27 @@
+# Configuración de lazygit - Ecosistema Spider-Man
+# Estilo: Rojinegro Premium con iconos estrictamente Nerd Fonts
+
+gui:
+  showIcons: true
+  theme:
+    activeBorderColor:
+      - '#ff3b5c' # Rojo neón brillante para elementos activos
+      - 'bold'
+    inactiveBorderColor:
+      - '#474b5c' # Gris apagado para inactivos
+    optionsTextColor:
+      - '#80f1ff' # Cyan para opciones rápidas
+    selectedLineBgColor:
+      - '#16171f' # Negro grisáceo para la línea seleccionada
+    selectedRangeBgColor:
+      - '#16171f'
+    cherryPickedCommitBgColor:
+      - '#16171f'
+    cherryPickedCommitFgColor:
+      - '#ff3b5c'
+    unstagedChangesColor:
+      - '#e60026' # Rojo Spider-Man clásico para cambios no preparados
+    defaultFgColor:
+      - '#f8f9fa' # Blanco hueso para texto ordinario
+    searchingActiveBorderColor:
+      - '#00e5ff' # Cyan para búsqueda activa

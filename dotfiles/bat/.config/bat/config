@@ -1,0 +1,5 @@
+# Configuración de bat - Ecosistema Spider-Man
+# Hereda los colores exactos de Alacritty para una tematización perfecta sin duplicar código
+
+--theme="ansi"
+--style="plain"

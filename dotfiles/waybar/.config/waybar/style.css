@@ -129,7 +129,7 @@ window#waybar {
     border-color: @red;
 }
 
-/* Custom Power Profile States (Dinámicos Premium) */
+/* Custom Power Profile States (Dinámicos) */
 #custom-powerprofile.performance {
     color: @red-glow;
     text-shadow: 0px 0px 8px @red-glow;

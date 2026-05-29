@@ -5,7 +5,7 @@
 [![Shell-Zsh](https://img.shields.io/badge/Shell-Zsh-black.svg?logo=gnubash&logoColor=white&color=ff3b5c)](https://www.zsh.org/)
 [![Style](https://img.shields.io/badge/Theme-Spider--Man-red.svg?style=flat-square&color=ff1e43)](https://github.com/afalvarezsite/Omaspidy)
 
-Una guía e instalador automatizado para desplegar un entorno premium **Hyprland + CLI moderna de Rust + Tema Rojinegro (Spider-Man)** ultraoptimizado para plataformas de alto rendimiento (Intel Meteor Lake, almacenamiento SSD NVMe y sistema de archivos BTRFS con subvolúmenes redundantes).
+Una guía e instalador automatizado para desplegar un entorno **Hyprland + CLI moderna de Rust + Tema Rojinegro (Spider-Man)** ultraoptimizado para plataformas de alto rendimiento (Intel Meteor Lake, almacenamiento SSD NVMe y sistema de archivos BTRFS con subvolúmenes redundantes).
 
 > [!NOTE]
 > **📖 Guía de Herramientas y Optimización de Rendimiento:**

@@ -7,7 +7,7 @@
 # --- Configuración defensiva y manejo de errores ---
 set -Euo pipefail
 
-# --- Colores de Salida (Paleta Spider-Man Premium) ---
+# --- Colores de Salida (Paleta Spider-Man) ---
 RED='\033[1;31m'
 GREEN='\033[1;32m'
 BLUE='\033[1;34m'
@@ -43,7 +43,7 @@ show_banner() {
   echo " ╚██████╔╝██║ ╚═╝ ██║██║  ██║███████║██║     ██║██████╔╝   ██║   "
   echo "  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═════╝    ╚═╝   "
   echo -e "${NC}"
-  echo -e "         ${BOLD}  OH MY SPIDY - Ecosistema Arch Linux Premium  ${NC}"
+  echo -e "         ${BOLD}  OH MY SPIDY - Ecosistema Arch Linux  ${NC}"
   echo -e "     ${WHITE}─────────────────────────────────────────────────────────${NC}"
   
   if [ -n "$paso" ] && [ -n "$desc" ]; then

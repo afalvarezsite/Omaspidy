@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # SYS-REPLICATE: Gestor de Replicación Incremental y Formateador BTRFS (100% FZF)
-# Estética: Ecosistema Spider-Man Premium
+# Estética: Ecosistema Spider-Man
 # ==============================================================================
 
 # Cargar variables de colores del tema activo

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # SYS-AUDIO: Selector Rápido de Dispositivos de Audio PipeWire
-# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# Estética: Ecosistema Spider-Man (Rojo Neón y Negro)
 # ==============================================================================
 
 # Cargar variables de colores del tema activo

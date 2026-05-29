@@ -321,6 +321,45 @@ for theme in Bibata-Modern-Amber Bibata-Modern-Amber-Right Bibata-Modern-Classic
 done
 msg_ok "Limpieza de cursores finalizada. Solo se conserva Bibata-Modern-Ice."
 
+# --- 8.5. Limpieza y Optimización del Sistema (Entorno Ultra Ligero) ---
+msg "Iniciando limpieza profunda del sistema para mantener un entorno ultra ligero..."
+
+# 1. Eliminar paquetes huérfanos residuales (instalados como dependencias de compilación de AUR que ya no se necesitan)
+msg "Buscando y eliminando paquetes huérfanos (make-dependencies sobrantes)..."
+ORPHANS=$(pacman -Qtdq)
+if [ -n "$ORPHANS" ]; then
+    sudo pacman -Rns --noconfirm $ORPHANS
+    msg_ok "Paquetes huérfanos eliminados con éxito."
+else
+    msg "No se encontraron paquetes huérfanos que eliminar."
+fi
+
+# 2. Limpiar completamente la caché de descargas de pacman
+msg "Vaciando caché de paquetes descargados de Pacman para liberar espacio en disco..."
+sudo pacman -Scc --noconfirm
+if command -v paccache &> /dev/null; then
+    sudo paccache -r -k 0 &>/dev/null
+fi
+
+# 3. Limpiar la caché de descargas de AUR (paru)
+msg "Limpiando la caché de compilaciones de Paru (AUR)..."
+if command -v paru &> /dev/null; then
+    paru -Sc --noconfirm
+fi
+rm -rf "$HOME/.cache/paru/clone/"* 2>/dev/null
+
+# 4. Reducir y limitar los registros (logs) de systemd journal a un máximo de 50MB
+msg "Optimizando y limitando el tamaño del log del sistema (systemd journal)..."
+sudo journalctl --vacuum-size=50M
+# Configurar límite permanente en journald.conf para evitar crecimiento futuro
+if [ -f "/etc/systemd/journald.conf" ]; then
+    sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=50M/' /etc/systemd/journald.conf 2>/dev/null || \
+    echo "SystemMaxUse=50M" | sudo tee -a /etc/systemd/journald.conf >/dev/null
+    sudo systemctl restart systemd-journald 2>/dev/null
+fi
+
+msg_ok "Optimización y limpieza profunda del sistema finalizada."
+
 msg_ok "=========================================================="
 msg_ok "  INSTALACIÓN FINALIZADA"
 msg_ok "=========================================================="

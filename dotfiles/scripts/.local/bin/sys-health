@@ -90,7 +90,7 @@ add_check "hyprpolkitagent (Polkit)" "user-service"   "hyprpolkitagent"       "s
 # Servicios de sistema
 add_check "NetworkManager (Red)"     "system-service" "NetworkManager"        ""                                  ""
 add_check "bluetooth (BT)"           "system-service" "bluetooth"             "sudo systemctl start bluetooth"    "󰂯"
-add_check "PipeWire (Audio)"         "system-service" "pipewire"              ""                                  "󰓃"
+add_check "PipeWire (Audio)"         "user-service"   "pipewire"              "systemctl --user restart pipewire pipewire-pulse wireplumber" "󰓃"
 add_check "snapper-timeline (BTRFS)" "system-service" "snapper-timeline.timer" ""                                 "󰁯"
 add_check "power-profiles-daemon"    "system-service" "power-profiles-daemon" ""                                  ""
 

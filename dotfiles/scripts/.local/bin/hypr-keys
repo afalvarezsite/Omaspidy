@@ -33,7 +33,7 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
     exit 1
 fi
 
-grep -E '^bind' "$CONFIG_FILE" \
+RESULT=$(grep -E '^bind' "$CONFIG_FILE" \
     | sed -E 's/^bind[a-z]*\s*=\s*//' \
     | awk -F', ' '{
         mod = $1;
@@ -84,6 +84,7 @@ grep -E '^bind' "$CONFIG_FILE" \
         # Reemplazar llamadas especificas con descripciones humanas
         if (desc ~ /hypr-keys/) desc = "Menu de Atajos de Teclado";
         else if (desc ~ /zen-browser/) desc = "Navegador Zen";
+        else if (desc ~ /sys-stow/) desc = "Gestor de Despliegue de Dotfiles";
         else if (desc ~ /scratchpad_term/) desc = "Terminal Scratchpad (Flotante)";
         else if (desc ~ /clipse_scratchpad/) desc = "Historial de Portapapeles (Scratchpad)";
         else if (desc ~ /sys-gemini/) desc = "Asistente Gemini AI (Copilot Key)";
@@ -117,11 +118,43 @@ grep -E '^bind' "$CONFIG_FILE" \
         else if (desc ~ /brightness lower/) desc = "Bajar Brillo";
         else if (desc ~ /hyprlock/) desc = "Bloquear Pantalla";
         
-        # Imprimir con un separador claro
-        printf "%s = %s\n", combo, desc;
+        # Guardar comando original para ejecución
+        if (action == "exec") {
+            orig_cmd = target;
+        } else {
+            orig_cmd = "hyprctl dispatch " action " " target;
+        }
+        gsub(/\$terminal/, "alacritty", orig_cmd);
+        gsub(/\$fileManager/, "alacritty --class floating_tui -e yazi", orig_cmd);
+        gsub(/\$menu/, "anyrun", orig_cmd);
+        
+        # Imprimir delimitado por │ con anchos fijos para alineación limpia
+        printf "%-30s │ %-50s │ %s\n", combo, desc, orig_cmd;
     }' \
-    | column -t -s '=' \
     | fzf \
-        --header="  ATAJO DE TECLADO            ACCION" \
-        --bind "enter:execute(echo {} | wl-copy)+abort" \
-        --info=inline
+        -d '│' \
+        --with-nth=1,2 \
+        --header="  ATAJO DE TECLADO               ACCION                              (ENTER: Copiar | CTRL-X: Lanzar)" \
+        --expect=ctrl-x \
+        --info=inline)
+
+if [ -n "$RESULT" ]; then
+    KEY=$(echo "$RESULT" | head -n 1)
+    LINE=$(echo "$RESULT" | tail -n 1)
+    
+    if [ -n "$LINE" ]; then
+        COMBO=$(echo "$LINE" | cut -d'│' -f1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        DESC=$(echo "$LINE" | cut -d'│' -f2 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        CMD=$(echo "$LINE" | cut -d'│' -f3 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        
+        if [ "$KEY" = "ctrl-x" ]; then
+            # Lanzar la acción de forma no bloqueante y desligada
+            notify-send -t 2000 -i system-run "Lanzando Atajo" "Ejecutando: $DESC"
+            eval "$CMD" &>/dev/null & disown
+        else
+            # Copiar al portapapeles
+            echo "$COMBO = $DESC" | wl-copy
+            notify-send -t 2000 -i edit-copy "Copiado" "Atajo copiado al portapapeles"
+        fi
+    fi
+fi

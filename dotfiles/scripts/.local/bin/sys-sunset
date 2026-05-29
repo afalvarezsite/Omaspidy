@@ -22,7 +22,7 @@ if [ "$1" = "--toggle" ]; then
         notify-send -t 2000 -i display-brightness "Filtro Nocturno" "Luz nocturna desactivada (Luz Fría)"
     else
         if command -v hyprsunset &>/dev/null; then
-            hyprsunset --temperature 3500K &
+            hyprsunset --temperature 3500K & disown
             notify-send -t 2000 -i display-brightness "Filtro Nocturno" "Luz nocturna activada (3500K)"
         else
             notify-send -u critical -i dialog-error "Filtro Nocturno" "Error: hyprsunset no se encuentra instalado."

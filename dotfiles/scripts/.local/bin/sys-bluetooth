@@ -20,6 +20,9 @@ if ! systemctl is-active --quiet bluetooth; then
     exit 1
 fi
 
+# Asegurar que el controlador bluetooth está encendido
+bluetoothctl power on &>/dev/null
+
 # Obtener dispositivos emparejados
 PAIRED_DEVICES=$(bluetoothctl devices)
 

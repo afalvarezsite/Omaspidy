@@ -71,4 +71,36 @@ echo -e "\033[1;36m-> Vaciando carpetas temporales de yay/paru...\033[0m"
 rm -rf "$HOME/.cache/paru/clone/"*
 rm -rf "$HOME/.cache/yay/"*
 
+# Limpieza profunda adicional opcional
+echo ""
+echo -e "\033[1;36m-> ¿Deseas realizar una limpieza de logs y cachés de desarrollo? \033[0m"
+if command -v fzf &>/dev/null; then
+    EXTRA_CLEAN_OPTS="1.   Sí, limpiar logs e historial de desarrollo (npm, pip, cargo, journal)\n2. 󰌑  No, terminar mantenimiento"
+    EXTRA_CLEAN_SEL=$(echo -e "$EXTRA_CLEAN_OPTS" | fzf --prompt=" Limpieza extendida ❯ " --header="Libera espacio en logs y cachés de lenguajes de desarrollo:" --info=hidden)
+else
+    read -r -p "Limpiar logs e historial de desarrollo (npm, pip, cargo, journal) [s/N]: " extra_confirm
+    if [[ "$extra_confirm" =~ ^[sS]$ ]]; then
+        EXTRA_CLEAN_SEL="Sí"
+    fi
+fi
+
+if [[ "$EXTRA_CLEAN_SEL" == *"Sí"* ]]; then
+    echo -e "\033[1;35m--> Vaciando registro histórico de logs de systemd a un máximo de 50MB...\033[0m"
+    sudo journalctl --vacuum-size=50M
+    
+    if [ -d "$HOME/.cache/pip" ]; then
+        echo -e "\033[1;35m--> Vaciando caché de Python pip...\033[0m"
+        rm -rf "$HOME/.cache/pip/"*
+    fi
+    if [ -d "$HOME/.npm" ]; then
+        echo -e "\033[1;35m--> Vaciando caché de Node npm...\033[0m"
+        rm -rf "$HOME/.npm/_cacache/"*
+    fi
+    if [ -d "$HOME/.cargo/registry/cache" ]; then
+        echo -e "\033[1;35m--> Vaciando caché de Rust cargo...\033[0m"
+        rm -rf "$HOME/.cargo/registry/cache/"*
+    fi
+fi
+
+echo ""
 echo -e "\033[1;31m  Mantenimiento Completado \033[0m"

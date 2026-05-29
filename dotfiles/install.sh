@@ -221,6 +221,7 @@ AUR_PKGS=(
     antigravity-cli
     bibata-cursor-theme
     zen-browser-bin
+    gpu-screen-recorder-git
 )
 
 paru -S --needed --noconfirm "${AUR_PKGS[@]}"
@@ -352,14 +353,14 @@ if [ -d "/boot/loader/entries" ]; then
     if [ -n "$ROOT_UUID" ]; then
         msg "Generando entrada de boot para linux-cachyos con mitigations=off..."
         
-        local ucode_initrd=""
+        ucode_initrd=""
         if [ "$INSTALL_INTEL_OPT" = true ] || [ "$CPU_BRAND" = "Intel" ]; then
             ucode_initrd="initrd  /intel-ucode.img"
         elif [ "$CPU_BRAND" = "AMD" ]; then
             ucode_initrd="initrd  /amd-ucode.img"
         fi
 
-        local kernel_options="root=UUID=$ROOT_UUID rw rootflags=subvol=@ mitigations=off"
+        kernel_options="root=UUID=$ROOT_UUID rw rootflags=subvol=@ mitigations=off"
         if [ "$INSTALL_INTEL_OPT" = true ]; then
             kernel_options="$kernel_options intel_pstate=active"
         fi

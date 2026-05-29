@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-THEME: Selector Dinámico de Skins del Ecosistema Spider-Man
+# Estética: Ecosistema Spider-Man Premium
+# ==============================================================================
+
+# Colores visuales Spider-Man para la interfaz del selector
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+BLUE='\033[1;34m'
+YELLOW='\033[1;33m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+msg() { echo -e "${BLUE}::${NC} $1"; }
+msg_ok() { echo -e "${GREEN}==>${NC} $1"; }
+msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+show_banner() {
+    clear
+    echo -e "${RED}"
+    echo "  ███████╗██╗  ██╗██╗███╗   ██╗███████╗"
+    echo "  ██╔════╝██║  ██║██║████╗  ██║██╔════╝"
+    echo "  ███████╗███████║██║██╔██╗ ██║███████╗"
+    echo "  ╚════██║██╔══██║██║██║╚██╗██║╚════██║"
+    echo "  ███████║██║  ██║██║██║ ╚████║███████║"
+    echo "  ╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝╚══════╝"
+    echo -e "${NC}"
+    echo -e "       ${BOLD}󰉼  SKIN SELECTOR MANAGER  󰉼${NC}"
+    echo -e "${WHITE}  ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+}
+
+THEME_DIR="$HOME/.config/theme"
+SKINS_DIR="$THEME_DIR/skins"
+
+# Comprobar directorios
+if [ ! -d "$THEME_DIR" ] || [ ! -d "$SKINS_DIR" ]; then
+    # Soporte para ejecución en el repositorio local antes de que stow actúe
+    # Intentar buscar en el repositorio local
+    WORKSPACE_SKINS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../theme/.config/theme/skins" 2>/dev/null && pwd)"
+    if [ -d "$WORKSPACE_SKINS_DIR" ]; then
+        THEME_DIR="$(cd "$WORKSPACE_SKINS_DIR/.." && pwd)"
+        SKINS_DIR="$THEME_DIR/skins"
+    else
+        msg_err "Directorio de skins no encontrado. Asegúrate de stowear el módulo 'theme'."
+        exit 1
+    fi
+fi
+
+# Listado de skins preconfiguradas
+OPTIONS="1. 🕷️  Spider-Man Classic (Rojo/Negro/Azul Neón)\n2. 🕸️  Symbiote Suit (Negro profundo/Blanco/Gris)\n3. ⚡  Miles Morales (Negro mate/Rojo/Púrpura)"
+
+show_banner
+
+# Selección interactiva con FZF heredando opciones estéticas por defecto
+SKIN_SELECT=$(echo -e "$OPTIONS" | fzf \
+    --prompt=" Selecciona una Skin ❯ " \
+    --header="Elige el aspecto visual de tu ecosistema:" \
+    --layout=reverse \
+    --border=rounded --padding=1,2 --margin=2% --pointer="" --marker="󰄬")
+
+if [ -z "$SKIN_SELECT" ]; then
+    msg "Operación cancelada. Manteniendo el tema actual."
+    exit 0
+fi
+
+# Identificar la skin elegida
+case "$SKIN_SELECT" in
+    *Classic*)
+        SKIN="classic_spidey"
+        ;;
+    *Symbiote*)
+        SKIN="symbiote"
+        ;;
+    *Miles*)
+        SKIN="miles_morales"
+        ;;
+    *)
+        msg_err "Skin no reconocida."
+        exit 1
+        ;;
+esac
+
+msg "Aplicando skin: ${SKIN_SELECT#*. }..."
+
+# 1. Enlazar archivos dinámicos del tema activo en ~/.config/theme/
+ln -sf "$SKINS_DIR/${SKIN}.sh" "$THEME_DIR/active.sh"
+ln -sf "$SKINS_DIR/${SKIN}.conf" "$THEME_DIR/active.conf"
+ln -sf "$SKINS_DIR/${SKIN}.css" "$THEME_DIR/active.css"
+
+# 2. Actualizar el symlink de Starship config
+ln -sf "$SKINS_DIR/${SKIN}_starship.toml" "$HOME/.config/starship.toml"
+
+# 3. Actualizar el symlink de Mako config
+mkdir -p "$HOME/.config/mako"
+ln -sf "$SKINS_DIR/${SKIN}_mako.conf" "$HOME/.config/mako/config"
+
+# --- Recargas al Vuelo ---
+
+# Recargar Hyprland
+if pgrep -x Hyprland &>/dev/null; then
+    msg "Recargando configuraciones de Hyprland..."
+    hyprctl reload &>/dev/null
+fi
+
+# Recargar Waybar en caliente (envía señal USR2 para recargar CSS y Config)
+if pgrep -x waybar &>/dev/null; then
+    msg "Recargando Waybar..."
+    pkill -USR2 waybar
+fi
+
+# Recargar Mako
+if pgrep -x mako &>/dev/null; then
+    msg "Recargando demonio de notificaciones Mako..."
+    makoctl reload &>/dev/null
+fi
+
+msg_ok "Skin ${SKIN_SELECT#*. } aplicada con éxito en todo tu ecosistema."

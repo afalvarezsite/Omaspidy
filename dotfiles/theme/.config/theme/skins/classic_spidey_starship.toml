@@ -1,0 +1,86 @@
+# starship.toml
+# Tema Spider-Man Minimalista + Elementos de p10k
+
+format = """
+[╭─](bold #ff1e43)\
+$os\
+${custom.distrobox}\
+$directory\
+$git_branch\
+$git_status\
+$line_break\
+[╰─](bold #ff1e43)$character"""
+
+right_format = """\
+$status\
+$cmd_duration\
+$jobs\
+$direnv\
+$nodejs\
+$python\
+$golang\
+"""
+
+[os]
+disabled = false
+style = "bold #e60026"
+format = "[󰣇 ]($style)"
+
+[directory]
+style = "bold #e60026"
+format = "[ $path ]($style)"
+read_only = " 󰌾"
+truncation_length = 3
+truncate_to_repo = false
+
+[git_branch]
+symbol = " "
+style = "bold #474b5c"
+format = "[ $symbol$branch ]($style)"
+
+[git_status]
+style = "bold #ff3b5c"
+format = "[$all_status$ahead_behind ]($style)"
+
+[character]
+success_symbol = "[❯](bold #ff1e43)"
+error_symbol = "[❮](bold #ff1e43)"
+
+# --- Elementos flotantes a la derecha (Extraídos de p10k) ---
+
+[status]
+disabled = false
+style = "bold #ff1e43"
+format = "[ $symbol$status]($style)"
+
+[cmd_duration]
+style = "bold #474b5c"
+format = "[ 󱎫 $duration]($style)"
+
+[jobs]
+style = "bold #00e5ff"
+format = "[ 󰒋 $number]($style)"
+
+[direnv]
+disabled = false
+style = "bold #ffd600"
+format = "[ 󱞣 $loaded]($style)"
+
+[nodejs]
+style = "bold #00e676"
+format = "[  $version]($style)"
+
+[python]
+style = "bold #ffd600"
+format = "[ 󰌠 $version]($style)"
+
+[golang]
+style = "bold #00e5ff"
+format = "[  $version]($style)"
+
+[custom.distrobox]
+description = "Show distrobox container name"
+command = "echo $container"
+when = "test -n \"$container\""
+style = "bold #00e5ff"
+format = "[ 🕷️ $output]($style)"

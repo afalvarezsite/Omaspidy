@@ -1,7 +1,9 @@
 /* 
- * Anyrun Spider-Man Theme (Red & Black)
+ * Anyrun Spidey Theme (Dynamic Skins)
  * Glassmorphic, modern, extremely snappy look
  */
+
+@import url("../theme/active.css");
 
 * {
   transition: 200ms ease-out;
@@ -24,21 +26,21 @@
 
 box#main {
   /* Contenedor principal de Anyrun */
-  background: rgba(12, 13, 18, 0.92);
-  border: 2px solid #e60026;
+  background: alpha(@bg-dark, 0.92);
+  border: 2px solid @red;
   border-radius: 12px;
   padding: 12px;
-  box-shadow: 0px 0px 15px rgba(230, 0, 38, 0.3);
+  box-shadow: 0px 0px 15px alpha(@red, 0.3);
 }
 
 entry#entry {
   /* Barra de busqueda */
-  background: rgba(22, 23, 31, 0.95);
-  border: 1px solid #ff3b5c;
+  background: @bg-light;
+  border: 1px solid @red-glow;
   border-radius: 8px;
   margin-bottom: 12px;
   padding: 8px 16px;
-  color: #f8f9fa;
+  color: @fg;
   box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
 }
 
@@ -51,16 +53,16 @@ list#main {
 #match {
   padding: 8px;
   border-radius: 8px;
-  color: #f8f9fa;
+  color: @fg;
   margin: 2px 0;
 }
 
 /* Hover / Seleccionado en la lista */
 #match:selected {
-  background: rgba(230, 0, 38, 0.4);
-  border: 1px solid #ff3b5c;
+  background: alpha(@red, 0.4);
+  border: 1px solid @red-glow;
   color: #ffffff;
-  box-shadow: 0px 0px 10px rgba(255, 59, 92, 0.5);
+  box-shadow: 0px 0px 10px alpha(@red-glow, 0.5);
 }
 
 /* Texto de la aplicacion / descripcion */

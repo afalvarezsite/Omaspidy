@@ -1,0 +1,86 @@
+# starship.toml
+# Tema Symbiote Suit (Black and White)
+
+format = """
+[╭─](bold #ffffff)\
+$os\
+${custom.distrobox}\
+$directory\
+$git_branch\
+$git_status\
+$line_break\
+[╰─](bold #ffffff)$character"""
+
+right_format = """\
+$status\
+$cmd_duration\
+$jobs\
+$direnv\
+$nodejs\
+$python\
+$golang\
+"""
+
+[os]
+disabled = false
+style = "bold #ffffff"
+format = "[󰣇 ]($style)"
+
+[directory]
+style = "bold #ffffff"
+format = "[ $path ]($style)"
+read_only = " 󰌾"
+truncation_length = 3
+truncate_to_repo = false
+
+[git_branch]
+symbol = " "
+style = "bold #70757a"
+format = "[ $symbol$branch ]($style)"
+
+[git_status]
+style = "bold #e8eaed"
+format = "[$all_status$ahead_behind ]($style)"
+
+[character]
+success_symbol = "[❯](bold #ffffff)"
+error_symbol = "[❮](bold #70757a)"
+
+# --- Elementos flotantes a la derecha ---
+
+[status]
+disabled = false
+style = "bold #ffffff"
+format = "[ $symbol$status]($style)"
+
+[cmd_duration]
+style = "bold #70757a"
+format = "[ 󱎫 $duration]($style)"
+
+[jobs]
+style = "bold #e8eaed"
+format = "[ 󰒋 $number]($style)"
+
+[direnv]
+disabled = false
+style = "bold #e8eaed"
+format = "[ 󱞣 $loaded]($style)"
+
+[nodejs]
+style = "bold #e8eaed"
+format = "[  $version]($style)"
+
+[python]
+style = "bold #e8eaed"
+format = "[ 󰌠 $version]($style)"
+
+[golang]
+style = "bold #e8eaed"
+format = "[  $version]($style)"
+
+[custom.distrobox]
+description = "Show distrobox container name"
+command = "echo $container"
+when = "test -n \"$container\""
+style = "bold #ffffff"
+format = "[ 🕷️ $output]($style)"

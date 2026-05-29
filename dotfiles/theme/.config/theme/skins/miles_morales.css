@@ -1,0 +1,8 @@
+/* miles_morales.css - CSS definitions */
+@define-color bg-dark   #08080a;
+@define-color bg-light  rgba(20, 20, 25, 0.85);
+@define-color fg        #f8f9fa;
+@define-color red       #ff1e43;
+@define-color red-glow  #ff5773;
+@define-color inactive  #4a4b57;
+@define-color secondary #d500f9;

@@ -1,0 +1,8 @@
+/* classic_spidey.css - CSS definitions */
+@define-color bg-dark   #0c0d12;
+@define-color bg-light  rgba(22, 23, 31, 0.85);
+@define-color fg        #f8f9fa;
+@define-color red       #e60026;
+@define-color red-glow  #ff3b5c;
+@define-color inactive  #474b5c;
+@define-color secondary #00e5ff;

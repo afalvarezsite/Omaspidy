@@ -1,0 +1,8 @@
+/* symbiote.css - CSS definitions */
+@define-color bg-dark   #050505;
+@define-color bg-light  rgba(18, 18, 18, 0.85);
+@define-color fg        #e8eaed;
+@define-color red       #ffffff;
+@define-color red-glow  #f8f9fa;
+@define-color inactive  #3c4043;
+@define-color secondary #70757a;

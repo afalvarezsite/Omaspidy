@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-HEALTH: Diagnóstico de Servicios del Ecosistema Spider-Man
+# Comprueba que todos los componentes críticos del entorno están activos
+# y ofrece acción de reinicio para los que fallen.
+# Estética: Ecosistema Spider-Man (Rojo Neón y Negro)
+# ==============================================================================
+
+# Cargar variables de colores del tema activo
+source "$HOME/.config/theme/active.sh" 2>/dev/null
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    ${FZF_THEME:---color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\" --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\" --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"}
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+WHITE='\033[1;37m'
+CYAN='\033[1;36m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+show_banner() {
+    clear
+    echo -e "${RED}"
+    echo "  ██╗  ██╗███████╗ █████╗ ██╗  ████████╗██╗  ██╗"
+    echo "  ██║  ██║██╔════╝██╔══██╗██║  ╚══██╔══╝██║  ██║"
+    echo "  ███████║█████╗  ███████║██║     ██║   ███████║"
+    echo "  ██╔══██║██╔══╝  ██╔══██║██║     ██║   ██╔══██║"
+    echo "  ██║  ██║███████╗██║  ██║███████╗██║   ██║  ██║"
+    echo "  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝   ╚═╝  ╚═╝"
+    echo -e "${NC}"
+    echo -e "      ${BOLD}  DIAGNÓSTICO DEL ECOSISTEMA  ${NC}"
+    echo -e "${WHITE}  ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+}
+
+# Función para comprobar si un proceso está activo
+_check_proc() {
+    local name="$1"
+    local cmd="${2:-$1}"
+    pgrep -x "$cmd" &>/dev/null
+}
+
+# Función para comprobar un servicio systemd de usuario
+_check_user_service() {
+    systemctl --user is-active --quiet "$1" 2>/dev/null
+}
+
+# Función para comprobar un servicio systemd de sistema
+_check_system_service() {
+    systemctl is-active --quiet "$1" 2>/dev/null
+}
+
+show_banner
+
+echo -e "  ${CYAN}Ejecutando diagnóstico del ecosistema...${NC}"
+echo ""
+
+# ==============================================================================
+# Definir checks: (nombre_display, tipo, nombre_proceso/servicio, restart_cmd)
+# Tipos: proc | user-service | system-service
+# ==============================================================================
+declare -a CHECK_NAMES CHECK_TYPES CHECK_IDS CHECK_RESTARTS CHECK_ICONS
+
+add_check() {
+    CHECK_NAMES+=("$1")
+    CHECK_TYPES+=("$2")
+    CHECK_IDS+=("$3")
+    CHECK_RESTARTS+=("$4")
+    CHECK_ICONS+=("$5")
+}
+
+# Procesos del compositor y barra
+add_check "Hyprland (Compositor)"   "proc"           "Hyprland"              ""                                  ""
+add_check "Waybar (Barra de Estado)" "proc"           "waybar"                "waybar &"                          "󱂬"
+add_check "Mako (Notificaciones)"    "proc"           "mako"                  "mako &"                            "󰂞"
+add_check "hypridle (Idle Manager)"  "proc"           "hypridle"              "hypridle &"                        "󰒲"
+add_check "hyprpaper (Wallpaper)"    "proc"           "hyprpaper"             "hyprpaper &"                       ""
+add_check "SwayOSD (Volumen/Brillo)" "proc"           "swayosd-server"        "swayosd-server &"                  "󰓃"
+add_check "clipse (Portapapeles)"    "proc"           "clipse"                "clipse -listen &"                  ""
+
+# Servicios de usuario
+add_check "hyprpolkitagent (Polkit)" "user-service"   "hyprpolkitagent"       "systemctl --user start hyprpolkitagent" ""
+
+# Servicios de sistema
+add_check "NetworkManager (Red)"     "system-service" "NetworkManager"        ""                                  ""
+add_check "bluetooth (BT)"           "system-service" "bluetooth"             "sudo systemctl start bluetooth"    "󰂯"
+add_check "PipeWire (Audio)"         "system-service" "pipewire"              ""                                  "󰓃"
+add_check "snapper-timeline (BTRFS)" "system-service" "snapper-timeline.timer" ""                                 "󰁯"
+add_check "power-profiles-daemon"    "system-service" "power-profiles-daemon" ""                                  ""
+
+# ==============================================================================
+# Ejecutar comprobaciones y mostrar resultados
+# ==============================================================================
+FAILED_INDICES=()
+PASS_COUNT=0
+FAIL_COUNT=0
+
+for i in "${!CHECK_NAMES[@]}"; do
+    name="${CHECK_NAMES[$i]}"
+    type="${CHECK_TYPES[$i]}"
+    id="${CHECK_IDS[$i]}"
+    icon="${CHECK_ICONS[$i]}"
+
+    status=false
+    case "$type" in
+        proc)           _check_proc "$id" && status=true ;;
+        user-service)   _check_user_service "$id" && status=true ;;
+        system-service) _check_system_service "$id" && status=true ;;
+    esac
+
+    if $status; then
+        echo -e "  ${GREEN}●${NC} ${icon}  ${WHITE}${name}${NC}  ${GREEN}[ACTIVO]${NC}"
+        (( PASS_COUNT++ ))
+    else
+        echo -e "  ${RED}●${NC} ${icon}  ${WHITE}${name}${NC}  ${RED}[DETENIDO]${NC}"
+        (( FAIL_COUNT++ ))
+        FAILED_INDICES+=("$i")
+    fi
+done
+
+echo ""
+echo -e "  ${WHITE}──────────────────────────────────────────────────${NC}"
+echo -e "  ${BOLD}Resultado: ${GREEN}${PASS_COUNT} activos${NC} / ${RED}${FAIL_COUNT} detenidos${NC}"
+echo ""
+
+# ==============================================================================
+# Si hay fallos, ofrecer reinicio interactivo con FZF
+# ==============================================================================
+if [ ${#FAILED_INDICES[@]} -gt 0 ]; then
+    # Construir lista de servicios fallidos para fzf
+    FAILED_OPTIONS=""
+    for i in "${FAILED_INDICES[@]}"; do
+        if [ -n "${CHECK_RESTARTS[$i]}" ]; then
+            FAILED_OPTIONS+="${CHECK_ICONS[$i]}  ${CHECK_NAMES[$i]}\n"
+        fi
+    done
+
+    if [ -n "$FAILED_OPTIONS" ]; then
+        SELECTION=$(echo -e "$FAILED_OPTIONS" | grep -v '^$' | fzf \
+            --multi \
+            --prompt="  Servicios a reiniciar (TAB para varios) ❯ " \
+            --header="Selecciona los servicios detenidos que quieres reiniciar:")
+
+        if [ -n "$SELECTION" ]; then
+            echo ""
+            while IFS= read -r line; do
+                # Buscar el índice que corresponde a esta línea
+                for i in "${FAILED_INDICES[@]}"; do
+                    display="${CHECK_ICONS[$i]}  ${CHECK_NAMES[$i]}"
+                    if [[ "$line" == "$display" ]] && [ -n "${CHECK_RESTARTS[$i]}" ]; then
+                        echo -e "  ${BLUE}::{NC} Reiniciando ${CHECK_NAMES[$i]}..."
+                        eval "${CHECK_RESTARTS[$i]}" && \
+                            echo -e "  ${GREEN}==>${NC} ${CHECK_NAMES[$i]} reiniciado." || \
+                            echo -e "  ${RED}[ERROR]${NC} No se pudo reiniciar ${CHECK_NAMES[$i]}."
+                    fi
+                done
+            done <<< "$SELECTION"
+        fi
+    else
+        echo -e "  ${YELLOW}[INFO]${NC} Los servicios detenidos no tienen comando de reinicio configurado."
+    fi
+else
+    echo -e "  ${GREEN}✓ Todo el ecosistema está funcionando correctamente.${NC}"
+fi
+
+echo ""
+read -n 1 -s -r -p "  Presiona cualquier tecla para salir..."
+echo ""

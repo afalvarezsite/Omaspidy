@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-RECORD: Grabador de Pantalla con Intel VA-API + Notificaciones Mako
+# Wrapper inteligente para gpu-screen-recorder con control ON/OFF y feedback visual
+# Estética: Ecosistema Spider-Man
+# ==============================================================================
+
+PIDFILE="/tmp/sys-record.pid"
+OUTPUT_DIR="$HOME/Vídeos"
+FRAMERATE=60
+CONTAINER="mp4"
+
+# Función de notificación Mako
+_notify() {
+    local urgency="${1:-normal}"
+    local summary="$2"
+    local body="$3"
+    local icon="${4:-video-display}"
+    notify-send \
+        --urgency="$urgency" \
+        --icon="$icon" \
+        --app-name="sys-record" \
+        "$summary" "$body" 2>/dev/null || true
+}
+
+_is_recording() {
+    [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null
+}
+
+_start_recording() {
+    if _is_recording; then
+        _notify normal "🔴 Ya en Grabación" "La grabación ya está en curso."
+        exit 0
+    fi
+
+    mkdir -p "$OUTPUT_DIR"
+    local filename
+    filename="$OUTPUT_DIR/Recording_$(date +%Y-%m-%d_%H-%M-%S).${CONTAINER}"
+
+    _notify normal "🔴 Grabación Iniciada" "Grabando en: $(basename "$filename")\nFramerate: ${FRAMERATE}fps | Codec: ${CONTAINER}" "media-record"
+
+    # Lanzar grabador en background y guardar PID
+    gpu-screen-recorder \
+        -w screen \
+        -f "$FRAMERATE" \
+        -c "$CONTAINER" \
+        -o "$filename" &
+    echo $! > "$PIDFILE"
+}
+
+_stop_recording() {
+    if ! _is_recording; then
+        _notify normal "⬜ Sin Grabación Activa" "No hay ninguna grabación en curso." "media-playback-stop"
+        exit 0
+    fi
+
+    local pid
+    pid=$(cat "$PIDFILE")
+    kill -INT "$pid" 2>/dev/null
+    sleep 1
+
+    # Esperar a que el proceso termine y finalice el archivo
+    wait "$pid" 2>/dev/null || true
+    rm -f "$PIDFILE"
+
+    # Buscar el archivo más reciente creado
+    local latest
+    latest=$(find "$OUTPUT_DIR" -name "Recording_*.${CONTAINER}" -newer /tmp -printf '%T@ %p\n' 2>/dev/null \
+        | sort -rn | head -1 | cut -d' ' -f2-)
+
+    if [ -n "$latest" ]; then
+        local size
+        size=$(du -sh "$latest" 2>/dev/null | cut -f1)
+        _notify normal "⬜ Grabación Guardada" "$(basename "$latest")\nTamaño: $size" "emblem-videos"
+    else
+        _notify normal "⬜ Grabación Detenida" "Archivo guardado en: $OUTPUT_DIR" "emblem-videos"
+    fi
+}
+
+_toggle_recording() {
+    if _is_recording; then
+        _stop_recording
+    else
+        _start_recording
+    fi
+}
+
+_status() {
+    if _is_recording; then
+        echo -e "\033[1;31m● GRABANDO\033[0m (PID: $(cat "$PIDFILE"))"
+        echo -e "Directorio de salida: $OUTPUT_DIR"
+    else
+        echo -e "\033[1;37m○ Sin grabación activa\033[0m"
+    fi
+}
+
+# Comprobar que gpu-screen-recorder está disponible
+if ! command -v gpu-screen-recorder &>/dev/null; then
+    _notify critical "sys-record: Error" "gpu-screen-recorder no está instalado.\nInstala: paru -S gpu-screen-recorder-git" "dialog-error"
+    echo -e "\033[1;31m[ERROR]\033[0m gpu-screen-recorder no encontrado."
+    echo "Instala con: paru -S gpu-screen-recorder-git"
+    exit 1
+fi
+
+# Dispatcher de argumentos
+case "${1:-}" in
+    --toggle|-t)
+        _toggle_recording
+        ;;
+    --start|-s)
+        _start_recording
+        ;;
+    --stop|-q)
+        _stop_recording
+        ;;
+    --status)
+        _status
+        ;;
+    "")
+        # Sin argumentos: toggle por defecto (comportamiento natural para keybind)
+        _toggle_recording
+        ;;
+    *)
+        echo "Uso: sys-record [--toggle | --start | --stop | --status]"
+        echo ""
+        echo "  --toggle, -t   Alterna grabación ON/OFF (por defecto)"
+        echo "  --start,  -s   Inicia la grabación"
+        echo "  --stop,   -q   Detiene la grabación y guarda el archivo"
+        echo "  --status       Muestra si hay grabación activa y su PID"
+        exit 1
+        ;;
+esac

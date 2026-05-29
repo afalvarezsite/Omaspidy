@@ -3,7 +3,7 @@
 [![Arch Linux](https://img.shields.io/badge/OS-Arch%20Linux-blue.svg?logo=arch-linux&logoColor=white&color=1793D1)](https://archlinux.org/)
 [![Hyprland](https://img.shields.io/badge/WM-Hyprland-neon.svg?logo=hyprland&logoColor=white&color=E60026)](https://hyprland.org/)
 [![Shell-Zsh](https://img.shields.io/badge/Shell-Zsh-black.svg?logo=gnubash&logoColor=white&color=ff3b5c)](https://www.zsh.org/)
-[![Style](https://img.shields.io/badge/Theme-Spider--Man-red.svg?style=flat-square&color=ff1e43)](https://github.com/adrianoml/ArchInstallGuide)
+[![Style](https://img.shields.io/badge/Theme-Spider--Man-red.svg?style=flat-square&color=ff1e43)](https://github.com/afalvarezsite/Omaspidy)
 
 Una guía e instalador automatizado para desplegar un entorno premium **Hyprland + CLI moderna de Rust + Tema Rojinegro (Spider-Man)** ultraoptimizado para plataformas de alto rendimiento (Intel Meteor Lake, almacenamiento SSD NVMe y sistema de archivos BTRFS con subvolúmenes redundantes).
 
@@ -257,14 +257,14 @@ nmtui
 Ahora, ejecuta el siguiente comando en la terminal para descargar e iniciar el script instalador:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yourusername/ArchInstallGuide/main/dotfiles/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/afalvarezsite/Omaspidy/main/dotfiles/install.sh | bash
 ```
 
 > [!NOTE]
 > **¿Quieres usar tu propio repositorio Fork?**
 > Si has realizado cambios en tu propio repositorio o deseas apuntar a otra URL, puedes pasar la variable de entorno `REPO_URL` directamente en el comando:
 > ```bash
-> REPO_URL="https://github.com/tu-usuario/ArchInstallGuide.git" curl -sSL https://raw.githubusercontent.com/tu-usuario/ArchInstallGuide/main/dotfiles/install.sh | bash
+> REPO_URL="https://github.com/tu-usuario/Omaspidy.git" curl -sSL https://raw.githubusercontent.com/tu-usuario/Omaspidy/main/dotfiles/install.sh | bash
 > ```
 
 El script detectará de forma inteligente la ejecución remota, configurará los **repositorios optimizados de CachyOS** para descargar binarios compilados específicamente para el conjunto de instrucciones de tu procesador (`x86-64-v3` / AVX2), actualizará todo el sistema a este estándar optimizado e instalará el **kernel de alto rendimiento `linux-cachyos`** (generando automáticamente su entrada en `systemd-boot` con las flags `mitigations=off intel_pstate=active` activadas por defecto). Además, cuenta con un **sistema de captura global de errores defensivo** (`set -Euo pipefail`) y está integrado con auditorías continuas mediante **ShellCheck** en GitHub Actions. Finalmente, clonará tu repositorio de dotfiles completo en `$HOME/.dotfiles` y ejecutará la instalación de todo el entorno gráfico (Hyprland, drivers Intel, herramientas modernas y dotfiles enlazados mediante Stow).

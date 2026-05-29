@@ -73,7 +73,7 @@ fi
 
 # --- Clonación de Dotfiles (Soporte para ejecución vía curl) ---
 DOTFILES_DIR="$HOME/.dotfiles"
-REPO_URL="${REPO_URL:-https://github.com/yourusername/ArchInstallGuide.git}"
+REPO_URL="${REPO_URL:-https://github.com/afalvarezsite/Omaspidy.git}"
 
 # Comprobar si estamos ejecutando localmente desde un repositorio existente
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"

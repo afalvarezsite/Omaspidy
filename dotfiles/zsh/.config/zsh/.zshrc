@@ -18,6 +18,14 @@ fi
 eval "$(starship init zsh)"
 
 # Llavero SSH y GPG seguro (Mantiene la contraseña entre terminales)
-if command -v keychain &> /dev/null; then
-    eval $(keychain --eval --quiet)
+# Solo activa keychain si existe al menos una clave SSH
+if command -v keychain &>/dev/null; then
+    _ssh_key=""
+    for _k in id_ed25519 id_rsa id_ecdsa; do
+        [[ -f "$HOME/.ssh/$_k" ]] && { _ssh_key="$_k"; break; }
+    done
+    if [[ -n "$_ssh_key" ]]; then
+        eval "$(keychain --eval --quiet "$_ssh_key")"
+    fi
+    unset _ssh_key _k
 fi

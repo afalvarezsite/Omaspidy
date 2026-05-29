@@ -53,8 +53,10 @@ alias glo='forgit::log'
 alias gcb='forgit::checkout::branch'
 
 # --- Mantenimiento Arch ---
-alias update="paru -Syu"
+alias update="sys-update"         # Actualizador completo del ecosistema
 alias orphans="pacman -Qtdq"
+alias health="sys-health"         # Diagnóstico de servicios del ecosistema
+alias record="sys-record --toggle" # Toggle grabación de pantalla
 
 # --- Distrobox y Podman (Entornos Contenedorizados de Pruebas y Pentesting) ---
 alias db="distrobox"

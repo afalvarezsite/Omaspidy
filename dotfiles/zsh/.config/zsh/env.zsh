@@ -43,5 +43,22 @@ setopt hist_reduce_blanks
 if [ -f "$HOME/.config/theme/active.sh" ]; then
     source "$HOME/.config/theme/active.sh"
     # Exportar la configuración de colores fzf global del tema
-    export FZF_DEFAULT_OPTS="--layout=reverse --border=rounded --padding=1,2 --margin=2% --prompt=' ❯ ' --pointer='' --marker='󰄬' $FZF_THEME"
+    export FZF_DEFAULT_OPTS="--layout=reverse --border=rounded --padding=1,2 --margin=2% --prompt=' ❯ ' --pointer='' --marker='󰄬' $FZF_THEME"
 fi
+
+# Recarga dinámica de colores FZF cuando sys-theme cambia la skin al vuelo
+# sys-theme escribe en este archivo de señal; el hook precmd lo recarga en cada prompt
+_ZSH_THEME_SIGNAL="$HOME/.cache/zsh/theme_signal.zsh"
+_reload_theme_if_changed() {
+    if [[ -f "$_ZSH_THEME_SIGNAL" ]]; then
+        local _mtime
+        _mtime=$(stat -c %Y "$_ZSH_THEME_SIGNAL" 2>/dev/null)
+        if [[ "$_mtime" != "${_LAST_THEME_MTIME:-}" ]]; then
+            _LAST_THEME_MTIME="$_mtime"
+            source "$_ZSH_THEME_SIGNAL"
+        fi
+    fi
+}
+# Añadir al hook precmd (se ejecuta justo antes de mostrar cada prompt)
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _reload_theme_if_changed

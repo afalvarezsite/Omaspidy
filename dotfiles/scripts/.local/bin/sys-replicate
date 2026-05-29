@@ -1,0 +1,395 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-REPLICATE: Gestor de Replicación Incremental y Formateador BTRFS (100% FZF)
+# Estética: Ecosistema Spider-Man Premium
+# ==============================================================================
+
+# Cargar variables de colores del tema activo
+# shellcheck source=/dev/null
+source "$HOME/.config/theme/active.sh" 2>/dev/null
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    ${FZF_THEME:---color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\" --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\" --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"}
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt=' 󰦃 ❯ ' --pointer='' --marker='󰄬'
+"
+
+# Colores visuales
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+BLUE='\033[1;34m'
+YELLOW='\033[1;33m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+msg() { echo -e "${BLUE}::${NC} $1"; }
+msg_ok() { echo -e "${GREEN}==>${NC} $1"; }
+msg_warn() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+show_banner() {
+    clear
+    echo -e "${RED}"
+    echo "  ██████╗ ██████╗ ██████╗ ██╗     ██╗ ██████╗ ██████╗ ████████╗███████╗"
+    echo "  ██╔══██╗██╔═══╝ ██╔══██╗██║     ██║██╔════╝██╔═══██╗╚══██╔══╝██╔════╝"
+    echo "  ██████╔╝█████╗  ██████╔╝██║     ██║██║     ██║   ██║   ██║   █████╗  "
+    echo "  ██╔══██╗██╔══╝  ██╔═══╝ ██║     ██║██║     ██║   ██║   ██║   ██╔══╝  "
+    echo "  ██║  ██║███████╗██║     ███████╗██║╚██████╗╚██████╔╝   ██║   ███████╗"
+    echo "  ╚═╝  ╚═╝╚══════╝╚═╝     ╚══════╝╚═╝ ╚═════╝ ╚═════╝    ╚═╝   ╚══════╝"
+    echo -e "${NC}"
+    echo -e "       ${BOLD}󰓅  BTRFS SNAPSHOT REPLICATOR & USB PREPARER  󰓅${NC}"
+    echo -e "${WHITE:-}  ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+}
+
+# Forzar ejecución como Root/Sudo para parted, mkfs y btrfs send/receive
+if [[ "$EUID" -ne 0 ]]; then
+    exec sudo "$0" "$@"
+fi
+
+# Directorio de montaje por defecto
+MNT_DIR="/mnt/backup_snapshots"
+
+# --- Helper de Continuación FZF (Reemplaza "read key") ---
+press_enter_to_continue() {
+    local header="${1:-Operación finalizada. Presiona ENTER para continuar.}"
+    echo -e "1. 󰌑  Continuar" | fzf \
+        --prompt=" Presiona ENTER ❯ " \
+        --header="$header" \
+        --info=hidden
+}
+
+# --- 1. Obtener Dispositivos USB candidatos seguros ---
+get_usb_devices() {
+    # Formato: /dev/NAME | SIZE | MODEL [FSTYPE]
+    lsblk -dno NAME,SIZE,TRAN,RM,MODEL,FSTYPE | awk '$4 == "1" || $3 == "usb" {
+        if ($1 !~ /loop|sr|zram/) {
+            name = $1
+            size = $2
+            model = $5
+            for (i=6; i<NF; i++) model = model " " $i
+            fstype = $NF
+            print "/dev/" name " | " size " | " model " [" fstype "]"
+        }
+    }'
+}
+
+# --- 2. Obtener Destinos BTRFS (Montados y Disponibles) ---
+get_backup_destinations() {
+    # 1. Obtener puntos de montaje BTRFS activos (excluyendo sistema raíz)
+    local mounted
+    mounted=$(findmnt -t btrfs -n -o TARGET,SOURCE | awk '{
+        target = $1
+        source = $2
+        if (target !~ /^\/($|home|var|boot|\.snapshots)/) {
+            print "ACTIVO: " target " (Dispositivo: " source ")"
+        }
+    }')
+
+    # 2. Obtener particiones BTRFS no montadas en el sistema
+    local unmounted
+    unmounted=$(lsblk -lo NAME,FSTYPE,LABEL,SIZE,MOUNTPOINT | awk '$2 == "btrfs" && ($5 == "" || $5 == "-") {
+        name = $1
+        label = $3
+        size = $4
+        if (name !~ /loop|sr|zram/) {
+            print "DISPONIBLE: /dev/" name " [" size "] - Etiqueta: " label
+        }
+    }')
+
+    if [ -n "$mounted" ]; then
+        echo -e "$mounted"
+    fi
+    if [ -n "$unmounted" ]; then
+        echo -e "$unmounted"
+    fi
+}
+
+# --- 3. Formatear y preparar USB interactivo (100% FZF) ---
+format_usb() {
+    show_banner
+    msg "Buscando dispositivos extraíbles y unidades USB..."
+    local candidates
+    candidates=$(get_usb_devices)
+    
+    if [ -z "$candidates" ]; then
+        press_enter_to_continue "Error: No se ha detectado ninguna unidad USB o extraíble conectada."
+        return
+    fi
+    
+    local selected
+    selected=$(echo -e "$candidates" | fzf \
+        --prompt=" 󰃢  Selecciona USB a Formatear ❯ " \
+        --header="¡CUIDADO! Todos los datos en la unidad seleccionada se destruirán permanentemente:")
+        
+    if [ -z "$selected" ]; then
+        msg "Operación cancelada."
+        return
+    fi
+    
+    local dev
+    dev=$(echo "$selected" | cut -d'|' -f1 | sed 's/[[:space:]]//g')
+    local details
+    details=$(echo "$selected" | cut -d'|' -f2-)
+    
+    # Comprobación de seguridad adicional: no permitir formatear discos principales montados en raíz, home o boot
+    if mount | grep -q "$dev"; then
+        if mount | grep "$dev" | grep -q -E ' (/\s|/home|/boot)'; then
+            press_enter_to_continue "ERROR CRÍTICO: No se permite formatear unidades montadas en /, /home o /boot."
+            return
+        fi
+    fi
+    
+    # 1. Confirmación de Formateo vía FZF
+    local confirm_opts="1.   Sí, proceder con la destrucción de datos\n2. 󰌑  No, cancelar operación"
+    local confirm
+    confirm=$(echo -e "$confirm_opts" | fzf \
+        --prompt=" ¿Estás absolutamente seguro de continuar? ❯ " \
+        --header="¡CUIDADO! Se borrará todo en $dev ($details)" \
+        --info=hidden)
+        
+    if [[ ! "$confirm" == *"Sí"* ]]; then
+        msg "Formateo cancelado."
+        return
+    fi
+    
+    # 2. Doble Confirmación de Seguridad vía FZF
+    local confirm_strings="1.   CANCELAR OPERACIÓN (Recomendado)\n2.   CONFIRMAR_FORMATEO_Y_BORRAR_TODO\n3. 󰌑  VOLVER AL MENÚ"
+    local type_confirm
+    type_confirm=$(echo -e "$confirm_strings" | fzf \
+        --prompt=" Confirmación Crítica ❯ " \
+        --header="SELECCIONA LA OPCIÓN PARA BORRAR $dev ($details):" \
+        --info=hidden)
+        
+    if [[ ! "$type_confirm" == *"CONFIRMAR_FORMATEO"* ]]; then
+        press_enter_to_continue "Confirmación incorrecta o rechazada. Formateo abortado."
+        return
+    fi
+    
+    show_banner
+    msg "Desmontando particiones activas en $dev..."
+    umount "${dev}"* 2>/dev/null || true
+    
+    msg "Creando tabla de particiones GPT en $dev..."
+    parted -s "$dev" mklabel gpt || { press_enter_to_continue "Error al crear la tabla GPT"; return; }
+    
+    msg "Creando partición principal de tipo BTRFS..."
+    parted -s "$dev" mkpart primary btrfs 0% 100% || { press_enter_to_continue "Error al particionar"; return; }
+    
+    sleep 1.5 # Esperar a que el kernel actualice los nodos de partición
+    
+    local part
+    if [[ "$dev" =~ nvme || "$dev" =~ loop ]]; then
+        part="${dev}p1"
+    else
+        part="${dev}1"
+    fi
+    
+    msg "Formateando partición $part a BTRFS con etiqueta 'SPIDY_BACKUP'..."
+    mkfs.btrfs -f -L SPIDY_BACKUP "$part" || { press_enter_to_continue "Error al formatear"; return; }
+    
+    msg "Montando provisionalmente para estructurar subvolúmenes..."
+    mkdir -p "$MNT_DIR"
+    mount "$part" "$MNT_DIR" || { press_enter_to_continue "Error al montar"; return; }
+    
+    msg "Creando subvolumen de destino '@backup_snapshots'..."
+    btrfs subvolume create "$MNT_DIR/@backup_snapshots" || { msg_err "Error al crear subvolumen"; umount "$MNT_DIR"; return; }
+    
+    umount "$MNT_DIR"
+    press_enter_to_continue "¡Unidad USB $dev preparada con éxito en BTRFS y lista para backups!"
+}
+
+# --- 4. Replicar Snapshots incrementalmente (100% FZF) ---
+replicate_snapshots() {
+    show_banner
+    msg "Buscando particiones y puntos de montaje BTRFS disponibles..."
+    
+    local destinations
+    destinations=$(get_backup_destinations)
+    
+    if [ -z "$destinations" ]; then
+        press_enter_to_continue "Error: No se encontró ningún destino BTRFS externo (montado o disponible)."
+        return
+    fi
+    
+    local dest_select
+    dest_select=$(echo -e "$destinations" | fzf \
+        --prompt=" 󰓅  Selecciona Destino de Replicación ❯ " \
+        --header="Selecciona la partición o punto de montaje BTRFS para guardar los snapshots:")
+        
+    if [ -z "$dest_select" ]; then
+        msg "Operación cancelada."
+        return
+    fi
+    
+    local active_target=""
+    
+    if [[ "$dest_select" == *"DISPONIBLE"* ]]; then
+        # Extraer dispositivo a montar
+        local part_dev
+        part_dev=$(echo "$dest_select" | grep -oE '/dev/[a-zA-Z0-9]+')
+        
+        mkdir -p "$MNT_DIR"
+        if ! findmnt -M "$MNT_DIR" &>/dev/null; then
+            msg "Montando automáticamente $part_dev en $MNT_DIR..."
+            mount -o noatime,compress=zstd:1 "$part_dev" "$MNT_DIR" || {
+                press_enter_to_continue "Error al montar la unidad $part_dev en $MNT_DIR"
+                return
+            }
+        fi
+        active_target="$MNT_DIR"
+    else
+        # Extraer punto de montaje activo
+        active_target=$(echo "$dest_select" | awk '{print $2}')
+    fi
+    
+    # Validar ruta de destino activa
+    if [ -z "$active_target" ] || [ ! -d "$active_target" ]; then
+        press_enter_to_continue "Error: El punto de montaje del destino no es válido."
+        return
+    fi
+    
+    # Validar que exista el subvolumen de destino
+    local target_subvol="$active_target/@backup_snapshots"
+    if [ ! -d "$target_subvol" ]; then
+        msg "Creando subvolumen '@backup_snapshots' en el disco de destino..."
+        btrfs subvolume create "$target_subvol" || {
+            press_enter_to_continue "Error: No se pudo crear el subvolumen @backup_snapshots en $active_target."
+            return
+        }
+    fi
+    
+    show_banner
+    msg "Escaneando snapshots locales de Snapper..."
+    
+    # Listar y formatear snapshots locales de snapper
+    local snap_list
+    snap_list=$(snapper -c root ls | tail -n +3 | grep -v 'current' | awk -F'|' '{
+      id = $1; gsub(/^[[:space:]]+|[[:space:]]+$/, "", id);
+      type = $2; gsub(/^[[:space:]]+|[[:space:]]+$/, "", type);
+      date = $4; gsub(/^[[:space:]]+|[[:space:]]+$/, "", date);
+      desc = $7; gsub(/^[[:space:]]+|[[:space:]]+$/, "", desc);
+      if (id != "" && id != "0") {
+        printf "%s = Snapshot #%-4s %-25s (%s) - %s\n", id, id, date, type, desc
+      }
+    }' | tac) # Invertir orden
+    
+    if [ -z "$snap_list" ]; then
+        press_enter_to_continue "Error: No se encontraron snapshots locales en Snapper."
+        return
+    fi
+    
+    local selection
+    selection=$(echo -e "$snap_list" | fzf \
+        --prompt=" 󰓅  Selecciona Snapshot a Replicar ❯ " \
+        --header="Los snapshots de Snapper son de solo lectura de forma nativa (perfectos para replicar):")
+        
+    if [ -z "$selection" ]; then
+        msg "Operación cancelada."
+        return
+    fi
+    
+    local snap_id
+    snap_id=$(echo "$selection" | cut -d'=' -f1 | sed 's/[[:space:]]//g')
+    local snap_desc
+    snap_desc=$(echo "$selection" | cut -d'=' -f2- | sed 's/^[[:space:]]*//')
+    
+    local source_path="/.snapshots/$snap_id/snapshot"
+    local dest_name="snap-$snap_id"
+    local dest_path="$target_subvol/$dest_name"
+    
+    if [ ! -d "$source_path" ]; then
+        press_enter_to_continue "Error: La ruta del snapshot local no existe o no es válida: $source_path"
+        return
+    fi
+    
+    if [ -d "$dest_path" ]; then
+        press_enter_to_continue "Aviso: El snapshot #$snap_id ya ha sido replicado en el destino anteriormente."
+        return
+    fi
+    
+    show_banner
+    echo -e "${CYAN}Replicando: $snap_desc${NC}"
+    msg "Analizando histórico de replicaciones para sincronización incremental..."
+    
+    # Buscar si existe un snapshot anterior ya enviado en el destino
+    local latest_target
+    latest_target=$(ls -d "$target_subvol"/snap-*/ 2>/dev/null | sort -V | tail -n1)
+    
+    if [ -n "$latest_target" ]; then
+        local parent_name
+        parent_name=$(basename "$latest_target") # ej. snap-12
+        local parent_id
+        parent_id="${parent_name//snap-/}"
+        local parent_path="/.snapshots/$parent_id/snapshot"
+        
+        # Validar si el snapshot padre todavía existe en el host
+        if [ -d "$parent_path" ]; then
+            msg_ok "¡Snapshot padre local detectado! Usando replicación incremental."
+            echo -e "Padre: snap-$parent_id (Sincronización incremental ultrarrápida)"
+            echo ""
+            
+            # Enviar BTRFS de forma incremental
+            btrfs send -p "$parent_path" "$source_path" | btrfs receive "$target_subvol" || {
+                press_enter_to_continue "Error: Falló la replicación incremental."
+                return
+            }
+        else
+            msg_warn "El snapshot padre (snap-$parent_id) ya no existe localmente en el host."
+            msg "Iniciando replicación completa para snap-$snap_id..."
+            echo ""
+            
+            # Enviar BTRFS completo
+            btrfs send "$source_path" | btrfs receive "$target_subvol" || {
+                press_enter_to_continue "Error: Falló la replicación completa."
+                return
+            }
+        fi
+    else
+        msg "No se detectaron replicaciones previas en la unidad. Iniciando primera replicación completa..."
+        echo ""
+        
+        # Enviar BTRFS completo
+        btrfs send "$source_path" | btrfs receive "$target_subvol" || {
+            press_enter_to_continue "Error: Falló la primera replicación completa."
+            return
+        }
+    fi
+    
+    # Renombrar en el destino el subvolumen recibido "snapshot" a su nombre identificativo "snap-Y"
+    if [ -d "$target_subvol/snapshot" ]; then
+        mv "$target_subvol/snapshot" "$dest_path"
+    fi
+    
+    press_enter_to_continue "¡Replicación del Snapshot #$snap_id completada con éxito en $dest_path!"
+}
+
+# --- Bucle de Menú Principal (100% FZF) ---
+while true; do
+    show_banner
+    MENU_OPTS="1. 󰓅  Replicar Snapshots del Sistema en Unidad BTRFS Externa\n2. 󰃢  Preparar y Formatear Unidad USB a BTRFS (Destructivo)\n3. 󰜉  Salir"
+    
+    ACTION_SELECT=$(echo -e "$MENU_OPTS" | fzf \
+        --prompt=" Selecciona una Acción ❯ " \
+        --header="Administración de Copias de Seguridad BTRFS:")
+        
+    if [ -z "$ACTION_SELECT" ] || [[ "$ACTION_SELECT" == *"Salir"* ]]; then
+        # Desmontar unidad de backups al salir por seguridad si está montada
+        if findmnt -M "$MNT_DIR" &>/dev/null; then
+            msg "Desmontando de forma segura la unidad de backups..."
+            umount "$MNT_DIR" 2>/dev/null || true
+        fi
+        msg "Saliendo del asistente de replicación."
+        break
+    fi
+    
+    case "$ACTION_SELECT" in
+        *"Replicar Snapshots"*)
+            replicate_snapshots
+            ;;
+        *"Formatear Unidad"*)
+            format_usb
+            ;;
+    esac
+done

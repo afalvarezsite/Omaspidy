@@ -138,7 +138,7 @@ CORE_PKGS=(
     
     # Utilidades Varias y Fuentes
     neovim ttf-hack-nerd wl-clipboard tesseract tesseract-data-spa grim slurp satty
-    greetd greetd-tuigreet nmtui pulsemixer snapper snap-pac power-profiles-daemon hyprsunset
+    greetd greetd-tuigreet nmtui pulsemixer snapper snap-pac power-profiles-daemon hyprsunset sbctl
     
     # Contenedores y Aislamiento (Pruebas y Pentesting)
     distrobox podman

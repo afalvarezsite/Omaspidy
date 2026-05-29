@@ -20,3 +20,28 @@ jobs:
         scandir: './dotfiles/scripts/.local/bin'
         additional_files: './dotfiles/install.sh'
         severity: error
+
+  stow-simulate:
+    name: Simulate Stow Deployment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install stow
+      run: sudo apt-get install -y stow
+
+    - name: Create fake HOME for simulation
+      run: |
+        mkdir -p /tmp/fakehome/.config
+        mkdir -p /tmp/fakehome/.local/bin
+
+    - name: Simulate stow for all dotfile modules
+      run: |
+        cd dotfiles
+        HOME=/tmp/fakehome stow --simulate --target=/tmp/fakehome \
+          alacritty anyrun bat fastfetch git gtk hypr lazygit \
+          mako nvim scripts starship theme waybar yazi zsh antigravity
+      env:
+        HOME: /tmp/fakehome
+

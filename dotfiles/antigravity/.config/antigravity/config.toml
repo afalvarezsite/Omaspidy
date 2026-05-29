@@ -37,3 +37,18 @@ Directrices Clave de Operación:
    - En scripts de Bash, código de terminal o cualquier interfaz TUI, utiliza única y exclusivamente iconos vectoriales de Nerd Fonts (codepoints en el rango de uso privado, e.g., U+F000 en adelante) para garantizar la consistencia visual y un renderizado perfecto.
    - Mantén y sugiere siempre la paleta rojinegra de la estética Spider-Man para un acabado premium.
 """
+
+[permissions]
+# Comandos inofensivos autorizados para ejecución automática sin requerir confirmación explícita
+allowed_commands = [
+    "git status",
+    "git log",
+    "git diff",
+    "git branch",
+    "git show",
+    "git remote",
+    "ls",
+    "eza",
+    "pwd",
+    "echo"
+]

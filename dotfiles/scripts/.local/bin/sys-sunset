@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-SUNSET: Gestor y Conmutador de Temperatura de Pantalla (Luz Azul)
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# Iconos: Estrictamente Nerd Fonts (Sin Emojis)
+# ==============================================================================
+
+# Si queremos la salida formateada para Waybar
+if [ "$1" = "--waybar" ]; then
+    if pgrep -x "hyprsunset" >/dev/null; then
+        echo '{"text": "Cálido", "alt": "active", "class": "active", "tooltip": "Filtro Nocturno: Activo (3500K)"}'
+    else
+        echo '{"text": "Frío", "alt": "inactive", "class": "inactive", "tooltip": "Filtro Nocturno: Desactivado"}'
+    fi
+    exit 0
+fi
+
+# Si queremos alternar el estado (activar/desactivar)
+if [ "$1" = "--toggle" ]; then
+    if pgrep -x "hyprsunset" >/dev/null; then
+        pkill -x "hyprsunset"
+        notify-send -t 2000 -i display-brightness "Filtro Nocturno" "Luz nocturna desactivada (Luz Fría)"
+    else
+        if command -v hyprsunset &>/dev/null; then
+            hyprsunset --temperature 3500K &
+            notify-send -t 2000 -i display-brightness "Filtro Nocturno" "Luz nocturna activada (3500K)"
+        else
+            notify-send -u critical -i dialog-error "Filtro Nocturno" "Error: hyprsunset no se encuentra instalado."
+            exit 1
+        fi
+    fi
+    # Actualizar Waybar inmediatamente mediante la señal RTMIN+9
+    pkill -RTMIN+9 waybar
+    exit 0
+fi
+
+echo "Uso: sys-sunset [--toggle | --waybar]"
+exit 1

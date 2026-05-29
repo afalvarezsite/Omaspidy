@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-POWER-PROFILE: Selector de Perfiles de Rendimiento (power-profiles-daemon)
+# Estética: Ecosistema Spider-Man Premium (Rojo Neón y Negro)
+# Iconos: Estrictamente Nerd Fonts (Sin Emojis)
+# ==============================================================================
+
+# Si se solicita la integración para Waybar
+if [ "$1" = "--waybar" ]; then
+    if ! command -v powerprofilesctl &>/dev/null; then
+        echo '{"text": "Error", "alt": "default", "class": "default", "tooltip": "power-profiles-daemon no instalado"}'
+        exit 0
+    fi
+    
+    ACTIVE=$(powerprofilesctl get)
+    case "$ACTIVE" in
+        "performance")
+            echo '{"text": "Rendimiento", "alt": "performance", "class": "performance", "tooltip": "Perfil Activo: Alto Rendimiento"}'
+            ;;
+        "balanced")
+            echo '{"text": "Equilibrado", "alt": "balanced", "class": "balanced", "tooltip": "Perfil Activo: Equilibrado"}'
+            ;;
+        "power-saver")
+            echo '{"text": "Ahorro", "alt": "power-saver", "class": "power-saver", "tooltip": "Perfil Activo: Ahorro de Energía"}'
+            ;;
+        *)
+            echo "{\"text\": \"$ACTIVE\", \"alt\": \"default\", \"class\": \"default\", \"tooltip\": \"Perfil Activo: $ACTIVE\"}"
+            ;;
+    esac
+    exit 0
+fi
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    --color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\"
+    --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\"
+    --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt=' 󰓅 ❯ ' --pointer='' --marker='󰄬'
+"
+
+if ! command -v powerprofilesctl &>/dev/null; then
+    echo -e "\033[1;31m[ERROR]\033[0m power-profiles-daemon no está instalado o activo."
+    read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+    exit 1
+fi
+
+# Obtener perfil activo
+ACTIVE=$(powerprofilesctl get)
+
+# Formatear opciones utilizando estrictamente iconos de Nerd Fonts
+OPT_PERF="    performance  (Alto Rendimiento)"
+OPT_BAL="  󰾆  balanced     (Equilibrado)"
+OPT_SAVE="  󰌢  power-saver  (Ahorro de Energía)"
+
+# Marcar la opción activa con el indicador de check de Nerd Fonts
+if [ "$ACTIVE" = "performance" ]; then
+    OPT_PERF="󰄬   performance  (Alto Rendimiento)"
+elif [ "$ACTIVE" = "balanced" ]; then
+    OPT_BAL="󰄬 󰾆  balanced     (Equilibrado)"
+elif [ "$ACTIVE" = "power-saver" ]; then
+    OPT_SAVE="󰄬 󰌢  power-saver  (Ahorro de Energía)"
+fi
+
+OPTIONS="${OPT_PERF}\n${OPT_BAL}\n${OPT_SAVE}"
+
+SELECTION=$(echo -e "$OPTIONS" | fzf --prompt=" 󰓅  Perfil de Energía ❯ " --header="Selecciona un perfil de rendimiento:")
+
+if [ -n "$SELECTION" ]; then
+    TARGET=""
+    if [[ "$SELECTION" == *"performance"* ]]; then
+        TARGET="performance"
+    elif [[ "$SELECTION" == *"balanced"* ]]; then
+        TARGET="balanced"
+    elif [[ "$SELECTION" == *"power-saver"* ]]; then
+        TARGET="power-saver"
+    fi
+    
+    if [ -n "$TARGET" ]; then
+        if powerprofilesctl set "$TARGET"; then
+            notify-send -t 3000 -i power-profile "Perfil de Energía" "Perfil cambiado a:\n$TARGET"
+            # Emitir señal RTMIN+8 a Waybar para actualizar el widget de forma instantánea
+            pkill -RTMIN+8 waybar
+        else
+            notify-send -u critical -i dialog-error "Perfil de Energía" "Error al cambiar el perfil de energía."
+        fi
+    fi
+fi

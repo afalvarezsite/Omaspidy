@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Spidey Centro de Control
+Comment=Hub interactivo y centro de control del ecosistema
+Exec=alacritty --class floating_tui -e sys-spidey
+Icon=utilities-system-monitor
+Terminal=false
+Type=Application
+Categories=System;Utility;
+StartupNotify=true

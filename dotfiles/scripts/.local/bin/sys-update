@@ -74,11 +74,22 @@ START_TIME=$(date +%s)
 # ==============================================================================
 msg_step "1" "5" "Actualizando sistema y paquetes AUR..."
 if command -v paru &>/dev/null; then
+    PRE_SNAP_ID=""
+    if command -v snapper &>/dev/null && sudo snapper -c root ls &>/dev/null; then
+        msg "Creando pre-snapshot de BTRFS..."
+        PRE_SNAP_ID=$(sudo snapper -c root create --type pre --print-number -d "Antes de sys-update: paru -Syu" 2>/dev/null || true)
+    fi
+
     if paru -Syu --noconfirm; then
         msg_ok "Sistema actualizado."
     else
         msg_warn "Hubo advertencias al actualizar el sistema."
         ERRORS+=("paru -Syu tuvo errores")
+    fi
+
+    if [ -n "$PRE_SNAP_ID" ]; then
+        msg "Creando post-snapshot de BTRFS..."
+        sudo snapper -c root create --type post --pre-number "$PRE_SNAP_ID" -d "Después de sys-update: paru -Syu" &>/dev/null || true
     fi
 else
     msg_err "paru no encontrado. Saltando actualización de sistema."

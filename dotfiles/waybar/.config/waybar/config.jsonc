@@ -18,6 +18,7 @@
         "network",
         "pulseaudio",
         "custom/hyprsunset",
+        "custom/sysrecord",
         "custom/powerprofile",
         "battery",
         "tray",
@@ -104,16 +105,21 @@
     },
 
     "custom/hyprsunset": {
-        "format": "{icon} {text}",
-        "format-icons": {
-            "active": "󰖔",
-            "inactive": "󰖨"
-        },
+        "format": "{text}",
         "return-type": "json",
         "exec": "sys-sunset --waybar",
         "interval": 5,
         "signal": 9,
         "on-click": "sys-sunset --toggle"
+    },
+
+    "custom/sysrecord": {
+        "format": "{text}",
+        "return-type": "json",
+        "exec": "sys-record --waybar",
+        "interval": 2,
+        "signal": 10,
+        "on-click": "sys-record --toggle"
     },
 
     "custom/powerprofile": {

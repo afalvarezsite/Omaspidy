@@ -46,6 +46,7 @@ _start_recording() {
         -c "$CONTAINER" \
         -o "$filename" &
     echo $! > "$PIDFILE"
+    pkill -RTMIN+10 waybar
 }
 
 _stop_recording() {
@@ -62,6 +63,7 @@ _stop_recording() {
     # Esperar a que el proceso termine y finalice el archivo
     wait "$pid" 2>/dev/null || true
     rm -f "$PIDFILE"
+    pkill -RTMIN+10 waybar
 
     # Buscar el archivo más reciente creado
     local latest
@@ -116,17 +118,26 @@ case "${1:-}" in
     --status)
         _status
         ;;
+    --waybar)
+        if _is_recording; then
+            echo '{"text": "󱑈 GRABANDO", "alt": "active", "class": "active", "tooltip": "Grabación de Pantalla en Curso"}'
+        else
+            echo '{"text": "", "alt": "inactive", "class": "inactive", "tooltip": ""}'
+        fi
+        exit 0
+        ;;
     "")
         # Sin argumentos: toggle por defecto (comportamiento natural para keybind)
         _toggle_recording
         ;;
     *)
-        echo "Uso: sys-record [--toggle | --start | --stop | --status]"
+        echo "Uso: sys-record [--toggle | --start | --stop | --status | --waybar]"
         echo ""
         echo "  --toggle, -t   Alterna grabación ON/OFF (por defecto)"
         echo "  --start,  -s   Inicia la grabación"
         echo "  --stop,   -q   Detiene la grabación y guarda el archivo"
         echo "  --status       Muestra si hay grabación activa y su PID"
+        echo "  --waybar       Salida formateada en JSON para Waybar (oculta cuando está inactiva)"
         exit 1
         ;;
 esac

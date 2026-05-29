@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Spidey Guía de Atajos
+Comment=Catálogo interactivo y lanzador rápido de atajos de teclado
+Exec=alacritty --class floating_tui -e hypr-keys
+Icon=input-keyboard
+Terminal=false
+Type=Application
+Categories=System;Utility;
+StartupNotify=true

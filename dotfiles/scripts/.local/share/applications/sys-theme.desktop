@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Spidey Skins Selector
+Comment=Selector dinámico de trajes y skins del ecosistema
+Exec=alacritty --class floating_tui -e sys-theme
+Icon=preferences-desktop-theme
+Terminal=false
+Type=Application
+Categories=System;Settings;
+StartupNotify=true

@@ -14,10 +14,50 @@ export FZF_DEFAULT_OPTS="
 "
 
 # Menú principal
-MENU="1. 󰓃  Dispositivos de Salida (Altavoces/Auriculares)\n2. 󰍬  Dispositivos de Entrada (Micrófonos)"
-SELECTION=$(echo -e "$MENU" | fzf --prompt="  Selector de Audio ❯ " --header="Selecciona tipo de dispositivo a configurar:")
+MENU="1. 󰓃  Dispositivos de Salida (Altavoces/Auriculares)\n2. 󰍬  Dispositivos de Entrada (Micrófonos)\n3. ⚡  Optimizar Latencia (Gaming / Pro Audio)"
+SELECTION=$(echo -e "$MENU" | fzf --prompt="  Selector de Audio ❯ " --header="Selecciona una opción a configurar:")
 
 if [ -z "$SELECTION" ]; then
+    exit 0
+fi
+
+if [[ "$SELECTION" == *"Latencia"* ]]; then
+    # Obtener estado actual del quantum
+    CURRENT_QUANTUM="Dinámico"
+    if command -v pw-metadata &>/dev/null; then
+        VAL=$(pw-metadata -n settings 0 clock.force-quantum 2>/dev/null | grep -oE "value: '[0-9]+'" | cut -d"'" -f2 || true)
+        if [ "$VAL" = "64" ]; then
+            CURRENT_QUANTUM="Ultra-Bajo (64)"
+        elif [ "$VAL" = "128" ]; then
+            CURRENT_QUANTUM="Bajo (128)"
+        elif [ "$VAL" = "0" ] || [ -z "$VAL" ]; then
+            CURRENT_QUANTUM="Dinámico (Estándar)"
+        fi
+    fi
+
+    SUB_LAT="1.   Latencia Ultra-Baja (Quantum 64 - Gaming Competitivo)\n2. 󰾆  Latencia Baja (Quantum 128 - Producción de Audio)\n3. 󰌢  Modo Estándar (Quantum Dinámico - Consumo Óptimo)"
+    LAT_SEL=$(echo -e "$SUB_LAT" | fzf --prompt=" ⚡ Latencia de Audio ❯ " --header="Perfil actual: $CURRENT_QUANTUM")
+
+    if [ -n "$LAT_SEL" ]; then
+        QUANTUM="0"
+        DESC="Dinámico (Estándar)"
+        ICON="audio-card"
+        if [[ "$LAT_SEL" == *"Ultra-Baja"* ]]; then
+            QUANTUM="64"
+            DESC="Ultra-Baja (Quantum 64)"
+            ICON="applications-games"
+        elif [[ "$LAT_SEL" == *"Latencia Baja"* ]]; then
+            QUANTUM="128"
+            DESC="Baja (Quantum 128)"
+            ICON="audio-headphones"
+        fi
+
+        if pw-metadata -n settings 0 clock.force-quantum "$QUANTUM" &>/dev/null; then
+            notify-send -t 3000 -i "$ICON" "Audio" "Latencia optimizada a:\n$DESC"
+        else
+            notify-send -u critical -i dialog-error "Audio" "Error al cambiar la latencia de PipeWire."
+        fi
+    fi
     exit 0
 fi
 

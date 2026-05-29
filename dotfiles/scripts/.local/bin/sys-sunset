@@ -8,9 +8,9 @@
 # Si queremos la salida formateada para Waybar
 if [ "$1" = "--waybar" ]; then
     if pgrep -x "hyprsunset" >/dev/null; then
-        echo '{"text": "Cálido", "alt": "active", "class": "active", "tooltip": "Filtro Nocturno: Activo (3500K)"}'
+        echo '{"text": "󰖔 Cálido", "alt": "active", "class": "active", "tooltip": "Filtro Nocturno: Activo (3500K)"}'
     else
-        echo '{"text": "Frío", "alt": "inactive", "class": "inactive", "tooltip": "Filtro Nocturno: Desactivado"}'
+        echo '{"text": "", "alt": "inactive", "class": "inactive", "tooltip": ""}'
     fi
     exit 0
 fi

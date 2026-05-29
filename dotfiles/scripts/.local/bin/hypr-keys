@@ -71,6 +71,7 @@ grep -E '^bind' "$CONFIG_FILE" \
         if (desc ~ /hypr-keys/) desc = "Menu de Atajos de Teclado";
         else if (desc ~ /scratchpad_term/) desc = "Terminal Scratchpad (Flotante)";
         else if (desc ~ /clipse_scratchpad/) desc = "Historial de Portapapeles (Scratchpad)";
+        else if (desc ~ /sys-gemini/) desc = "Asistente Gemini AI (Copilot Key)";
         else if (desc ~ /bluetuith/) desc = "Menu de Bluetooth";
         else if (desc ~ /sys-bluetooth/) desc = "Selector Rapido de Bluetooth";
         else if (desc ~ /nmtui/) desc = "Menu de Red / WiFi";

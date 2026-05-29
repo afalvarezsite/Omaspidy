@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# sys-gemini: Centro de asistencia de IA rápida.
+# Abre la aplicación web de Gemini en el navegador por defecto, o la enfoca si ya está activa.
+# Diseñado para enlazarse con la tecla Copilot (SUPER + SHIFT + F23) en Hyprland.
+
+URL="https://gemini.google.com/app"
+
+# Buscar si hay alguna ventana de navegador activa con "Gemini" en el título usando jaq
+GEMINI_WINDOW=$(hyprctl clients -j | jaq -r '.[] | select(.title | contains("Gemini")) | .address' 2>/dev/null | head -n1)
+
+if [ -n "$GEMINI_WINDOW" ] && [ "$GEMINI_WINDOW" != "null" ]; then
+    # Si la pestaña ya está activa en algún navegador abierto, la enfocamos instantáneamente
+    hyprctl dispatch focuswindow "address:$GEMINI_WINDOW"
+else
+    # Si el navegador está cerrado o la pestaña no está visible/activa, abrimos una nueva pestaña
+    xdg-open "$URL"
+fi

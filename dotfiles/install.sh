@@ -31,7 +31,7 @@ show_banner() {
   echo " ╚██████╔╝██║ ╚═╝ ██║██║  ██║███████║██║     ██║██████╔╝   ██║   "
   echo "  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═════╝    ╚═╝   "
   echo -e "${NC}"
-  echo -e "         ${BOLD}🕷️  OH MY SPIDY - Ecosistema Arch Linux Premium  🕷️${NC}"
+  echo -e "         ${BOLD}󰠚  OH MY SPIDY - Ecosistema Arch Linux Premium  󰠚${NC}"
   echo -e "     ${WHITE}─────────────────────────────────────────────────────────${NC}"
   
   if [ -n "$paso" ] && [ -n "$desc" ]; then
@@ -138,7 +138,7 @@ CORE_PKGS=(
     
     # Utilidades Varias y Fuentes
     neovim ttf-hack-nerd wl-clipboard tesseract tesseract-data-spa grim slurp satty
-    greetd greetd-tuigreet nmtui pulsemixer snapper snap-pac
+    greetd greetd-tuigreet nmtui pulsemixer snapper snap-pac power-profiles-daemon hyprsunset
     
     # Contenedores y Aislamiento (Pruebas y Pentesting)
     distrobox podman
@@ -161,6 +161,7 @@ AUR_PKGS=(
     systemd-boot-lifeboat
     localsend-go-bin
     oxker-bin
+    antigravity-cli
 )
 
 paru -S --needed --noconfirm "${AUR_PKGS[@]}"
@@ -183,6 +184,22 @@ sudo usermod -aG video greeter
 # --- 5. Configuración de Snapper y Backups Automáticos ---
 show_banner "5" "Configurando políticas de backups y snapshots automáticos BTRFS..."
 msg "Configurando Snapshots automáticos de BTRFS..."
+
+if [ "$(findmnt -n -o FSTYPE /)" = "btrfs" ]; then
+    msg "Sistema de archivos BTRFS detectado. Validando estructura de snapper..."
+    if [ -d "/.snapshots" ]; then
+        if ! sudo btrfs subvolume show /.snapshots &>/dev/null; then
+            msg_warn "/.snapshots existe como directorio normal. Convirtiéndolo a subvolumen BTRFS para evitar snapshots recursivos..."
+            sudo mv /.snapshots /.snapshots_old_backup 2>/dev/null
+            sudo btrfs subvolume create /.snapshots
+            sudo rm -rf /.snapshots_old_backup
+        fi
+    else
+        sudo btrfs subvolume create /.snapshots
+    fi
+    msg_ok "Subvolumen /.snapshots verificado y listo."
+fi
+
 if [[ ! -f /etc/snapper/configs/root ]]; then
     sudo snapper -c root create-config / || msg_warn "Snapper config 'root' ya existe o hubo un error."
     
@@ -206,7 +223,7 @@ msg "Desplegando configuraciones con Stow..."
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%s)"
 msg_backup=false
 
-for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim"; do
+for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim" "$HOME/.config/antigravity"; do
     if [ -e "$item" ] || [ -L "$item" ]; then
         if [ "$msg_backup" = false ]; then
             msg "Se han detectado configuraciones previas en tu sistema."
@@ -228,7 +245,7 @@ cd "$DOTFILES_DIR/dotfiles" || { msg_err "No se pudo acceder a la carpeta de dot
 
 # Hacer stow
 msg "Creando symlinks..."
-stow alacritty anyrun hypr mako nvim scripts starship waybar zsh git
+stow alacritty anyrun hypr mako nvim scripts starship waybar zsh git antigravity lazygit bat
 msg_ok "Configuraciones desplegadas."
 
 # --- 7. Habilitación de Servicios ---
@@ -237,6 +254,7 @@ msg "Habilitando servicios systemd..."
 sudo systemctl enable --now thermald
 sudo systemctl enable --now NetworkManager
 sudo systemctl enable --now bluetooth
+sudo systemctl enable --now power-profiles-daemon
 sudo systemctl enable greetd
 msg_ok "Servicios activados."
 
@@ -251,6 +269,14 @@ if ! grep -q "^$USER:" /etc/subuid 2>/dev/null || ! grep -q "^$USER:" /etc/subgi
     msg_ok "Mapeos de subuid y subgid configurados para el usuario $USER."
 else
     msg_ok "Mapeos de subuid y subgid ya existentes para el usuario $USER."
+fi
+
+# --- 7.2. Verificación de Antigravity-CLI ---
+msg "Verificando instalación de Antigravity-CLI..."
+if command -v antigravity &> /dev/null; then
+    msg_ok "Antigravity-CLI se encuentra instalado en el sistema."
+else
+    msg_warn "Antigravity-CLI no se ha detectado. Asegúrate de que se instaló correctamente desde el AUR."
 fi
 
 # --- 7.5. Configuración de systemd-boot con Kernel CachyOS ---
@@ -286,7 +312,7 @@ msg "Cambiando la shell por defecto a Zsh..."
 chsh -s "$(which zsh)"
 
 msg_ok "=========================================================="
-msg_ok "🚀 INSTALACIÓN FINALIZADA"
+msg_ok "  INSTALACIÓN FINALIZADA"
 msg_ok "=========================================================="
 msg_ok "Tu ecosistema Arch/Hyprland 'Spider-Man' está listo."
 msg_ok "La próxima vez que reinicies, verás el login de tuigreet."

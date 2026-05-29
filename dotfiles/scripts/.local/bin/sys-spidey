@@ -7,11 +7,12 @@
 
 # Cargar variables de colores del tema activo
 source "$HOME/.config/theme/active.sh" 2>/dev/null
+# Variable global FZF
 export FZF_DEFAULT_OPTS="
     --layout=reverse
     ${FZF_THEME:---color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\" --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\" --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"}
     --border=rounded --padding=1,2 --margin=2%
-    --prompt=' 󰠚 ❯ ' --pointer='' --marker='󰄬'
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
 "
 
 # Lista de opciones con iconos Nerd Fonts formateados
@@ -32,7 +33,7 @@ OPTIONS="  sys-distrobox      (Gestor de Contenedores TUI - dbs)
 󰍺  hypr-mirror        (Duplicador de Pantalla en Espejo)
 󰄀  wl-ocr             (Captura de Pantalla a Texto - OCR)"
 
-SELECTION=$(echo -e "$OPTIONS" | fzf --prompt=" 󰠚  Spider-Man Centro de Control ❯ " --header="Selecciona una utilidad para ejecutar:")
+SELECTION=$(echo -e "$OPTIONS" | fzf --prompt="   Spider-Man Centro de Control ❯ " --header="Selecciona una utilidad para ejecutar:")
 
 if [ -z "$SELECTION" ]; then
     exit 0

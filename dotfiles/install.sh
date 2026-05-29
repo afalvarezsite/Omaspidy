@@ -43,7 +43,7 @@ show_banner() {
   echo " ╚██████╔╝██║ ╚═╝ ██║██║  ██║███████║██║     ██║██████╔╝   ██║   "
   echo "  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═════╝    ╚═╝   "
   echo -e "${NC}"
-  echo -e "         ${BOLD}󰠚  OH MY SPIDY - Ecosistema Arch Linux Premium  󰠚${NC}"
+  echo -e "         ${BOLD}  OH MY SPIDY - Ecosistema Arch Linux Premium  ${NC}"
   echo -e "     ${WHITE}─────────────────────────────────────────────────────────${NC}"
   
   if [ -n "$paso" ] && [ -n "$desc" ]; then

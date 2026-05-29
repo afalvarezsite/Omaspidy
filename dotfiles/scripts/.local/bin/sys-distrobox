@@ -30,7 +30,7 @@ msg_warn() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 msg_err() { echo -e "${RED}[ERROR]${NC} $1"; }
 msg_title() {
     clear
-    echo -e "${RED} 󰠚  OH MY SPIDY - DISTROBOX MANAGER  󰠚${NC}"
+    echo -e "${RED}   OH MY SPIDY - DISTROBOX MANAGER  ${NC}"
     echo -e "${WHITE:-} ─────────────────────────────────────────────────────────${NC}"
     echo ""
 }

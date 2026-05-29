@@ -15,9 +15,9 @@ export FZF_DEFAULT_OPTS="
 "
 
 # Lista de opciones con iconos Nerd Fonts formateados
-OPTIONS="  sys-distrobox     (Gestor de Contenedores TUI - dbs)
-󰦃  sys-secureboot     (Asistente de Arranque Seguro - sbctl)
-󰓅  sys-power-profile  (Selector de Perfiles de Rendimiento)
+OPTIONS="  sys-distrobox      (Gestor de Contenedores TUI - dbs)
+󰦛  sys-secureboot     (Asistente de Arranque Seguro - sbctl)
+  sys-power-profile  (Selector de Perfiles de Rendimiento)
 󰕾  sys-audio          (Selector de Dispositivos de Audio)
   sys-wifi           (Selector y Gestor de Wi-Fi)
 󰂯  sys-bluetooth      (Selector y Gestor de Bluetooth)
@@ -25,12 +25,12 @@ OPTIONS="  sys-distrobox     (Gestor de Contenedores TUI - dbs)
   sys-aliases        (Buscador de Alias de Terminal)
 󰁯  sys-snaps          (Explorador de Snapshots de Snapper)
 󰆓  sys-backup         (Crear Snapshot Manual de Recuperación)
-󰄔  sys-share          (Compartir Archivos en Red - LocalSend)
+  sys-share          (Compartir Archivos en Red - LocalSend)
   sys-clean          (Limpieza y Mantenimiento de Huérfanos)
 󰖔  sys-sunset         (Alternar Filtro Nocturno / Luz Azul)
   hypr-keys          (Catálogo de Atajos Interactivos)
 󰍺  hypr-mirror        (Duplicador de Pantalla en Espejo)
-󰘶  wl-ocr             (Captura de Pantalla a Texto - OCR)"
+󰄀  wl-ocr             (Captura de Pantalla a Texto - OCR)"
 
 SELECTION=$(echo -e "$OPTIONS" | fzf --prompt=" 󰠚  Spider-Man Centro de Control ❯ " --header="Selecciona una utilidad para ejecutar:")
 

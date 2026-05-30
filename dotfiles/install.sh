@@ -184,7 +184,7 @@ CORE_PKGS=(
     "${HW_PKGS[@]}"
     
     # Entorno Gráfico (Wayland/Hyprland)
-    hyprland hyprpaper hyprlock hypridle waybar mako hyprlang hyprutils
+    hyprland hyprpaper hyprlock hypridle waybar mako hyprlang hyprutils hyprpolkitagent
     
     # Audio y Redes
     pipewire pipewire-pulse pipewire-alsa wireplumber
@@ -224,7 +224,6 @@ msg "Instalando paquetes de AUR..."
 AUR_PKGS=(
     anyrun-git
     swayosd-git
-    hyprpolkitagent-git
     clipse
     bluetuith-bin
     systemd-boot-lifeboat

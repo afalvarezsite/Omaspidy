@@ -35,7 +35,7 @@ OPTIONS="  sys-distrobox      (Gestor de Contenedores TUI - dbs)
 󰖔  sys-sunset         (Alternar Filtro Nocturno / Luz Azul)
   hypr-keys          (Catálogo de Atajos Interactivos)
 󰍺  hypr-mirror        (Duplicador de Pantalla en Espejo)
-󰄀  wl-ocr             (Captura de Pantalla a Texto - OCR)
+󱄽  wl-ocr             (Captura de Pantalla a Texto - OCR)
 󰄀  sys-cam            (Protector de Privacidad y Gestor de Cámara)"
 
 SELECTION=$(echo -e "$OPTIONS" | fzf --prompt="   Spider-Man Centro de Control ❯ " --header="Selecciona una utilidad para ejecutar:")

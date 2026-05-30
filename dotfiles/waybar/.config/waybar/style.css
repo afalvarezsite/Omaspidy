@@ -1,10 +1,13 @@
-/* Minimalist Spider-Man Theme for Waybar (Pill Design) */
+/* ==============================================================================
+ * ULTRA-PREMIUM SPIDER-MAN GLASSMORPHIC THEME FOR WAYBAR
+ * Modular, clean pill-based design with glow effects and micro-animations
+ * ============================================================================== */
 
 @import url("../theme/active.css");
 
 * {
-    font-family: "Hack Nerd Font";
-    font-size: 14px;
+    font-family: "Hack Nerd Font", "Outfit", "Inter", sans-serif;
+    font-size: 13.5px;
     font-weight: 700;
     border: none;
     border-radius: 0;
@@ -15,7 +18,9 @@ window#waybar {
     background: transparent;
 }
 
-/* Modulos convertidos en pildoras flotantes (Pills) */
+/* ------------------------------------------------------------------------------
+ * CONTENEDORES BASE: ESTRUCTURA DE PÍLDORAS (PILLS)
+ * ------------------------------------------------------------------------------ */
 #workspaces,
 #window,
 #clock,
@@ -23,20 +28,21 @@ window#waybar {
 #pulseaudio,
 #custom-powerprofile,
 #custom-hyprsunset,
+#custom-sysrecord,
 #battery,
 #tray,
 #custom-power {
     background: @bg-light;
     color: @fg;
-    border: 1px solid alpha(@red, 0.4);
-    border-radius: 20px; /* Bordes super redondeados */
-    padding: 0 16px;
-    margin: 0 4px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid rgba(230, 0, 38, 0.25); /* Bordes rojizos semitransparentes */
+    border-radius: 16px;
+    padding: 2px 14px;
+    margin: 4px 4px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4), inset 0px 1px 1px rgba(255, 255, 255, 0.05);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hover general para pildoras interactivas */
+/* Hover general premium para las cápsulas interactivas */
 #network:hover,
 #pulseaudio:hover,
 #custom-powerprofile:hover,
@@ -44,120 +50,186 @@ window#waybar {
 #battery:hover,
 #custom-power:hover,
 #clock:hover {
-    background: alpha(@red, 0.2);
+    background: rgba(230, 0, 38, 0.15);
     border-color: @red-glow;
-    box-shadow: 0px 0px 12px alpha(@red-glow, 0.4);
+    box-shadow: 0px 0px 12px rgba(255, 59, 92, 0.45);
     color: #ffffff;
+    transform: translateY(-1px);
 }
 
-/* Workspaces Específico */
+/* ------------------------------------------------------------------------------
+ * MÓDULOS ESPECÍFICOS Y AJUSTES DE ESPACIADO
+ * ------------------------------------------------------------------------------ */
+
+/* WORKSPACES (Gestor de áreas) */
 #workspaces {
-    padding: 0 6px;
+    padding: 0 4px;
 }
 
 #workspaces button {
     color: @inactive;
     padding: 0 8px;
     margin: 4px 2px;
-    border-radius: 12px;
+    border-radius: 10px;
     background: transparent;
-    transition: all 0.3s ease;
-    font-size: 16px;
+    transition: all 0.25s ease;
+    font-size: 15px;
 }
 
 #workspaces button:hover {
     color: @fg;
-    background: alpha(@red, 0.3);
+    background: rgba(230, 0, 38, 0.25);
     text-shadow: 0px 0px 5px @fg;
 }
 
 #workspaces button.active {
     color: @red;
-    background: transparent;
-    text-shadow: 0px 0px 10px @red-glow;
+    background: rgba(230, 0, 38, 0.1);
+    text-shadow: 0px 0px 8px @red-glow;
 }
 
 #workspaces button.urgent {
     color: @red-glow;
-    background: transparent;
+    background: rgba(230, 0, 38, 0.3);
+    animation: urgent-blink 0.8s ease infinite alternate;
 }
 
-/* Window (Titulo) Minimalista */
+/* TITULO DE VENTANA (WINDOW) */
 #window {
     border: none;
     background: transparent;
     box-shadow: none;
     color: @fg;
-    font-weight: normal;
+    font-weight: 500;
+    padding: 0 10px;
 }
 
-/* Reloj Central Destacado */
+/* RELOJ CENTRAL DESTACADO (Cápsula de Poder) */
 #clock {
     color: @fg;
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 800;
     background: @bg-dark;
     border: 2px solid @red;
-    box-shadow: 0px 0px 15px alpha(@red, 0.5);
+    box-shadow: 0px 0px 15px rgba(230, 0, 38, 0.4);
+    padding: 2px 18px;
 }
 
-/* Alertas de Bateria */
-#battery.charging, #battery.plugged {
+/* BATERÍA DILIGENTE */
+#battery {
+    color: @fg;
+}
+
+#battery.charging, 
+#battery.plugged {
     color: #00e676;
-    border-color: #00e676;
+    border-color: rgba(0, 230, 118, 0.3);
+}
+
+#battery.warning:not(.charging) {
+    color: #ff9100;
+    border-color: rgba(255, 145, 0, 0.4);
 }
 
 #battery.critical:not(.charging) {
     background-color: @red;
     color: @bg-dark;
-    animation-name: blink;
-    animation-duration: 0.5s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
+    border-color: @red;
+    animation: battery-alert 0.6s linear infinite alternate;
 }
 
-/* Custom Power Button (Rojo y llamativo) */
+/* REDES */
+#network {
+    color: @fg;
+}
+
+#network.disconnected {
+    color: #ff3d00;
+    border-color: rgba(255, 61, 0, 0.3);
+}
+
+/* GRABACIÓN DE PANTALLA (Activo parpadeando en rojo) */
+#custom-sysrecord.active {
+    background: rgba(230, 0, 38, 0.3);
+    color: #ffffff;
+    border-color: @red;
+    animation: recording-glow 0.8s ease-in-out infinite alternate;
+}
+
+#custom-sysrecord.inactive {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* FILTRO NOCTURNO */
+#custom-hyprsunset.active {
+    color: #ffd600;
+    border-color: rgba(255, 214, 0, 0.3);
+    text-shadow: 0px 0px 8px rgba(255, 214, 0, 0.4);
+}
+
+/* PERFILES DE ENERGÍA */
+#custom-powerprofile.performance {
+    color: @red-glow;
+    border-color: rgba(255, 59, 92, 0.4);
+    text-shadow: 0px 0px 8px @red-glow;
+}
+
+#custom-powerprofile.power-saver {
+    color: #00e676;
+    border-color: rgba(0, 230, 118, 0.3);
+    text-shadow: 0px 0px 8px rgba(0, 230, 118, 0.3);
+}
+
+/* BANDEJA DEL SISTEMA (TRAY) */
+#tray {
+    padding: 0 12px;
+}
+
+/* BOTÓN DE APAGADO (Vibrante y agresivo rojinegro) */
 #custom-power {
     color: @red-glow;
-    padding: 0 18px;
+    background: @bg-dark;
+    border: 1px solid @red;
+    padding: 0 16px;
 }
 
 #custom-power:hover {
     background: @red;
     color: @bg-dark;
     border-color: @red;
+    box-shadow: 0px 0px 15px @red;
 }
 
-/* Custom Power Profile States (Dinámicos) */
-#custom-powerprofile.performance {
-    color: @red-glow;
-    text-shadow: 0px 0px 8px @red-glow;
+/* ------------------------------------------------------------------------------
+ * ANIMACIONES KEYFRAMES (Efectos visuales fluidos)
+ * ------------------------------------------------------------------------------ */
+
+@keyframes urgent-blink {
+    to {
+        background-color: rgba(230, 0, 38, 0.6);
+        color: #ffffff;
+    }
 }
 
-#custom-powerprofile.power-saver {
-    color: #00e676;
-    text-shadow: 0px 0px 8px alpha(#00e676, 0.4);
-}
-
-#custom-powerprofile.balanced {
-    color: @fg;
-}
-
-/* Custom Hyprsunset (Filtro Nocturno) States */
-#custom-hyprsunset.active {
-    color: #ffd600;
-    text-shadow: 0px 0px 8px alpha(#ffd600, 0.5);
-}
-
-#custom-hyprsunset.inactive {
-    color: @fg;
-}
-
-@keyframes blink {
+@keyframes battery-alert {
     to {
         background-color: @bg-dark;
         color: @red;
         border-color: @red;
+        box-shadow: 0px 0px 12px @red;
+    }
+}
+
+@keyframes recording-glow {
+    from {
+        box-shadow: 0px 0px 4px rgba(230, 0, 38, 0.3);
+    }
+    to {
+        box-shadow: 0px 0px 14px rgba(230, 0, 38, 0.85);
+        background-color: rgba(230, 0, 38, 0.55);
     }
 }

@@ -46,9 +46,9 @@
         "max-length": 40,
         "rewrite": {
             "": "Escritorio Libre",
-            "(.*) - Mozilla Firefox": "󰈹 $1",
-            "(.*) - nvim": " $1",
-            "Alacritty": " Terminal"
+            "(.*) - Mozilla Firefox": "󰈹   $1",
+            "(.*) - nvim": "   $1",
+            "Alacritty": "   Terminal"
         }
     },
 
@@ -60,20 +60,20 @@
     },
 
     "network": {
-        "format-wifi": " {signalStrength}%",
-        "format-ethernet": "󰈀 Conectado",
+        "format-wifi": "   {signalStrength}%",
+        "format-ethernet": "󰈀   Conectado",
         "tooltip-format": "{essid} vía {gwaddr} ",
-        "format-linked": "󰈀 (Sin IP)",
-        "format-disconnected": "⚠ Desconectado",
+        "format-linked": "󰈀   (Sin IP)",
+        "format-disconnected": "⚠   Desconectado",
         "format-alt": "{ifname}: {ipaddr}/{cidr}",
         "on-click-right": "alacritty --class floating_tui -e nmtui"
     },
 
     "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-bluetooth": "󰂰 {volume}%",
-        "format-bluetooth-muted": "󰂲 Mute",
-        "format-muted": "󰝟 Mute",
+        "format": "{icon}   {volume}%",
+        "format-bluetooth": "󰂰   {volume}%",
+        "format-bluetooth-muted": "󰂲   Mute",
+        "format-muted": "󰝟   Mute",
         "format-icons": {
             "headphone": "",
             "hands-free": "",
@@ -92,10 +92,10 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "{icon} {capacity}%",
-        "format-charging": "󰂄 {capacity}%",
-        "format-plugged": " {capacity}%",
-        "format-alt": "{time} {icon}",
+        "format": "{icon}   {capacity}%",
+        "format-charging": "󰂄   {capacity}%",
+        "format-plugged": "   {capacity}%",
+        "format-alt": "{time}   {icon}",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
     },
 
@@ -123,7 +123,7 @@
     },
 
     "custom/powerprofile": {
-        "format": "{icon} {text}",
+        "format": "{icon}   {text}",
         "format-icons": {
             "performance": "",
             "balanced": "󰾆",

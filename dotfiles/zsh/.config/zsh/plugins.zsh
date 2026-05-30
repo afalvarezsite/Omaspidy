@@ -13,14 +13,18 @@ fi
 # Iniciar Zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
-# --- Plugins Puros Asíncronos ---
-# Autocompletado rápido
-zinit light zsh-users/zsh-autosuggestions
-# Resaltado de sintaxis (se carga el último para no interferir)
-zinit light zsh-users/zsh-syntax-highlighting
+# Inicializar compinit (Requerido para el sistema de autocompletado y fzf-tab)
+autoload -Uz compinit && compinit
 
-# fzf-tab (Reemplaza el autocompletado tabulador por defecto por fzf)
+# --- Plugins Puros Asíncronos ---
+# 1. fzf-tab (Reemplaza el autocompletado por defecto con fzf. Debe ir ANTES de autosuggestions y syntax-highlighting)
 zinit light Aloxaf/fzf-tab
+
+# 2. Autocompletado rápido
+zinit light zsh-users/zsh-autosuggestions
+
+# 3. Resaltado de sintaxis (se carga al final para no interferir)
+zinit light zsh-users/zsh-syntax-highlighting
 
 # forgit (Utilidad interactiva fzf para git)
 zinit light wfxr/forgit
@@ -32,6 +36,9 @@ zinit snippet OMZP::sudo
 zinit snippet OMZP::extract
 # git: Cientos de alias y utilidades para git
 zinit snippet OMZP::git
+
+# Reaplicar los completers definidos por los plugins y snippets cargados con Zinit
+zinit cdreplay -q
 
 # --- Configuración específica de plugins ---
 # Asegurar compatibilidad de fzf-tab con colores personalizados (Spider-Man theme)

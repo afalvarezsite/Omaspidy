@@ -327,7 +327,7 @@ msg "Desplegando configuraciones con Stow..."
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%s)"
 msg_backup=false
 
-for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim" "$HOME/.config/antigravity" "$HOME/.config/fastfetch" "$HOME/.config/git" "$HOME/.config/swayosd"; do
+for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim" "$HOME/.config/antigravity" "$HOME/.config/fastfetch" "$HOME/.config/git" "$HOME/.config/swayosd" "$HOME/.config/mpv"; do
     if [ -e "$item" ] || [ -L "$item" ]; then
         if [ "$msg_backup" = false ]; then
             msg "Se han detectado configuraciones previas en tu sistema."
@@ -349,7 +349,7 @@ cd "$DOTFILES_DIR/dotfiles" || { msg_err "No se pudo acceder a la carpeta de dot
 
 # Hacer stow
 msg "Creando symlinks..."
-stow alacritty anyrun hypr mako nvim scripts starship waybar zsh git antigravity lazygit bat fastfetch gtk theme swayosd
+stow alacritty anyrun hypr mako nvim scripts starship waybar zsh git antigravity lazygit bat fastfetch gtk theme swayosd mpv
 msg_ok "Configuraciones desplegadas."
 
 # --- 7. Habilitación de Servicios ---

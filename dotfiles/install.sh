@@ -184,7 +184,7 @@ CORE_PKGS=(
     "${HW_PKGS[@]}"
     
     # Entorno Gráfico (Wayland/Hyprland)
-    hyprland hyprpaper hyprlock hypridle waybar mako
+    hyprland hyprpaper hyprlock hypridle waybar mako hyprlang hyprutils
     
     # Audio y Redes
     pipewire pipewire-pulse pipewire-alsa wireplumber

@@ -83,6 +83,7 @@ Para cambiar de tema: ejecuta `sys-theme` o presiona `Super + M` para abrir el C
 | `sys-secureboot` | `Super+Shift+U` | Asistente de Secure Boot (sbctl) |
 | `sys-distrobox` | `dbs` | Gestor de contenedores TUI |
 | `hypr-keys` | `Super+G` | Guía interactiva de atajos |
+| `wl-ocr` | `Super+T` | Captura de pantalla a texto (OCR) |
 
 
 Este directorio contiene las configuraciones específicas de las aplicaciones gestionadas e instaladas con `stow` (incluyendo el nuevo módulo centralizado `theme` para la gestión de Skins).

@@ -85,6 +85,9 @@ esac
 
 msg "Aplicando skin: ${SKIN_SELECT#*. }..."
 
+# Cargar las variables de color del tema seleccionado inmediatamente
+source "$SKINS_DIR/${SKIN}.sh"
+
 # 1. Enlazar archivos dinámicos del tema activo en ~/.config/theme/
 ln -sf "$SKINS_DIR/${SKIN}.sh" "$THEME_DIR/active.sh"
 ln -sf "$SKINS_DIR/${SKIN}.conf" "$THEME_DIR/active.conf"
@@ -100,6 +103,96 @@ ln -sf "$SKINS_DIR/${SKIN}_mako.conf" "$HOME/.config/mako/config"
 # 4. Actualizar el symlink de Alacritty config
 mkdir -p "$HOME/.config/alacritty"
 ln -sf "$SKINS_DIR/${SKIN}_alacritty.toml" "$HOME/.config/alacritty/active.toml"
+
+# 5. Generar configuración de colores dinámica para Yazi
+if [ -d "$HOME/.config/yazi" ]; then
+    msg "Actualizando tema dinámico de Yazi..."
+    cat << YAZI_THEME_EOF > "$HOME/.config/yazi/theme.toml"
+# theme.toml
+# Paleta de colores dinámica para Yazi
+# Generado automáticamente por sys-theme — NO EDITAR
+
+[manager]
+cwd = { fg = "${COLOR_PRIMARY}", bold = true }
+hovered = { fg = "${COLOR_BG_DARK}", bg = "${COLOR_PRIMARY}", bold = true }
+preview_hovered = { bg = "${COLOR_BG_LIGHT}" }
+
+find_keyword = { fg = "${COLOR_PRIMARY_GLOW}", bold = true, italic = true }
+find_position = { fg = "${COLOR_PRIMARY_GLOW}", bg = "reset", italic = true }
+
+marker_copied = { fg = "#00e676", bg = "#00e676" }
+marker_cut = { fg = "${COLOR_PRIMARY_GLOW}", bg = "${COLOR_PRIMARY_GLOW}" }
+marker_selected = { fg = "${COLOR_PRIMARY_GLOW}", bg = "${COLOR_PRIMARY_GLOW}" }
+
+border_symbol = "│"
+border_style = { fg = "${COLOR_PRIMARY}" }
+
+[status]
+separator_open = ""
+separator_close = ""
+
+# Modo normal
+mode_normal = { bg = "${COLOR_PRIMARY}", fg = "${COLOR_BG_DARK}", bold = true }
+# Modo seleccion
+mode_select = { bg = "${COLOR_PRIMARY_GLOW}", fg = "${COLOR_BG_DARK}", bold = true }
+# Modo no establecido
+mode_unset = { bg = "${COLOR_PRIMARY_GLOW}", fg = "${COLOR_BG_DARK}", bold = true }
+
+progress_label = { fg = "${COLOR_FG}", bold = true }
+progress_normal = { fg = "${COLOR_PRIMARY}", bg = "${COLOR_BG_LIGHT}" }
+progress_error = { fg = "${COLOR_PRIMARY_GLOW}", bg = "${COLOR_BG_LIGHT}" }
+
+[select]
+border = { fg = "${COLOR_PRIMARY}" }
+active = { fg = "${COLOR_BG_DARK}", bg = "${COLOR_PRIMARY}", bold = true }
+inactive = { fg = "${COLOR_FG}" }
+
+[input]
+border = { fg = "${COLOR_PRIMARY}" }
+title = { fg = "${COLOR_PRIMARY}", bold = true }
+value = { fg = "${COLOR_FG}" }
+selected = { bg = "${COLOR_PRIMARY}" }
+
+[completion]
+border = { fg = "${COLOR_PRIMARY}" }
+active = { bg = "${COLOR_PRIMARY}", fg = "${COLOR_BG_DARK}" }
+inactive = { fg = "${COLOR_FG}" }
+
+[help]
+on = { fg = "${COLOR_PRIMARY}", bold = true }
+exec = { fg = "${COLOR_PRIMARY_GLOW}" }
+desc = { fg = "${COLOR_FG}" }
+hovered = { bg = "${COLOR_BG_LIGHT}", bold = true }
+footer = { fg = "${COLOR_INACTIVE}" }
+
+[filetype]
+rules = [
+    # Imágenes
+    { mime = "image/*", fg = "${COLOR_SECONDARY}" },
+    # Videos
+    { mime = "video/*", fg = "${COLOR_PRIMARY_GLOW}" },
+    # Audio
+    { mime = "audio/*", fg = "${COLOR_PRIMARY}" },
+    # Archivos comprimidos
+    { mime = "application/zip", fg = "#ffd600" },
+    { mime = "application/gzip", fg = "#ffd600" },
+    { mime = "application/x-tar", fg = "#ffd600" },
+    { mime = "application/x-bzip*", fg = "#ffd600" },
+    { mime = "application/x-7z-compressed", fg = "#ffd600" },
+    { mime = "application/x-rar", fg = "#ffd600" },
+    # Documentos
+    { mime = "application/pdf", fg = "${COLOR_PRIMARY_GLOW}" },
+    # Scripts y código
+    { url = "*.sh", fg = "#00e676", bold = true },
+    { url = "*.py", fg = "${COLOR_SECONDARY}", bold = true },
+    { url = "*.rs", fg = "${COLOR_PRIMARY_GLOW}", bold = true },
+    { url = "*.c", fg = "#54a0ff", bold = true },
+    { url = "*.cpp", fg = "#54a0ff", bold = true },
+    # Por defecto
+    { url = "*", fg = "${COLOR_FG}" }
+]
+YAZI_THEME_EOF
+fi
 
 # --- Recargas al Vuelo ---
 

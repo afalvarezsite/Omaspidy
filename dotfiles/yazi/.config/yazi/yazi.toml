@@ -51,3 +51,9 @@ rules = [
     { mime = "inode/x-empty", use = "edit" },
     { url = "*", use = "open" },
 ]
+
+[plugin]
+prepend_previewers = [
+    { mime = "image/*", run = "noop" },
+    { mime = "video/*", run = "noop" },
+]

@@ -50,20 +50,19 @@ CMD_NAME=$(echo "$SELECTION" | awk '{print $2}')
 # Determinar si ejecutar con exec (para TUIs interactivas en la misma terminal) o en background (para scripts gráficos)
 case "$CMD_NAME" in
     "sys-sunset")
-        sys-sunset --toggle &
+        hyprctl dispatch -- exec sys-sunset --toggle
         exit 0
         ;;
     "wl-ocr")
-        wl-ocr &
+        hyprctl dispatch -- exec wl-ocr
         exit 0
         ;;
     "hypr-mirror")
-        hypr-mirror &
+        hyprctl dispatch -- exec hypr-mirror
         exit 0
         ;;
     "sys-record")
-        sys-record --toggle &
-        exit 0
+        exec sys-record
         ;;
     "sys-secureboot")
         # Requiere sudo, así que hacemos exec con sudo

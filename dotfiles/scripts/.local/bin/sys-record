@@ -1,14 +1,52 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# SYS-RECORD: Grabador de Pantalla con Intel VA-API + Notificaciones Mako
-# Wrapper inteligente para gpu-screen-recorder con control ON/OFF y feedback visual
+# SYS-RECORD: Grabador de Pantalla Inteligente con Intel VA-API + Notificaciones
+# Wrapper avanzado para gpu-screen-recorder con control ON/OFF y menú FZF
 # Estética: Ecosistema Spider-Man
 # ==============================================================================
 
+# Cargar variables de colores del tema activo
+source "$HOME/.config/theme/active.sh" 2>/dev/null || {
+    COLOR_BG_DARK="#0c0d12"
+    COLOR_PRIMARY_GLOW="#ff3b5c"
+    COLOR_SECONDARY="#00e5ff"
+}
+
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    ${FZF_THEME:---color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\" --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\" --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"}
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+WHITE='\033[1;37m'
+CYAN='\033[1;36m'
+NC='\033[0m'
+BOLD='\033[1m'
+
 PIDFILE="/tmp/sys-record.pid"
 OUTPUT_DIR="$HOME/Vídeos"
+CONFIG_FILE="$HOME/.config/sys-record.conf"
+
+# Valores por defecto
+REC_MODE="pantalla"
+AUDIO_MODE="speakers"
 FRAMERATE=60
 CONTAINER="mp4"
+QUALITY="very_high"
+
+# Cargar configuración persistente si existe
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+fi
+
+# Limpiar los caracteres '#' para compatibilidad de slurp
+BG_HEX="${COLOR_BG_DARK//#/}"
+PRIMARY_HEX="${COLOR_PRIMARY_GLOW//#/}"
 
 # Función de notificación Mako
 _notify() {
@@ -21,6 +59,32 @@ _notify() {
         --icon="$icon" \
         --app-name="sys-record" \
         "$summary" "$body" 2>/dev/null || true
+}
+
+show_banner() {
+    clear
+    echo -e "${RED}"
+    echo "   ██████╗ ███████╗ ██████╗"
+    echo "   ██╔══██╗██╔════╝██╔════╝"
+    echo "   ██████╔╝█████╗  ██║     "
+    echo "   ██╔══██╗██╔══╝  ██║     "
+    echo "   ██║  ██║███████╗╚██████╗"
+    echo "   ╚═╝  ╚═╝╚══════╝ ╚═════╝"
+    echo -e "${NC}"
+    echo -e "       ${BOLD}  SPIDER-MAN SCREEN RECORDER  ${NC}"
+    echo -e "${WHITE}  ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+}
+
+_save_config() {
+    cat <<EOF > "$CONFIG_FILE"
+# Configuración de sys-record
+REC_MODE="$REC_MODE"
+AUDIO_MODE="$AUDIO_MODE"
+FRAMERATE=$FRAMERATE
+CONTAINER="$CONTAINER"
+QUALITY="$QUALITY"
+EOF
 }
 
 _is_recording() {
@@ -37,14 +101,83 @@ _start_recording() {
     local filename
     filename="$OUTPUT_DIR/Recording_$(date +%Y-%m-%d_%H-%M-%S).${CONTAINER}"
 
-    _notify normal "󰑋  Grabación Iniciada" "Grabando en: $(basename "$filename")\nFramerate: ${FRAMERATE}fps | Codec: ${CONTAINER}" "media-record"
+    # Construir comando gpu-screen-recorder
+    local cmd=(gpu-screen-recorder)
+
+    # 1. Modo de grabación
+    case "$REC_MODE" in
+        pantalla)
+            cmd+=(-w screen)
+            ;;
+        focused)
+            cmd+=(-w focused)
+            ;;
+        portal)
+            cmd+=(-w portal)
+            ;;
+        region)
+            local geom
+            geom=$(slurp -b "${BG_HEX}80" -c "${PRIMARY_HEX}ff" -s 00000000 -w 2 -f "%wx%h+%x+%y")
+            if [ -z "$geom" ]; then
+                _notify normal "󰓛  Grabación Cancelada" "No se seleccionó ninguna región." "dialog-information"
+                exit 0
+            fi
+            cmd+=(-w region -region "$geom")
+            ;;
+        *)
+            cmd+=(-w screen)
+            ;;
+    esac
+
+    # 2. Audio
+    case "$AUDIO_MODE" in
+        speakers)
+            local sink
+            sink=$(pactl get-default-sink 2>/dev/null)
+            if [ -n "$sink" ]; then
+                cmd+=(-a "${sink}.monitor")
+            fi
+            ;;
+        mic)
+            local source
+            source=$(pactl get-default-source 2>/dev/null)
+            if [ -n "$source" ]; then
+                cmd+=(-a "$source")
+            fi
+            ;;
+        both)
+            local sink source
+            sink=$(pactl get-default-sink 2>/dev/null)
+            source=$(pactl get-default-source 2>/dev/null)
+            if [ -n "$sink" ]; then
+                cmd+=(-a "${sink}.monitor")
+            fi
+            if [ -n "$source" ]; then
+                cmd+=(-a "$source")
+            fi
+            ;;
+        none|*)
+            ;;
+    esac
+
+    # 3. Framerate, formato, calidad y salida
+    cmd+=(-f "$FRAMERATE" -c "$CONTAINER" -q "$QUALITY" -o "$filename")
+
+    # Mapeo legible para notificación
+    local mode_notif="Pantalla Completa"
+    [ "$REC_MODE" = "region" ] && mode_notif="Región"
+    [ "$REC_MODE" = "focused" ] && mode_notif="Ventana Enfocada"
+    [ "$REC_MODE" = "portal" ] && mode_notif="Portal de Selección"
+
+    local audio_notif="Sin Audio"
+    [ "$AUDIO_MODE" = "speakers" ] && audio_notif="Sistema"
+    [ "$AUDIO_MODE" = "mic" ] && audio_notif="Micrófono"
+    [ "$AUDIO_MODE" = "both" ] && audio_notif="Sistema + Mic"
+
+    _notify normal "󰑋  Grabación Iniciada" "Modo: $mode_notif | Audio: $audio_notif\nFPS: $FRAMERATE | Formato: $CONTAINER" "media-record"
 
     # Lanzar grabador en background y guardar PID
-    gpu-screen-recorder \
-        -w screen \
-        -f "$FRAMERATE" \
-        -c "$CONTAINER" \
-        -o "$filename" &
+    "${cmd[@]}" &
     echo $! > "$PIDFILE"
     pkill -RTMIN+10 waybar
 }
@@ -96,6 +229,94 @@ _status() {
     fi
 }
 
+_config_menu() {
+    while true; do
+        show_banner
+        
+        # Formatear valores legibles para el menú
+        local mode_lbl="Pantalla Completa"
+        [ "$REC_MODE" = "region" ] && mode_lbl="Región de Pantalla (slurp)"
+        [ "$REC_MODE" = "focused" ] && mode_lbl="Ventana Activa (Enfocada)"
+        [ "$REC_MODE" = "portal" ] && mode_lbl="Selector del Sistema (Portal)"
+
+        local audio_lbl="Sin Audio"
+        [ "$AUDIO_MODE" = "speakers" ] && audio_lbl="Audio del Sistema (Altavoces)"
+        [ "$AUDIO_MODE" = "mic" ] && audio_lbl="Micrófono"
+        [ "$AUDIO_MODE" = "both" ] && audio_lbl="Sistema + Micrófono"
+
+        local q_lbl="Muy Alta"
+        [ "$QUALITY" = "medium" ] && q_lbl="Media"
+        [ "$QUALITY" = "high" ] && q_lbl="Alta"
+        [ "$QUALITY" = "very_high" ] && q_lbl="Muy Alta"
+        [ "$QUALITY" = "ultra" ] && q_lbl="Ultra (Calidad sin Pérdidas)"
+
+        # Menu options
+        local options="1. 󰍹  Modo de Grabación: $mode_lbl
+2. 󰕾  Canal de Audio: $audio_lbl
+3. 󰓅  Framerate: $FRAMERATE FPS
+4. 󰚵  Formato de Vídeo: $CONTAINER
+5. 󰈐  Calidad de Vídeo: $q_lbl
+6. 󰌑  Guardar y Salir"
+
+        local selection
+        selection=$(echo -e "$options" | fzf --prompt=" 󰑋  Ajustes de Grabación ❯ " --header="Selecciona una opción para cambiarla:")
+
+        if [ -z "$selection" ]; then
+            break
+        fi
+
+        case "$selection" in
+            *"Modo de Grabación"*)
+                local modes="󰍹  pantalla  (Pantalla Completa)
+󰆗  region    (Seleccionar área con ratón)
+󰖯  focused   (Ventana activa bajo el cursor)
+󰨞  portal    (Selector interactivo del sistema)"
+                local choice
+                choice=$(echo -e "$modes" | fzf --prompt=" 󰍹  Selecciona Modo ❯ " | awk '{print $2}')
+                [ -n "$choice" ] && REC_MODE="$choice"
+                ;;
+            *"Canal de Audio"*)
+                local audios="󰖀  speakers  (Capturar sonidos del sistema)
+󰍬  mic       (Capturar tu micrófono)
+󰕾  both      (Capturar sistema y micrófono)
+󰝟  none      (Sin audio)"
+                local choice
+                choice=$(echo -e "$audios" | fzf --prompt=" 󰕾  Selecciona Audio ❯ " | awk '{print $2}')
+                [ -n "$choice" ] && AUDIO_MODE="$choice"
+                ;;
+            *"Framerate"*)
+                local fps="󰓅  60  (60 FPS - Fluidez máxima)
+󰓅  30  (30 FPS - Menor peso de archivo)"
+                local choice
+                choice=$(echo -e "$fps" | fzf --prompt=" 󰓅  Selecciona Framerate ❯ " | awk '{print $2}')
+                [ -n "$choice" ] && FRAMERATE="$choice"
+                ;;
+            *"Formato de Vídeo"*)
+                local formats="󰚵  mp4   (Formato estándar universal)
+󰚵  mkv   (Robusto, ideal ante cortes de energía)
+󰚵  webm  (Código libre, optimizado para web)"
+                local choice
+                choice=$(echo -e "$formats" | fzf --prompt=" 󰚵  Selecciona Formato ❯ " | awk '{print $2}')
+                [ -n "$choice" ] && CONTAINER="$choice"
+                ;;
+            *"Calidad de Vídeo"*)
+                local qualities="󰈐  medium     (Media - Económico en espacio)
+󰈐  high       (Alta - Excelente balance)
+󰈐  very_high  (Muy Alta - Nitidez impecable)
+󰈐  ultra      (Ultra - Máxima fidelidad)"
+                local choice
+                choice=$(echo -e "$qualities" | fzf --prompt=" 󰈐  Selecciona Calidad ❯ " | awk '{print $2}')
+                [ -n "$choice" ] && QUALITY="$choice"
+                ;;
+            *"Guardar y Salir"*)
+                _save_config
+                _notify normal "󰄬  Configuración Guardada" "Los ajustes de grabación se han actualizado correctamente." "emblem-saved"
+                break
+                ;;
+        esac
+    done
+}
+
 # Comprobar que gpu-screen-recorder está disponible
 if ! command -v gpu-screen-recorder &>/dev/null; then
     _notify critical "sys-record: Error" "gpu-screen-recorder no está instalado.\nInstala: paru -S gpu-screen-recorder-git" "dialog-error"
@@ -118,6 +339,9 @@ case "${1:-}" in
     --status)
         _status
         ;;
+    --config|-c)
+        _config_menu
+        ;;
     --waybar)
         if _is_recording; then
             echo '{"text": "  GRABANDO", "alt": "active", "class": "active", "tooltip": "Grabación de Pantalla en Curso"}'
@@ -127,17 +351,22 @@ case "${1:-}" in
         exit 0
         ;;
     "")
-        # Sin argumentos: toggle por defecto (comportamiento natural para keybind)
-        _toggle_recording
+        # Sin argumentos: si es terminal interactivo abrimos el menú, si no, toggle
+        if [ -t 0 ]; then
+            _config_menu
+        else
+            _toggle_recording
+        fi
         ;;
     *)
-        echo "Uso: sys-record [--toggle | --start | --stop | --status | --waybar]"
+        echo "Uso: sys-record [--toggle | --start | --stop | --status | --config | --waybar]"
         echo ""
-        echo "  --toggle, -t   Alterna grabación ON/OFF (por defecto)"
+        echo "  --toggle, -t   Alterna grabación ON/OFF"
         echo "  --start,  -s   Inicia la grabación"
         echo "  --stop,   -q   Detiene la grabación y guarda el archivo"
         echo "  --status       Muestra si hay grabación activa y su PID"
-        echo "  --waybar       Salida formateada en JSON para Waybar (oculta cuando está inactiva)"
+        echo "  --config, -c   Abre el centro de ajustes interactivo de grabación (FZF)"
+        echo "  --waybar       Salida formateada en JSON para Waybar"
         exit 1
         ;;
 esac

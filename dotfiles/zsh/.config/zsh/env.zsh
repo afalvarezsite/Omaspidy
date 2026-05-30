@@ -30,6 +30,8 @@ export FORGIT_FZF_DEFAULT_OPTS="
 
 # Historial
 export HISTFILE="$XDG_STATE_HOME/zsh/history"
+# Asegurar que el directorio del historial existe
+[[ -d "$(dirname "$HISTFILE")" ]] || mkdir -p "$(dirname "$HISTFILE")"
 export HISTSIZE=10000
 export SAVEHIST=10000
 setopt append_history

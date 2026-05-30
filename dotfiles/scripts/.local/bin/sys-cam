@@ -1,0 +1,256 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-CAM: Gestor y Protector de Privacidad de Cámara Web / Webcam (100% FZF)
+# Estética: Ecosistema Spider-Man (Rojo Neón y Negro)
+# ==============================================================================
+
+# Cargar variables de colores del tema activo
+source "$HOME/.config/theme/active.sh" 2>/dev/null
+export FZF_DEFAULT_OPTS="
+    --layout=reverse
+    ${FZF_THEME:---color=\"bg+:#16171f,bg:#0c0d12,spinner:#ff3b5c,hl:#00e5ff\" --color=\"fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676\" --color=\"marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43\"}
+    --border=rounded --padding=1,2 --margin=2%
+    --prompt='  ❯ ' --pointer='' --marker='󰄬'
+"
+
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+WHITE='\033[1;37m'
+CYAN='\033[1;36m'
+NC='\033[0m'
+BOLD='\033[1m'
+
+show_banner() {
+    clear
+    echo -e "${RED}"
+    echo "   ██████╗ █████╗ ███╗   ███╗"
+    echo "  ██╔════╝██╔══██╗████╗ ████║"
+    echo "  ██║     ███████║██╔████╔██║"
+    echo "  ██║     ██╔══██║██║╚██╔╝██║"
+    echo "  ╚██████╗██║  ██║██║ ╚═╝ ██║"
+    echo "   ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝"
+    echo -e "${NC}"
+    echo -e "       ${BOLD}󰄀  WEBCAM PRIVACY & CONTROL  󰄀${NC}"
+    echo -e "${WHITE}  ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+}
+
+# Comprobar estado del driver de la webcam (módulo uvcvideo)
+_check_driver() {
+    lsmod | grep -q "^uvcvideo"
+}
+
+# Comprobar procesos usando la cámara
+_check_processes() {
+    local dev
+    for dev in /dev/video*; do
+        if [ -c "$dev" ] && lsof "$dev" &>/dev/null; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Obtener los detalles del proceso que usa la cámara
+_get_camera_users() {
+    local dev users=""
+    for dev in /dev/video*; do
+        if [ -c "$dev" ]; then
+            local out
+            out=$(lsof -t "$dev" 2>/dev/null)
+            if [ -n "$out" ]; then
+                while read -r pid; do
+                    if [ -n "$pid" ]; then
+                        local name
+                        name=$(ps -p "$pid" -o comm= 2>/dev/null)
+                        users+="Proceso: ${BOLD}$name${NC} (PID: $pid) en $dev\n"
+                    fi
+                done <<< "$out"
+            fi
+        fi
+    done
+    echo -e "$users"
+}
+
+# --- 1. Estado y Diagnóstico ---
+check_status() {
+    show_banner
+    echo -e "  ${BOLD}Estado del Módulo de la Cámara (Kernel):${NC}"
+    if _check_driver; then
+        echo -e "  󰄀  Driver:   ${GREEN}HABILITADO${NC} (Módulo 'uvcvideo' cargado)"
+    else
+        echo -e "  󰄀  Driver:   ${RED}DESHABILITADO${NC} (Cámara bloqueada físicamente por software)"
+    fi
+    
+    echo ""
+    echo -e "  ${BOLD}Uso de la Cámara en Tiempo Real:${NC}"
+    if _check_processes; then
+        echo -e "  ⚠  Estado:   ${RED}¡ACTIVO Y CAPTURANDO!${NC}"
+        echo ""
+        echo -e "  ${YELLOW}Aplicaciones accediendo a la cámara:${NC}"
+        _get_camera_users | sed 's/^/  /'
+    else
+        echo -e "  󰄬  Estado:   ${WHITE}Inactivo (Nadie está usando tu cámara)${NC}"
+    fi
+    echo -e "${WHITE}  ─────────────────────────────────────────────────────────${NC}"
+    echo ""
+    read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+}
+
+# --- 2. Habilitar/Deshabilitar Cámara (Privacidad) ---
+toggle_camera() {
+    show_banner
+    if _check_driver; then
+        echo -e "  ${YELLOW}⚠  Bloqueando el driver de la cámara web (Desinstalando uvcvideo)...${NC}"
+        echo -e "  Se requieren permisos de administrador."
+        echo ""
+        if sudo modprobe -r uvcvideo; then
+            notify-send -t 3000 -i camera-disabled "Cámara Web" "Cámara bloqueada de forma segura (Modo Privado)"
+            echo -e "  ${GREEN}✓ Cámara deshabilitada correctamente. El hardware está inaccesible.${NC}"
+        else
+            notify-send -u critical -i dialog-error "Cámara Web" "Error al bloquear la cámara web."
+            echo -e "  ${RED}❌ Error al descargar el módulo 'uvcvideo'.${NC}"
+        fi
+    else
+        echo -e "  ${CYAN}  Activando el driver de la cámara web (Cargando uvcvideo)...${NC}"
+        echo -e "  Se requieren permisos de administrador."
+        echo ""
+        if sudo modprobe uvcvideo; then
+            notify-send -t 3000 -i camera-web "Cámara Web" "Cámara habilitada y lista para su uso"
+            echo -e "  ${GREEN}✓ Cámara habilitada correctamente.${NC}"
+        else
+            notify-send -u critical -i dialog-error "Cámara Web" "Error al activar la cámara web."
+            echo -e "  ${RED}❌ Error al cargar el módulo 'uvcvideo'.${NC}"
+        fi
+    fi
+    echo ""
+    sleep 1.5
+}
+
+# --- 3. Vista Previa Rápida ---
+preview_camera() {
+    show_banner
+    if ! _check_driver; then
+        echo -e "  ${RED}[ERROR]${NC} La cámara está deshabilitada en el kernel."
+        echo -e "  Activa primero la cámara para poder probarla."
+        echo ""
+        read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+        return
+    fi
+
+    local dev=""
+    for d in /dev/video0 /dev/video1 /dev/video2; do
+        if [ -c "$d" ]; then
+            dev="$d"
+            break
+        fi
+    done
+
+    if [ -z "$dev" ]; then
+        echo -e "  ${RED}[ERROR]${NC} No se encontró ningún dispositivo de vídeo (/dev/video*)."
+        echo ""
+        read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+        return
+    fi
+
+    if ! command -v mpv &>/dev/null; then
+        echo -e "  ${RED}[ERROR]${NC} Se requiere 'mpv' para la vista previa de la cámara."
+        echo -e "  Por favor, instala: pacman -S mpv"
+        echo ""
+        read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+        return
+    fi
+
+    echo -e "  ${GREEN}Lanzando vista previa con MPV de la cámara: $dev...${NC}"
+    echo -e "  Presiona ${BOLD}'q'${NC} en la ventana de vídeo para cerrar la vista previa."
+    echo ""
+    
+    # Lanzar mpv con latencia ultrabaja
+    mpv av://v4l2:"$dev" --profile=low-latency --untimed --title="Spidey Cam Preview" &>/dev/null &
+    
+    sleep 1
+}
+
+# --- 4. Interrumpir Aplicaciones Sospechosas ---
+kill_camera_users() {
+    show_banner
+    if ! _check_processes; then
+        echo -e "  ${GREEN}✓ No hay ningún proceso sospechoso usando tu cámara web.${NC}"
+        echo ""
+        read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+        return
+    fi
+
+    echo -e "  ${RED}⚠ Peligro: Las siguientes aplicaciones están transmitiendo desde tu cámara:${NC}"
+    echo ""
+    _get_camera_users | sed 's/^/  /'
+    echo ""
+    read -r -p "  ¿Deseas forzar el cierre de TODOS estos procesos? [s/N]: " confirm
+    if [[ "$confirm" =~ ^[sS]$ ]]; then
+        local dev
+        for dev in /dev/video*; do
+            if [ -c "$dev" ]; then
+                local pids
+                pids=$(lsof -t "$dev" 2>/dev/null)
+                if [ -n "$pids" ]; then
+                    while read -r pid; do
+                        if [ -n "$pid" ]; then
+                            echo -e "  ${YELLOW}Matando proceso PID: $pid...${NC}"
+                            kill -9 "$pid" 2>/dev/null
+                        fi
+                    done <<< "$pids"
+                fi
+            fi
+        done
+        echo ""
+        echo -e "  ${GREEN}✓ Todos los procesos sospechosos han sido interrumpidos.${NC}"
+        notify-send -t 3000 -i security-high "Seguridad de Cámara" "Procesos sospechosos interrumpidos con éxito"
+    else
+        echo -e "  Operación cancelada."
+    fi
+    echo ""
+    sleep 1.5
+}
+
+main_loop() {
+    while true; do
+        show_banner
+        
+        # Estado rápido para el menú
+        local drv_status="[DESACTIVADA]"
+        _check_driver && drv_status="[ACTIVA]"
+        
+        local use_status="[Inactivo]"
+        _check_processes && use_status="[¡EN USO ACTIVO!]"
+
+        local menu="1.   Diagnóstico Completo de Cámara $use_status\n2. 󰄀  Alternar Habilitar/Bloquear Cámara $drv_status\n3.   Vista Previa de Cámara (MPV Test)\n4. 󰅖  Interrumpir Aplicaciones Espías (Kill Camera Users)\n5. 󰌑  Salir"
+        
+        local choice
+        choice=$(echo -e "$menu" | fzf \
+            --prompt=" 󰄀  Spidey Cam Control ❯ " \
+            --header="Protector de Privacidad y Gestor de Cámara Web:")
+            
+        case "$choice" in
+            *Diagnóstico*)
+                check_status
+                ;;
+            *Alternar*)
+                toggle_camera
+                ;;
+            *Vista*)
+                preview_camera
+                ;;
+            *Interrumpir*)
+                kill_camera_users
+                ;;
+            *Salir*|*)
+                clear
+                exit 0
+                ;;
+        esac
+    done
+}
+
+main_loop

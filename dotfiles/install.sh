@@ -382,7 +382,17 @@ if [ -d "/boot/loader/entries" ]; then
             ucode_initrd="initrd  /amd-ucode.img"
         fi
 
-        kernel_options="root=UUID=$ROOT_UUID rw rootflags=subvol=@ mitigations=off"
+        # Detectar de manera dinámica el sistema de archivos y el subvolumen BTRFS real
+        ROOT_FSTYPE=$(findmnt -n -o FSTYPE /)
+        ROOT_FLAGS=""
+        if [ "$ROOT_FSTYPE" = "btrfs" ]; then
+            FSROOT=$(findmnt -n -o FSROOT /)
+            if [ "$FSROOT" != "/" ] && [ -n "$FSROOT" ]; then
+                ROOT_FLAGS="rootflags=subvol=${FSROOT#/}"
+            fi
+        fi
+
+        kernel_options="root=UUID=$ROOT_UUID rw ${ROOT_FLAGS:+$ROOT_FLAGS }mitigations=off"
         if [ "$INSTALL_INTEL_OPT" = true ]; then
             kernel_options="$kernel_options intel_pstate=active"
         fi

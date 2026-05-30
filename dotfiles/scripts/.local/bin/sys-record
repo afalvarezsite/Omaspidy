@@ -29,7 +29,7 @@ _is_recording() {
 
 _start_recording() {
     if _is_recording; then
-        _notify normal "🔴 Ya en Grabación" "La grabación ya está en curso."
+        _notify normal "󰑋  Ya en Grabación" "La grabación ya está en curso."
         exit 0
     fi
 
@@ -37,7 +37,7 @@ _start_recording() {
     local filename
     filename="$OUTPUT_DIR/Recording_$(date +%Y-%m-%d_%H-%M-%S).${CONTAINER}"
 
-    _notify normal "🔴 Grabación Iniciada" "Grabando en: $(basename "$filename")\nFramerate: ${FRAMERATE}fps | Codec: ${CONTAINER}" "media-record"
+    _notify normal "󰑋  Grabación Iniciada" "Grabando en: $(basename "$filename")\nFramerate: ${FRAMERATE}fps | Codec: ${CONTAINER}" "media-record"
 
     # Lanzar grabador en background y guardar PID
     gpu-screen-recorder \
@@ -51,7 +51,7 @@ _start_recording() {
 
 _stop_recording() {
     if ! _is_recording; then
-        _notify normal "⬜ Sin Grabación Activa" "No hay ninguna grabación en curso." "media-playback-stop"
+        _notify normal "󰓛  Sin Grabación Activa" "No hay ninguna grabación en curso." "media-playback-stop"
         exit 0
     fi
 
@@ -73,9 +73,9 @@ _stop_recording() {
     if [ -n "$latest" ]; then
         local size
         size=$(du -sh "$latest" 2>/dev/null | cut -f1)
-        _notify normal "⬜ Grabación Guardada" "$(basename "$latest")\nTamaño: $size" "emblem-videos"
+        _notify normal "󰓛  Grabación Guardada" "$(basename "$latest")\nTamaño: $size" "emblem-videos"
     else
-        _notify normal "⬜ Grabación Detenida" "Archivo guardado en: $OUTPUT_DIR" "emblem-videos"
+        _notify normal "󰓛  Grabación Detenida" "Archivo guardado en: $OUTPUT_DIR" "emblem-videos"
     fi
 }
 
@@ -89,10 +89,10 @@ _toggle_recording() {
 
 _status() {
     if _is_recording; then
-        echo -e "\033[1;31m● GRABANDO\033[0m (PID: $(cat "$PIDFILE"))"
+        echo -e "\033[1;31m󰑋  GRABANDO\033[0m (PID: $(cat "$PIDFILE"))"
         echo -e "Directorio de salida: $OUTPUT_DIR"
     else
-        echo -e "\033[1;37m○ Sin grabación activa\033[0m"
+        echo -e "\033[1;37m󰓛  Sin grabación activa\033[0m"
     fi
 }
 

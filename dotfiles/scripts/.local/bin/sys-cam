@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# SYS-CAM: Gestor y Protector de Privacidad de Cámara Web / Webcam (100% FZF)
+# SYS-CAM: Gestor, Grabador y Protector de Cámara Web (100% FZF)
 # Estética: Ecosistema Spider-Man (Rojo Neón y Negro)
 # ==============================================================================
 
@@ -22,27 +22,39 @@ CYAN='\033[1;36m'
 NC='\033[0m'
 BOLD='\033[1m'
 
+CONFIG_FILE="$HOME/.config/sys-cam.conf"
+OUTPUT_DIR="$HOME/Vídeos"
+
+# Configuración por defecto
+CAM_RES="1280x720"
+CAM_FPS="30"
+RECORD_AUDIO="Sí"
+MIRROR_MODE="No"
+
+# Cargar configuración persistente si existe
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+fi
+
 show_banner() {
     clear
     echo -e "${RED}"
-    echo "   ██████╗ █████╗ ███╗   ███╗"
-    echo "  ██╔════╝██╔══██╗████╗ ████║"
-    echo "  ██║     ███████║██╔████╔██║"
-    echo "  ██║     ██╔══██║██║╚██╔╝██║"
-    echo "  ╚██████╗██║  ██║██║ ╚═╝ ██║"
-    echo "   ╚═════╝╚═╝  ╚═╝╚═╝     ╚═╝"
+    echo "  ██████╗██╗  ██╗██╗  ██╗██████╗  █████╗ ███╗   ███╗"
+    echo "  ██╔════╝██║  ██║╚██╗██╔╝██╔══██╗██╔══██╗████╗ ████║"
+    echo "  ██║     ███████║ ╚███╔╝ ██████╔╝███████║██╔████╔██║"
+    echo "  ██║     ██╔══██║ ╚██╔╝  ██╔═══╝ ██╔══██║██║╚██╔╝██║"
+    echo "  ╚██████╗██║  ██║  ██║   ██║     ██║  ██║██║ ╚═╝ ██║"
+    echo "   ╚═════╝╚═╝  ╚═╝  ╚═╝   ╚═╝     ╚═╝  ╚═╝╚═╝     ╚═╝"
     echo -e "${NC}"
-    echo -e "       ${BOLD}󰄀  WEBCAM PRIVACY & CONTROL  󰄀${NC}"
+    echo -e "       ${BOLD}󰄀  WEBCAM PRIVACY, RECORD & CONFIG  󰄀${NC}"
     echo -e "${WHITE}  ─────────────────────────────────────────────────────────${NC}"
     echo ""
 }
 
-# Comprobar estado del driver de la webcam (módulo uvcvideo)
 _check_driver() {
     lsmod | grep -q "^uvcvideo"
 }
 
-# Comprobar procesos usando la cámara
 _check_processes() {
     local dev
     for dev in /dev/video*; do
@@ -53,7 +65,6 @@ _check_processes() {
     return 1
 }
 
-# Obtener los detalles del proceso que usa la cámara
 _get_camera_users() {
     local dev users=""
     for dev in /dev/video*; do
@@ -74,7 +85,7 @@ _get_camera_users() {
     echo -e "$users"
 }
 
-# --- 1. Estado y Diagnóstico ---
+# --- 1. Diagnóstico ---
 check_status() {
     show_banner
     echo -e "  ${BOLD}Estado del Módulo de la Cámara (Kernel):${NC}"
@@ -87,7 +98,7 @@ check_status() {
     echo ""
     echo -e "  ${BOLD}Uso de la Cámara en Tiempo Real:${NC}"
     if _check_processes; then
-        echo -e "  ⚠  Estado:   ${RED}¡ACTIVO Y CAPTURANDO!${NC}"
+        echo -e "    Estado:   ${RED}¡ACTIVO Y CAPTURANDO!${NC}"
         echo ""
         echo -e "  ${YELLOW}Aplicaciones accediendo a la cámara:${NC}"
         _get_camera_users | sed 's/^/  /'
@@ -99,19 +110,19 @@ check_status() {
     read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
 }
 
-# --- 2. Habilitar/Deshabilitar Cámara (Privacidad) ---
+# --- 2. Bloquear/Activar ---
 toggle_camera() {
     show_banner
     if _check_driver; then
-        echo -e "  ${YELLOW}⚠  Bloqueando el driver de la cámara web (Desinstalando uvcvideo)...${NC}"
+        echo -e "  ${YELLOW}  Bloqueando el driver de la cámara web (Desinstalando uvcvideo)...${NC}"
         echo -e "  Se requieren permisos de administrador."
         echo ""
         if sudo modprobe -r uvcvideo; then
             notify-send -t 3000 -i camera-disabled "Cámara Web" "Cámara bloqueada de forma segura (Modo Privado)"
-            echo -e "  ${GREEN}✓ Cámara deshabilitada correctamente. El hardware está inaccesible.${NC}"
+            echo -e "  ${GREEN}󰄬  Cámara deshabilitada correctamente. El hardware está inaccesible.${NC}"
         else
             notify-send -u critical -i dialog-error "Cámara Web" "Error al bloquear la cámara web."
-            echo -e "  ${RED}❌ Error al descargar el módulo 'uvcvideo'.${NC}"
+            echo -e "  ${RED}󰅖  Error al descargar el módulo 'uvcvideo'.${NC}"
         fi
     else
         echo -e "  ${CYAN}  Activando el driver de la cámara web (Cargando uvcvideo)...${NC}"
@@ -119,17 +130,17 @@ toggle_camera() {
         echo ""
         if sudo modprobe uvcvideo; then
             notify-send -t 3000 -i camera-web "Cámara Web" "Cámara habilitada y lista para su uso"
-            echo -e "  ${GREEN}✓ Cámara habilitada correctamente.${NC}"
+            echo -e "  ${GREEN}󰄬  Cámara habilitada correctamente.${NC}"
         else
             notify-send -u critical -i dialog-error "Cámara Web" "Error al activar la cámara web."
-            echo -e "  ${RED}❌ Error al cargar el módulo 'uvcvideo'.${NC}"
+            echo -e "  ${RED}󰅖  Error al cargar el módulo 'uvcvideo'.${NC}"
         fi
     fi
     echo ""
     sleep 1.5
 }
 
-# --- 3. Vista Previa Rápida ---
+# --- 3. Vista Previa ---
 preview_camera() {
     show_banner
     if ! _check_driver; then
@@ -141,7 +152,7 @@ preview_camera() {
     fi
 
     local dev=""
-    for d in /dev/video0 /dev/video1 /dev/video2; do
+    for d in /dev/video*; do
         if [ -c "$d" ]; then
             dev="$d"
             break
@@ -155,35 +166,219 @@ preview_camera() {
         return
     fi
 
-    if ! command -v mpv &>/dev/null; then
-        echo -e "  ${RED}[ERROR]${NC} Se requiere 'mpv' para la vista previa de la cámara."
-        echo -e "  Por favor, instala: pacman -S mpv"
+    if ! command -v ffplay &>/dev/null; then
+        echo -e "  ${RED}[ERROR]${NC} Se requiere 'ffplay' para la vista previa de la cámara."
+        echo -e "  Por favor, instala: pacman -S ffmpeg (incluye ffplay)"
         echo ""
         read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
         return
     fi
 
-    echo -e "  ${GREEN}Lanzando vista previa con MPV de la cámara: $dev...${NC}"
-    echo -e "  Presiona ${BOLD}'q'${NC} en la ventana de vídeo para cerrar la vista previa."
+    echo -e "  ${GREEN}Lanzando vista previa interactiva de la cámara: $dev...${NC}"
+    echo -e "  Configuración activa: ${CYAN}${CAM_RES} @ ${CAM_FPS} FPS${NC}"
+    echo -e "  Cierra la ventana de vídeo para finalizar la vista previa."
     echo ""
     
-    # Lanzar mpv con latencia ultrabaja
-    mpv av://v4l2:"$dev" --profile=low-latency --untimed --title="Spidey Cam Preview" &>/dev/null &
+    # Lanzar ffplay con los parámetros configurados de forma no bloqueante con baja latencia y filtro espejo si está activo
+    local ffplay_args=(-f v4l2 -input_format mjpeg -video_size "$CAM_RES" -framerate "$CAM_FPS" -fflags nobuffer -flags low_delay -framedrop)
+    if [ "$MIRROR_MODE" = "Sí" ]; then
+        ffplay_args+=(-vf hflip)
+    fi
+    ffplay "${ffplay_args[@]}" "$dev" -window_title "Spidey Cam Preview" &>/dev/null &
     
-    sleep 1
+    sleep 1.5
 }
 
-# --- 4. Interrumpir Aplicaciones Sospechosas ---
+# --- 4. Grabar Vídeo ---
+record_camera() {
+    show_banner
+    if ! _check_driver; then
+        echo -e "  ${RED}[ERROR]${NC} La cámara está deshabilitada en el kernel."
+        echo ""
+        read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+        return
+    fi
+
+    local dev=""
+    for d in /dev/video*; do
+        if [ -c "$d" ]; then
+            dev="$d"
+            break
+        fi
+    done
+
+    if [ -z "$dev" ]; then
+        echo -e "  ${RED}[ERROR]${NC} No se encontró ningún dispositivo de vídeo (/dev/video*)."
+        echo ""
+        read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+        return
+    fi
+
+    if ! command -v ffmpeg &>/dev/null || ! command -v ffplay &>/dev/null; then
+        echo -e "  ${RED}[ERROR]${NC} Se requieren 'ffmpeg' y 'ffplay' para realizar grabaciones con preview."
+        echo -e "  Instala: pacman -S ffmpeg"
+        echo ""
+        read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+        return
+    fi
+
+    mkdir -p "$OUTPUT_DIR"
+    local filename="$OUTPUT_DIR/Webcam_$(date +%Y-%m-%d_%H-%M-%S).mp4"
+
+    echo -e "  ${RED}󰑋  PREPARANDO GRABACIÓN DE CÁMARA WEB  󰑋${NC}"
+    echo -e "  ─────────────────────────────────────────────────────────"
+    echo -e "  Dispositivo: ${CYAN}$dev${NC}"
+    echo -e "  Resolución:  ${CYAN}$CAM_RES${NC}"
+    echo -e "  FPS:         ${CYAN}$CAM_FPS${NC}"
+    echo -e "  Audio:       ${CYAN}$RECORD_AUDIO${NC} (Micrófono por defecto)"
+    echo -e "  Destino:     ${WHITE}$filename${NC}"
+    echo -e "  ─────────────────────────────────────────────────────────"
+    echo ""
+    read -r -p "  ¿Deseas iniciar la grabación ahora? [S/n]: " confirm
+    if [[ "$confirm" =~ ^[nN]$ ]]; then
+        return
+    fi
+
+    show_banner
+    echo -e "  ${RED}󰑋  GRABANDO... Cierra la ventana de vista previa para finalizar y guardar la grabación.${NC}"
+    echo ""
+
+    notify-send -t 2000 -i camera-web "Grabadora Webcam" "Iniciando grabación y vista previa..."
+
+    # Crear tubería nombrada (FIFO) temporal para la vista previa
+    local fifo="/tmp/syscam_preview_$(date +%s).fifo"
+    rm -f "$fifo"
+    mkfifo "$fifo"
+
+    # Construir el filter_complex según el modo espejo
+    local filter_complex="[0:v]split=2[out1][out2]"
+    if [ "$MIRROR_MODE" = "Sí" ]; then
+        filter_complex="[0:v]hflip,split=2[out1][out2]"
+    fi
+
+    # Grabar con audio y/o sólo vídeo dividiendo los frames a la FIFO
+    if [ "$RECORD_AUDIO" = "Sí" ]; then
+        (trap '' PIPE; exec ffmpeg -y \
+            -f v4l2 -input_format mjpeg -video_size "$CAM_RES" -framerate "$CAM_FPS" -i "$dev" \
+            -f pulse -i default \
+            -filter_complex "$filter_complex" \
+            -map "[out1]" -map 1:a -c:v libx264 -preset ultrafast -crf 23 -pix_fmt yuv420p -c:a aac -b:a 128k "$filename" \
+            -map "[out2]" -c:v mjpeg -f mjpeg "$fifo" &>/dev/null) &
+    else
+        (trap '' PIPE; exec ffmpeg -y \
+            -f v4l2 -input_format mjpeg -video_size "$CAM_RES" -framerate "$CAM_FPS" -i "$dev" \
+            -filter_complex "$filter_complex" \
+            -map "[out1]" -c:v libx264 -preset ultrafast -crf 23 -pix_fmt yuv420p "$filename" \
+            -map "[out2]" -c:v mjpeg -f mjpeg "$fifo" &>/dev/null) &
+    fi
+    local ffmpeg_pid=$!
+
+    # Lanzar ffplay leyendo de la FIFO (se ejecuta en primer plano)
+    ffplay -fflags nobuffer -flags low_delay -framedrop -window_title "Grabando... Cierra esta ventana para guardar" "$fifo" &>/dev/null
+
+    # En cuanto ffplay se cierra:
+    # 1. Iniciamos un cat en background para vaciar la FIFO y evitar que ffmpeg se bloquee o reciba SIGPIPE
+    cat "$fifo" >/dev/null &
+    local cat_pid=$!
+
+    # 2. Enviamos SIGINT (Ctrl+C) a ffmpeg para que finalice correctamente el archivo de vídeo
+    kill -INT "$ffmpeg_pid" 2>/dev/null
+    wait "$ffmpeg_pid" 2>/dev/null || true
+
+    # 3. Limpiamos el proceso cat y la FIFO
+    kill "$cat_pid" 2>/dev/null
+    rm -f "$fifo"
+
+    # Confirmación de finalización
+    if [ -f "$filename" ]; then
+        local size
+        size=$(du -sh "$filename" 2>/dev/null | cut -f1)
+        show_banner
+        echo -e "  ${GREEN}󰄬  ¡Grabación completada con éxito!${NC}"
+        echo -e "  Archivo guardado: ${WHITE}$(basename "$filename")${NC} ($size)"
+        echo ""
+        notify-send -t 3500 -i emblem-videos "Grabación Guardada" "$(basename "$filename")\nTamaño: $size"
+    else
+        echo -e "  ${RED}󰅖  Hubo un problema al generar la grabación.${NC}"
+        echo ""
+    fi
+
+    read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
+}
+
+# --- 5. Configurar Calidad ---
+configure_settings() {
+    while true; do
+        show_banner
+        echo -e "  ${BOLD}Ajustes de Calidad y Grabación:${NC}"
+        echo -e "  Configure los parámetros de captura de tu cámara web:"
+        echo ""
+        
+        local menu_config="1. 󰗚  Resolución: $CAM_RES\n2. 󰓅  Framerate: $CAM_FPS FPS\n3. 󰕾  Grabar Audio: $RECORD_AUDIO\n4. 󰅏  Modo Espejo: $MIRROR_MODE\n5. 󰌑  Guardar y Volver Atrás"
+        local sel
+        sel=$(echo -e "$menu_config" | fzf \
+            --prompt=" 󰒓  Configuración ❯ " \
+            --header="Selecciona un ajuste para modificarlo:")
+
+        case "$sel" in
+            *Resolución*)
+                local res_opts="1920x1080 (Full HD)\n1280x720 (HD Ready)\n800x600 (SVGA)\n640x480 (VGA)\n320x240 (QVGA)"
+                local new_res
+                new_res=$(echo -e "$res_opts" | fzf --prompt=" Resoluciones Soportadas ❯ " | awk '{print $1}')
+                if [ -n "$new_res" ]; then
+                    CAM_RES="$new_res"
+                fi
+                ;;
+            *Framerate*)
+                local fps_opts="60 FPS\n30 FPS\n24 FPS\n15 FPS"
+                local new_fps
+                new_fps=$(echo -e "$fps_opts" | fzf --prompt=" Framerates Soportados ❯ " | awk '{print $1}')
+                if [ -n "$new_fps" ]; then
+                    CAM_FPS="$new_fps"
+                fi
+                ;;
+            *Audio*)
+                if [ "$RECORD_AUDIO" = "Sí" ]; then
+                    RECORD_AUDIO="No"
+                else
+                    RECORD_AUDIO="Sí"
+                fi
+                ;;
+            *Espejo*)
+                if [ "$MIRROR_MODE" = "Sí" ]; then
+                    MIRROR_MODE="No"
+                else
+                    MIRROR_MODE="Sí"
+                fi
+                ;;
+            *Guardar*|*)
+                # Guardar en archivo de configuración
+                mkdir -p "$(dirname "$CONFIG_FILE")"
+                cat > "$CONFIG_FILE" << EOF
+# Configuración generada automáticamente por sys-cam
+CAM_RES="$CAM_RES"
+CAM_FPS="$CAM_FPS"
+RECORD_AUDIO="$RECORD_AUDIO"
+MIRROR_MODE="$MIRROR_MODE"
+EOF
+                notify-send -t 2000 -i preferences-system "Configuración" "Ajustes de cámara guardados con éxito"
+                break
+                ;;
+        esac
+    done
+}
+
+# --- 6. Interrumpir Espías ---
 kill_camera_users() {
     show_banner
     if ! _check_processes; then
-        echo -e "  ${GREEN}✓ No hay ningún proceso sospechoso usando tu cámara web.${NC}"
+        echo -e "  ${GREEN}󰄬  No hay ningún proceso sospechoso usando tu cámara web.${NC}"
         echo ""
         read -n 1 -s -r -p "  Presiona cualquier tecla para continuar..."
         return
     fi
 
-    echo -e "  ${RED}⚠ Peligro: Las siguientes aplicaciones están transmitiendo desde tu cámara:${NC}"
+    echo -e "  ${RED}  Peligro: Las siguientes aplicaciones están transmitiendo desde tu cámara:${NC}"
     echo ""
     _get_camera_users | sed 's/^/  /'
     echo ""
@@ -205,7 +400,7 @@ kill_camera_users() {
             fi
         done
         echo ""
-        echo -e "  ${GREEN}✓ Todos los procesos sospechosos han sido interrumpidos.${NC}"
+        echo -e "  ${GREEN}󰄬  Todos los procesos sospechosos han sido interrumpidos.${NC}"
         notify-send -t 3000 -i security-high "Seguridad de Cámara" "Procesos sospechosos interrumpidos con éxito"
     else
         echo -e "  Operación cancelada."
@@ -225,12 +420,14 @@ main_loop() {
         local use_status="[Inactivo]"
         _check_processes && use_status="[¡EN USO ACTIVO!]"
 
-        local menu="1.   Diagnóstico Completo de Cámara $use_status\n2. 󰄀  Alternar Habilitar/Bloquear Cámara $drv_status\n3.   Vista Previa de Cámara (MPV Test)\n4. 󰅖  Interrumpir Aplicaciones Espías (Kill Camera Users)\n5. 󰌑  Salir"
+        local mirror_status="Normal"
+        [ "$MIRROR_MODE" = "Sí" ] && mirror_status="Espejo"
+        local menu="1.   Diagnóstico Completo de Cámara $use_status\n2. 󰄀  Alternar Habilitar/Bloquear Cámara $drv_status\n3.   Vista Previa Interactiva (MPV Test)\n4. 󰑋  Grabar Vídeo desde Cámara (ffmpeg)\n5. 󰒓  Ajustar Calidad y Configuración ($CAM_RES @ $CAM_FPS FPS, $mirror_status)\n6. 󰅖  Interrumpir Aplicaciones Espías (Kill Camera Users)\n7. 󰌑  Salir"
         
         local choice
         choice=$(echo -e "$menu" | fzf \
             --prompt=" 󰄀  Spidey Cam Control ❯ " \
-            --header="Protector de Privacidad y Gestor de Cámara Web:")
+            --header="Protector de Privacidad, Grabación y Ajustes:")
             
         case "$choice" in
             *Diagnóstico*)
@@ -241,6 +438,12 @@ main_loop() {
                 ;;
             *Vista*)
                 preview_camera
+                ;;
+            *Grabar*)
+                record_camera
+                ;;
+            *Ajustar*)
+                configure_settings
                 ;;
             *Interrumpir*)
                 kill_camera_users

@@ -36,9 +36,9 @@
         },
         "format": "{icon}",
         "format-icons": {
-            "default": "󰯰",
-            "active": "󰯰",
-            "urgent": "󰯰"
+            "default": "\uef10",
+            "active": "\uef10",
+            "urgent": "\uef10"
         }
     },
 

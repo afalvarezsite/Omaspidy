@@ -30,6 +30,7 @@ CAM_RES="1280x720"
 CAM_FPS="30"
 RECORD_AUDIO="Sí"
 MIRROR_MODE="No"
+LOW_LIGHT_COMP="No"
 
 # Cargar configuración persistente si existe
 if [ -f "$CONFIG_FILE" ]; then
@@ -178,6 +179,15 @@ preview_camera() {
     echo -e "  Configuración activa: ${CYAN}${CAM_RES} @ ${CAM_FPS} FPS${NC}"
     echo -e "  Cierra la ventana de vídeo para finalizar la vista previa."
     echo ""
+
+    # Aplicar configuración de compensación de poca luz (evitar desenfoque de movimiento)
+    if command -v v4l2-ctl &>/dev/null; then
+        if [ "$LOW_LIGHT_COMP" = "Sí" ]; then
+            v4l2-ctl -d "$dev" -c exposure_dynamic_framerate=1 &>/dev/null || true
+        else
+            v4l2-ctl -d "$dev" -c exposure_dynamic_framerate=0 &>/dev/null || true
+        fi
+    fi
     
     # Lanzar ffplay con los parámetros configurados de forma no bloqueante con baja latencia y filtro espejo si está activo
     local ffplay_args=(-f v4l2 -input_format mjpeg -video_size "$CAM_RES" -framerate "$CAM_FPS" -fflags nobuffer -flags low_delay -framedrop)
@@ -244,6 +254,15 @@ record_camera() {
     echo ""
 
     notify-send -t 2000 -i camera-web "Grabadora Webcam" "Iniciando grabación y vista previa..."
+
+    # Aplicar configuración de compensación de poca luz (evitar desenfoque de movimiento)
+    if command -v v4l2-ctl &>/dev/null; then
+        if [ "$LOW_LIGHT_COMP" = "Sí" ]; then
+            v4l2-ctl -d "$dev" -c exposure_dynamic_framerate=1 &>/dev/null || true
+        else
+            v4l2-ctl -d "$dev" -c exposure_dynamic_framerate=0 &>/dev/null || true
+        fi
+    fi
 
     # Crear tubería nombrada (FIFO) temporal para la vista previa
     local fifo="/tmp/syscam_preview_$(date +%s).fifo"
@@ -314,7 +333,7 @@ configure_settings() {
         echo -e "  Configure los parámetros de captura de tu cámara web:"
         echo ""
         
-        local menu_config="1. 󰗚  Resolución: $CAM_RES\n2. 󰓅  Framerate: $CAM_FPS FPS\n3. 󰕾  Grabar Audio: $RECORD_AUDIO\n4. 󰅏  Modo Espejo: $MIRROR_MODE\n5. 󰌑  Guardar y Volver Atrás"
+        local menu_config="1. 󰗚  Resolución: $CAM_RES\n2. 󰓅  Framerate: $CAM_FPS FPS\n3. 󰕾  Grabar Audio: $RECORD_AUDIO\n4. 󰅏  Modo Espejo: $MIRROR_MODE\n5. 󰖨  Compensación Poca Luz: $LOW_LIGHT_COMP\n6. 󰌑  Guardar y Volver Atrás"
         local sel
         sel=$(echo -e "$menu_config" | fzf \
             --prompt=" 󰒓  Configuración ❯ " \
@@ -351,6 +370,13 @@ configure_settings() {
                     MIRROR_MODE="Sí"
                 fi
                 ;;
+            *Luz*)
+                if [ "$LOW_LIGHT_COMP" = "Sí" ]; then
+                    LOW_LIGHT_COMP="No"
+                else
+                    LOW_LIGHT_COMP="Sí"
+                fi
+                ;;
             *Guardar*|*)
                 # Guardar en archivo de configuración
                 mkdir -p "$(dirname "$CONFIG_FILE")"
@@ -360,6 +386,7 @@ CAM_RES="$CAM_RES"
 CAM_FPS="$CAM_FPS"
 RECORD_AUDIO="$RECORD_AUDIO"
 MIRROR_MODE="$MIRROR_MODE"
+LOW_LIGHT_COMP="$LOW_LIGHT_COMP"
 EOF
                 notify-send -t 2000 -i preferences-system "Configuración" "Ajustes de cámara guardados con éxito"
                 break
@@ -422,7 +449,9 @@ main_loop() {
 
         local mirror_status="Normal"
         [ "$MIRROR_MODE" = "Sí" ] && mirror_status="Espejo"
-        local menu="1.   Diagnóstico Completo de Cámara $use_status\n2. 󰄀  Alternar Habilitar/Bloquear Cámara $drv_status\n3.   Vista Previa Interactiva (MPV Test)\n4. 󰑋  Grabar Vídeo desde Cámara (ffmpeg)\n5. 󰒓  Ajustar Calidad y Configuración ($CAM_RES @ $CAM_FPS FPS, $mirror_status)\n6. 󰅖  Interrumpir Aplicaciones Espías (Kill Camera Users)\n7. 󰌑  Salir"
+        local low_light_status="Fluido"
+        [ "$LOW_LIGHT_COMP" = "Sí" ] && low_light_status="Poca Luz"
+        local menu="1.   Diagnóstico Completo de Cámara $use_status\n2. 󰄀  Alternar Habilitar/Bloquear Cámara $drv_status\n3.   Vista Previa Interactiva (MPV Test)\n4. 󰑋  Grabar Vídeo desde Cámara (ffmpeg)\n5. 󰒓  Ajustar Calidad y Configuración ($CAM_RES @ $CAM_FPS FPS, $mirror_status, $low_light_status)\n6. 󰅖  Interrumpir Aplicaciones Espías (Kill Camera Users)\n7. 󰌑  Salir"
         
         local choice
         choice=$(echo -e "$menu" | fzf \

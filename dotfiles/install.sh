@@ -216,7 +216,7 @@ for pkg in hyprlang-git hyprutils-git; do
     fi
 done
 
-paru -S --needed --noconfirm "${CORE_PKGS[@]}"
+paru -S --needed --noconfirm --overwrite "*" "${CORE_PKGS[@]}"
 
 # --- 3. Paquetes AUR (-git y específicos) ---
 show_banner "3" "Instalando herramientas y utilidades adicionales desde AUR..."
@@ -236,7 +236,7 @@ AUR_PKGS=(
     gpu-screen-recorder-git
 )
 
-paru -S --needed --noconfirm "${AUR_PKGS[@]}"
+paru -S --needed --noconfirm --overwrite "*" "${AUR_PKGS[@]}"
 
 # --- 4. Configuración del Greetd (Login TUI) ---
 show_banner "4" "Configurando gestor de login visual (greetd + tuigreet)..."

@@ -43,7 +43,7 @@ show_banner() {
   echo " ╚██████╔╝██║ ╚═╝ ██║██║  ██║███████║██║     ██║██████╔╝   ██║   "
   echo "  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═════╝    ╚═╝   "
   echo -e "${NC}"
-  echo -e "         ${BOLD}  OH MY SPIDY - Ecosistema Arch Linux  ${NC}"
+  echo -e "         ${BOLD}  OH MY SPIDY - Ecosistema Arch Linux  ${NC}"
   echo -e "     ${WHITE}─────────────────────────────────────────────────────────${NC}"
   
   if [ -n "$paso" ] && [ -n "$desc" ]; then
@@ -131,7 +131,10 @@ msg "Pidiendo permisos de administrador para la instalación inicial..."
 
 # Configuración de los repositorios optimizados de CachyOS e instalación del Kernel
 msg "Configurando repositorios optimizados de CachyOS (soporte precompilado x86-64-v3)..."
-curl -sSL https://ross.cachyos.org/cachyos-repo.sh | sudo bash || { msg_err "Error al configurar repositorios de CachyOS"; exit 1; }
+curl https://mirror.cachyos.org/cachyos-repo.tar.xz -o cachyos-repo.tar.xz || { msg_err "Error al descargar repositorios de CachyOS"; exit 1; }
+tar xvf cachyos-repo.tar.xz && cd cachyos-repo
+sudo ./cachyos-repo.sh
+cd .. && rm -rf cachyos-repo cachyos-repo.tar.xz
 
 msg "Actualizando librerías del sistema al nivel de instrucciones óptimo de tu CPU..."
 sudo pacman -Syu --noconfirm || { msg_err "Error actualizando el sistema"; exit 1; }
@@ -283,7 +286,7 @@ msg "Desplegando configuraciones con Stow..."
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%s)"
 msg_backup=false
 
-for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim" "$HOME/.config/antigravity" "$HOME/.config/fastfetch" "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/theme"; do
+for item in "$HOME/.zshrc" "$HOME/.bashrc" "$HOME/.config/hypr" "$HOME/.config/waybar" "$HOME/.config/alacritty" "$HOME/.config/nvim" "$HOME/.config/antigravity" "$HOME/.config/fastfetch" "$HOME/.config/git"; do
     if [ -e "$item" ] || [ -L "$item" ]; then
         if [ "$msg_backup" = false ]; then
             msg "Se han detectado configuraciones previas en tu sistema."
@@ -327,7 +330,7 @@ if ! grep -q "^$USER:" /etc/subuid 2>/dev/null || ! grep -q "^$USER:" /etc/subgi
     msg "Configurando rangos de subuids/subgids para contenedores rootless..."
     # Asignar un rango estándar de UIDs/GIDs si no están ya configurados (estándar: 100000-165535)
     sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 "$USER" || {
-        msg_warn "No se pudieron configurar automáticamente los subuids/subgids. Si tienes problemas con podman, ejecuta manualmente: sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $USER"
+        msg_warn "No se pudieron configurar automáticamente los subuids/subgids. Si tienes problemas con podman, ejecuta manualmente: sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535"
     }
     msg_ok "Mapeos de subuid y subgid configurados para el usuario $USER."
 else
@@ -389,7 +392,7 @@ chsh -s "$(which zsh)"
 
 # Optimizar almacenamiento de cursores (mantener solo Bibata-Modern-Ice)
 msg "Optimizando almacenamiento de cursores (manteniendo solo Bibata-Modern-Ice)..."
-for theme in Bibata-Modern-Amber Bibata-Modern-Amber-Right Bibata-Modern-Classic Bibata-Modern-Classic-Right Bibata-Modern-Ice-Right Bibata-Original-Amber Bibata-Original-Amber-Right Bibata-Original-Classic Bibata-Original-Classic-Right Bibata-Original-Ice Bibata-Original-Ice-Right; do
+for theme in Bibata-Modern-Amber Bibata-Modern-Amber-Right Bibata-Modern-Classic Bibata-Modern-Classic-Right Bibata-Modern-Ice-Right Bibata-Original-Amber Bibata-Original-Amber-Right Bibata-Original-Amber-Right Bibata-Original-Classic Bibata-Original-Classic-Right Bibata-Original-Ice Bibata-Original-Ice-Right; do
     if [ -d "/usr/share/icons/$theme" ]; then
         sudo rm -rf "/usr/share/icons/$theme"
     fi
@@ -442,7 +445,7 @@ xdg-mime default zen-browser.desktop x-scheme-handler/https 2>/dev/null || true
 msg_ok "Optimización y limpieza profunda del sistema finalizada."
 
 msg_ok "=========================================================="
-msg_ok "  INSTALACIÓN FINALIZADA"
+msg_ok "  INSTALACIÓN FINALIZADA"
 msg_ok "=========================================================="
 msg_ok "Tu ecosistema Arch/Hyprland 'Spider-Man' está listo."
 msg_ok "La próxima vez que reinicies, verás el login de tuigreet."

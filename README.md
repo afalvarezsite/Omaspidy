@@ -170,7 +170,7 @@ initrd  /intel-ucode.img (opcional si instalas intel-ucode ahora, el script lo m
 initrd  /initramfs-linux.img
 options root=UUID=AQUÍ_EL_UUID_DE_LA_PARTICION_BTRFS rw rootflags=subvol=@ mitigations=off intel_pstate=active
 ```
-*(Puedes obtener el UUID de tu partición BTRFS ejecutando `:r !blkid -s UUID -o value /dev/nvme0n1p2` desde dentro de nano/vi, o saliendo momentáneamente)*.
+*(Puedes obtener el UUID de tu partición BTRFS ejecutando `blkid -s UUID -o value /dev/nvme0n1p2` desde dentro de nano/vi, o saliendo momentáneamente)*.
 
 ### 8. Finalización y Reinicio
 Sal del chroot, desmonta todas las particiones de forma segura y reinicia:

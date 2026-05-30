@@ -1,7 +1,9 @@
 # alacritty.toml
 # Configuración del emulador de terminal Alacritty
 
+[general]
 import = ["./active.toml"]
+
 
 [env]
 TERM = "xterm-256color"

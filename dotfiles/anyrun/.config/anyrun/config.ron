@@ -1,25 +1,54 @@
-// config.ron
-// Configuración de Anyrun (Rust-based launcher)
+/* ============================================================================
+ * ANYRUN CONFIGURATION (Rusty Object Notation)
+ * Premium Spiderman Theme Settings
+ * ============================================================================ */
 
 Config(
-  // Posición: top, center, bottom
-  position: Top,
+  // Posición horizontal (centrada)
+  x: Fraction(0.5),
 
-  // Fracción de la pantalla que Anyrun ocupa horizontalmente
+  // Desplazamiento desde la parte superior (20% de la altura de la pantalla)
+  y: Fraction(0.2),
+
+  // Ancho del lanzador (30% del ancho de la pantalla)
   width: Fraction(0.3),
 
-  // Desplazamiento desde la parte superior (si position es Top)
-  y_fraction: 0.2,
+  // Altura mínima inicial
+  height: Absolute(1),
 
-  // Ocultar al perder el foco
-  hide_on_focus_lost: true,
+  // Mostrar iconos de aplicaciones
+  hide_icons: false,
 
-  // Cierra anyrun con un clic fuera
+  // Respetar zonas exclusivas de Hyprland
+  ignore_exclusive_zones: false,
+
+  // Capa en la que se dibuja Anyrun (Overlay dibuja encima de todo)
+  layer: Overlay,
+
+  // Ocultar el panel de información del plugin lateral
+  hide_plugin_info: true,
+
+  // Cerrar Anyrun al hacer clic fuera
   close_on_click: true,
 
-  // Plugins a cargar
-  // Según TOOLING_GUIDE.md: estrictamente libapplications.so
+  // Mostrar resultados inmediatamente
+  show_results_immediately: false,
+
+  // Límite de entradas
+  max_entries: None,
+
+  // Lista de plugins activos (ruta absoluta a libapplications.so)
   plugins: [
     "libapplications.so",
+  ],
+
+  // Atajos de teclado para la interfaz de Anyrun
+  keybinds: [
+    Keybind(key: "Return", action: Select),
+    Keybind(key: "Up", action: Up),
+    Keybind(key: "Down", action: Down),
+    Keybind(key: "ISO_Left_Tab", action: Up, shift: true),
+    Keybind(key: "Tab", action: Down),
+    Keybind(key: "Escape", action: Close),
   ],
 )

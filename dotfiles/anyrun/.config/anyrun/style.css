@@ -1,9 +1,8 @@
-/* 
- * Anyrun Spidey Theme (Dynamic Skins)
- * Glassmorphic, modern, extremely snappy look
- */
+/* ============================================================================
+ * ANYRUN SPIDER-MAN GLASSMORPHIC THEME
+ * Correct class-based selectors for GTK4
+ * ============================================================================ */
 
-/* Color definitions inlined directly to prevent relative import failures in GTK parser */
 @define-color bg-dark   #0c0d12;
 @define-color bg-light  rgba(22, 23, 31, 0.85);
 @define-color fg        #f8f9fa;
@@ -13,67 +12,88 @@
 @define-color secondary #00e5ff;
 
 * {
-  transition: 200ms ease-out;
-  font-family: "Hack Nerd Font";
-  font-size: 1.3rem;
+  transition: 150ms ease-out;
+  font-family: "Hack Nerd Font", "Outfit", "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-#window,
-window {
-  /* Fondo completamente transparente para el contenedor global */
+/* Transparencia absoluta en la ventana, decoraciones y fondo base del sistema */
+window,
+window > decoration,
+.background,
+scrolledwindow,
+viewport {
+  background-color: transparent;
   background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
-#match,
-#entry,
-#plugin,
-#main {
-  /* Fondo transparente heredado */
-  background: transparent;
+/* Contenedor principal de Anyrun (sin bordes y con esquinas rectas) */
+box.main {
+  background-color: rgba(12, 13, 18, 0.93);
+  background: rgba(12, 13, 18, 0.93);
+  border: none;
+  border-radius: 0px;
+  padding: 14px;
+  box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.5), 0px 0px 15px rgba(255, 59, 92, 0.3);
 }
 
-box#main {
-  /* Contenedor principal de Anyrun */
-  background: alpha(@bg-dark, 0.92);
-  border: 2px solid @red;
-  border-radius: 12px;
-  padding: 12px;
-  box-shadow: 0px 0px 15px alpha(@red, 0.3);
-}
-
-entry#entry {
-  /* Barra de busqueda */
+/* Caja de búsqueda (sin bordes y con esquinas rectas) */
+text {
+  background-color: @bg-light;
   background: @bg-light;
-  border: 1px solid @red-glow;
-  border-radius: 8px;
-  margin-bottom: 12px;
+  border: none;
+  border-radius: 0px;
+  margin-bottom: 8px;
   padding: 8px 16px;
   color: @fg;
-  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-list#main {
-  /* Lista de resultados */
+text:focus {
+  border: none;
+  box-shadow: 0px 0px 8px rgba(255, 59, 92, 0.4);
+}
+
+/* Forzar transparencia absoluta en todas las listas, filas y contenedores de plugins por defecto */
+list,
+row,
+box.plugin,
+.plugin,
+.matches,
+list.plugin,
+.match {
+  background-color: transparent;
   background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
-/* Items individuales en la lista */
-#match {
-  padding: 8px;
-  border-radius: 8px;
+/* Items individuales de cada app (completamente planos y transparentes) */
+.match {
+  padding: 10px 14px;
+  border-radius: 0px;
   color: @fg;
-  margin: 2px 0;
+  margin: 0;
 }
 
-/* Hover / Seleccionado en la lista */
-#match:selected {
-  background: alpha(@red, 0.4);
-  border: 1px solid @red-glow;
+/* El elemento seleccionado debe mostrar un fondo plano Spiderman Red en la Fila de la lista, evitando cajas anidadas */
+row:selected {
+  background-color: rgba(230, 0, 38, 0.35);
+  background: rgba(230, 0, 38, 0.35);
+  border: none;
+  border-radius: 0px;
   color: #ffffff;
-  box-shadow: 0px 0px 10px alpha(@red-glow, 0.5);
+  box-shadow: 0px 0px 10px rgba(255, 59, 92, 0.4);
 }
 
-/* Texto de la aplicacion / descripcion */
-#match label {
+label.match {
   color: inherit;
+}
+
+label.match.description {
+  font-size: 11px;
+  color: rgba(248, 249, 250, 0.6);
 }

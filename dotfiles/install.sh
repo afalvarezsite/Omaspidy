@@ -212,7 +212,7 @@ CORE_PKGS=(
     networkmanager bluez bluez-utils
     
     # TUI, Terminal y Shell
-    alacritty zsh stow fzf starship yazi
+    alacritty zsh stow fzf starship yazi mpv imv ueberzugpp
     
     # CLI Modernos (Rust/Go)
     zoxide eza bat ripgrep fd btop procs dust duf git-delta tealdeer

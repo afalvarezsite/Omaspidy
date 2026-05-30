@@ -72,11 +72,11 @@ rules = [
     # Documentos
     { mime = "application/pdf", fg = "#ff1e43" },
     # Scripts y código
-    { name = "*.sh", fg = "#00e676", bold = true },
-    { name = "*.py", fg = "#00e5ff", bold = true },
-    { name = "*.rs", fg = "#ff3b5c", bold = true },
-    { name = "*.c", fg = "#54a0ff", bold = true },
-    { name = "*.cpp", fg = "#54a0ff", bold = true },
+    { url = "*.sh", fg = "#00e676", bold = true },
+    { url = "*.py", fg = "#00e5ff", bold = true },
+    { url = "*.rs", fg = "#ff3b5c", bold = true },
+    { url = "*.c", fg = "#54a0ff", bold = true },
+    { url = "*.cpp", fg = "#54a0ff", bold = true },
     # Por defecto
-    { name = "*", fg = "#f8f9fa" }
+    { url = "*", fg = "#f8f9fa" }
 ]

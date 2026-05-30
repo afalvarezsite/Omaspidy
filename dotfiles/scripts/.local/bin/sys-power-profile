@@ -7,12 +7,17 @@
 
 # Si se solicita la integración para Waybar
 if [ "$1" = "--waybar" ]; then
-    if ! command -v powerprofilesctl &>/dev/null; then
-        echo '{"text": "Error", "alt": "default", "class": "default", "tooltip": "power-profiles-daemon no instalado"}'
+    if ! command -v gdbus &>/dev/null; then
+        echo '{"text": "Error", "alt": "default", "class": "default", "tooltip": "gdbus no instalado"}'
         exit 0
     fi
     
-    ACTIVE=$(powerprofilesctl get)
+    ACTIVE=$(gdbus call --system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles --method org.freedesktop.DBus.Properties.Get 'net.hadess.PowerProfiles' 'ActiveProfile' 2>/dev/null | cut -d"'" -f2)
+    if [ -z "$ACTIVE" ]; then
+        echo '{"text": "Error", "alt": "default", "class": "default", "tooltip": "power-profiles-daemon no activo"}'
+        exit 0
+    fi
+    
     case "$ACTIVE" in
         "performance")
             echo '{"text": "Rendimiento", "alt": "performance", "class": "performance", "tooltip": "Perfil Activo: Alto Rendimiento"}'
@@ -39,14 +44,19 @@ export FZF_DEFAULT_OPTS="
     --prompt=' 󰓅 ❯ ' --pointer='' --marker='󰄬'
 "
 
-if ! command -v powerprofilesctl &>/dev/null; then
-    echo -e "\033[1;31m[ERROR]\033[0m power-profiles-daemon no está instalado o activo."
+if ! command -v gdbus &>/dev/null; then
+    echo -e "\033[1;31m[ERROR]\033[0m gdbus no está instalado."
     read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
     exit 1
 fi
 
 # Obtener perfil activo
-ACTIVE=$(powerprofilesctl get)
+ACTIVE=$(gdbus call --system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles --method org.freedesktop.DBus.Properties.Get 'net.hadess.PowerProfiles' 'ActiveProfile' 2>/dev/null | cut -d"'" -f2)
+if [ -z "$ACTIVE" ]; then
+    echo -e "\033[1;31m[ERROR]\033[0m power-profiles-daemon no está activo en D-Bus."
+    read -n 1 -s -r -p "Presiona cualquier tecla para salir..."
+    exit 1
+fi
 
 # Formatear opciones utilizando estrictamente iconos de Nerd Fonts
 OPT_PERF="    performance  (Alto Rendimiento)"
@@ -77,7 +87,7 @@ if [ -n "$SELECTION" ]; then
     fi
     
     if [ -n "$TARGET" ]; then
-        if powerprofilesctl set "$TARGET"; then
+        if gdbus call --system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles --method org.freedesktop.DBus.Properties.Set 'net.hadess.PowerProfiles' 'ActiveProfile' "<'$TARGET'>" >/dev/null; then
             notify-send -t 3000 -i power-profile "Perfil de Energía" "Perfil cambiado a:\n$TARGET"
             # Emitir señal RTMIN+8 a Waybar para actualizar el widget de forma instantánea
             pkill -RTMIN+8 waybar

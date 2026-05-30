@@ -26,6 +26,7 @@ window#waybar {
 #clock,
 #network,
 #pulseaudio,
+#backlight,
 #custom-powerprofile,
 #custom-hyprsunset,
 #custom-sysrecord,
@@ -45,6 +46,7 @@ window#waybar {
 /* Hover general premium para las cápsulas interactivas */
 #network:hover,
 #pulseaudio:hover,
+#backlight:hover,
 #custom-powerprofile:hover,
 #custom-hyprsunset:hover,
 #battery:hover,
@@ -54,7 +56,6 @@ window#waybar {
     border-color: @red-glow;
     box-shadow: 0px 0px 12px rgba(255, 59, 92, 0.45);
     color: #ffffff;
-    transform: translateY(-1px);
 }
 
 /* ------------------------------------------------------------------------------
@@ -136,6 +137,11 @@ window#waybar {
     color: @bg-dark;
     border-color: @red;
     animation: battery-alert 0.6s linear infinite alternate;
+}
+
+/* BRILLO DE PANTALLA (BACKLIGHT) */
+#backlight {
+    color: @fg;
 }
 
 /* REDES */

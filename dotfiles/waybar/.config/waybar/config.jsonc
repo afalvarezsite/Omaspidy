@@ -17,6 +17,7 @@
     "modules-right": [
         "network",
         "pulseaudio",
+        "backlight",
         "custom/hyprsunset",
         "custom/sysrecord",
         "custom/powerprofile",
@@ -84,7 +85,16 @@
             "default": ["", "", ""]
         },
         "on-click": "swayosd-client --output-volume mute-toggle",
-        "on-click-right": "alacritty --class floating_tui -e pulsemixer"
+        "on-click-right": "alacritty --class floating_tui -e pulsemixer",
+        "on-scroll-up": "swayosd-client --output-volume raise",
+        "on-scroll-down": "swayosd-client --output-volume lower"
+    },
+
+    "backlight": {
+        "format": "{icon}   {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "on-scroll-up": "swayosd-client --brightness raise",
+        "on-scroll-down": "swayosd-client --brightness lower"
     },
 
     "battery": {

@@ -370,8 +370,7 @@ show_banner "8" "Optimizando cargador de arranque systemd-boot y post-instalaci�
 msg "Verificando y configurando cargador de arranque systemd-boot con linux-cachyos..."
 if [ -d "/boot/loader/entries" ]; then
     # Obtener el UUID de la partición raíz montada en /
-    ROOT_DEV=$(findmnt -n -o SOURCE /)
-    ROOT_UUID=$(sudo blkid -s UUID -o value "$ROOT_DEV" 2>/dev/null)
+    ROOT_UUID=$(findmnt -n -o UUID /)
     
     if [ -n "$ROOT_UUID" ]; then
         msg "Generando entrada de boot para linux-cachyos con mitigations=off..."

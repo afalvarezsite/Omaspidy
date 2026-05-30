@@ -6,8 +6,8 @@ source "$ZDOTDIR/env.zsh"
 source "$ZDOTDIR/aliases.zsh"
 source "$ZDOTDIR/plugins.zsh"
 
-# Inicializar Zoxide (cd inteligente)
-eval "$(zoxide init zsh)"
+# Inicializar Zoxide (cd inteligente redefiniendo la función cd)
+eval "$(zoxide init zsh --cmd cd)"
 
 # Inicializar Mise (Gestor de versiones políglota en Rust)
 if command -v mise &> /dev/null; then

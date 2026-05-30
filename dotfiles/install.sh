@@ -207,6 +207,15 @@ CORE_PKGS=(
     fastfetch gdu xh jaq lazygit mise trippy bandwhich
 )
 
+# --- Evitar conflictos de paquetes -git ---
+msg "Comprobando posibles conflictos de paquetes -git con hyprlang e hyprutils..."
+for pkg in hyprlang-git hyprutils-git; do
+    if pacman -Qq "$pkg" &>/dev/null; then
+        msg_warn "Se ha detectado '$pkg' instalado. Removiendo temporalmente con -Rdd para evitar conflictos..."
+        sudo pacman -Rdd --noconfirm "$pkg"
+    fi
+done
+
 paru -S --needed --noconfirm "${CORE_PKGS[@]}"
 
 # --- 3. Paquetes AUR (-git y específicos) ---

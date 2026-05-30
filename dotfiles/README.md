@@ -84,6 +84,7 @@ Para cambiar de tema: ejecuta `sys-theme` o presiona `Super + M` para abrir el C
 | `sys-distrobox` | `dbs` | Gestor de contenedores TUI |
 | `hypr-keys` | `Super+G` | Guía interactiva de atajos |
 | `wl-ocr` | `Super+T` | Captura de pantalla a texto (OCR) |
+| `sys-touchpad` | `Fn+F7` | Conmutador ON/OFF del panel táctil |
 
 
 Este directorio contiene las configuraciones específicas de las aplicaciones gestionadas e instaladas con `stow` (incluyendo el nuevo módulo centralizado `theme` para la gestión de Skins).

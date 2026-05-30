@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-TOUCHPAD: Conmutador Inteligente de Touchpad para Hyprland
+# Estética: Ecosistema Spider-Man (OSD a través de SwayOSD)
+# ==============================================================================
+
+# Cargar variables del tema activo
+source "$HOME/.config/theme/active.sh" 2>/dev/null
+
+HYPRLAND_DEVICE="htix5288:00-0911:5288-touchpad"
+STATUS_FILE="/tmp/hyprland_touchpad.status"
+
+# Leer estado actual
+if [ ! -f "$STATUS_FILE" ]; then
+    echo "true" > "$STATUS_FILE"
+fi
+
+STATUS=$(cat "$STATUS_FILE")
+
+if [ "$STATUS" = "true" ]; then
+    hyprctl keyword "device[$HYPRLAND_DEVICE]:enabled" false
+    echo "false" > "$STATUS_FILE"
+    
+    # Lanzar OSD del sistema (estilo volumen/brillo) usando SwayOSD
+    if command -v swayosd-client &>/dev/null; then
+        swayosd-client --custom-message "Touchpad Bloqueado" --custom-icon "input-touchpad"
+    else
+        notify-send --urgency=normal --icon=input-touchpad --app-name="sys-touchpad" "󰟆  Touchpad Desactivado" "El panel táctil ha sido bloqueado."
+    fi
+else
+    hyprctl keyword "device[$HYPRLAND_DEVICE]:enabled" true
+    echo "true" > "$STATUS_FILE"
+    
+    # Lanzar OSD del sistema (estilo volumen/brillo) usando SwayOSD
+    if command -v swayosd-client &>/dev/null; then
+        swayosd-client --custom-message "Touchpad Activado" --custom-icon "input-touchpad"
+    else
+        notify-send --urgency=normal --icon=input-touchpad --app-name="sys-touchpad" "󰟄  Touchpad Activado" "El panel táctil está ahora disponible."
+    fi
+fi

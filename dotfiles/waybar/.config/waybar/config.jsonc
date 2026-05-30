@@ -102,10 +102,12 @@
             "warning": 30,
             "critical": 15
         },
+        "interval": 10,
         "format": "{icon}   {capacity}%",
         "format-charging": "󰂄   {capacity}%",
         "format-plugged": "   {capacity}%",
         "format-alt": "{time}   {icon}",
+        "tooltip-format": "{capacity}% | Tiempo restante: {time}",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
     },
 

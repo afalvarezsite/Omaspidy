@@ -89,6 +89,15 @@ if [ -n "$SELECTION" ]; then
     if [ -n "$TARGET" ]; then
         if gdbus call --system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles --method org.freedesktop.DBus.Properties.Set 'net.hadess.PowerProfiles' 'ActiveProfile' "<'$TARGET'>" >/dev/null; then
             notify-send -t 3000 -i power-profile "Perfil de Energía" "Perfil cambiado a:\n$TARGET"
+            
+            # Si el perfil es ahorro de energía, bajar el brillo al 30%
+            if [ "$TARGET" = "power-saver" ]; then
+                if command -v swayosd-client &>/dev/null; then
+                    swayosd-client --brightness -100
+                    swayosd-client --brightness +30
+                fi
+            fi
+            
             # Emitir señal RTMIN+8 a Waybar para actualizar el widget de forma instantánea
             pkill -RTMIN+8 waybar
         else

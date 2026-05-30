@@ -263,18 +263,18 @@ record_camera() {
             -f pulse -i default \
             -filter_complex "$filter_complex" \
             -map "[out1]" -map 1:a -c:v libx264 -preset ultrafast -crf 23 -pix_fmt yuv420p -c:a aac -b:a 128k "$filename" \
-            -map "[out2]" -c:v mjpeg -f mjpeg "$fifo" &>/dev/null) &
+            -map "[out2]" -c:v mjpeg -f mjpeg -flush_packets 1 "$fifo" &>/dev/null) &
     else
         (trap '' PIPE; exec ffmpeg -y \
             -f v4l2 -input_format mjpeg -video_size "$CAM_RES" -framerate "$CAM_FPS" -i "$dev" \
             -filter_complex "$filter_complex" \
             -map "[out1]" -c:v libx264 -preset ultrafast -crf 23 -pix_fmt yuv420p "$filename" \
-            -map "[out2]" -c:v mjpeg -f mjpeg "$fifo" &>/dev/null) &
+            -map "[out2]" -c:v mjpeg -f mjpeg -flush_packets 1 "$fifo" &>/dev/null) &
     fi
     local ffmpeg_pid=$!
 
-    # Lanzar ffplay leyendo de la FIFO (se ejecuta en primer plano)
-    ffplay -fflags nobuffer -flags low_delay -framedrop -window_title "Grabando... Cierra esta ventana para guardar" "$fifo" &>/dev/null
+    # Lanzar ffplay leyendo de la FIFO (se ejecuta en primer plano con latencia cero)
+    ffplay -f mjpeg -probesize 32 -analyzeduration 0 -sync ext -fflags nobuffer -flags low_delay -framedrop -window_title "Grabando... Cierra esta ventana para guardar" "$fifo" &>/dev/null
 
     # En cuanto ffplay se cierra:
     # 1. Iniciamos un cat en background para vaciar la FIFO y evitar que ffmpeg se bloquee o reciba SIGPIPE

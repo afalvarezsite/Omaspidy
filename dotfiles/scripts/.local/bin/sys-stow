@@ -56,7 +56,7 @@ if [[ ! -d "$DOTFILES_DIR/dotfiles" ]]; then
     exit 1
 fi
 
-MODULES=(alacritty anyrun hypr mako nvim scripts starship waybar zsh git antigravity lazygit bat fastfetch gtk theme)
+MODULES=(alacritty anyrun hypr mako nvim scripts starship waybar zsh git antigravity lazygit bat fastfetch gtk theme swayosd)
 
 check_status() {
     show_banner
@@ -86,6 +86,7 @@ check_status() {
                 fastfetch) [ -L "$HOME/.config/fastfetch" ] && is_linked=true ;;
                 gtk) [ -L "$HOME/.config/gtk-3.0" ] && is_linked=true ;;
                 theme) [ -L "$HOME/.config/theme" ] && is_linked=true ;;
+                swayosd) [ -L "$HOME/.config/swayosd" ] && is_linked=true ;;
             esac
             
             if $is_linked; then

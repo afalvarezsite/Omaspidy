@@ -1,0 +1,47 @@
+/* ============================================================================
+ * ULTRA-PREMIUM SPIDER-MAN GLASSMORPHIC THEME FOR SWAYOSD
+ * Modular, clean pill-based design with glow effects and micro-animations
+ * ============================================================================ */
+
+window#osd {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+#container {
+    background-color: rgba(12, 13, 18, 0.85); /* bg-dark with high opacity */
+    border: 1px solid rgba(230, 0, 38, 0.35); /* Spiderman Red semitransparent */
+    border-radius: 20px;
+    padding: 16px 24px;
+    box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.6), inset 0px 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+#container > image {
+    color: #ff3b5c; /* red-glow */
+    -gtk-icon-transform: scale(0.9);
+}
+
+label {
+    color: #f8f9fa; /* fg color */
+    font-family: "Hack Nerd Font", "Outfit", "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+progressbar {
+    min-height: 8px;
+    background: transparent;
+}
+
+progressbar trough {
+    background-color: rgba(22, 23, 31, 0.9); /* bg-light track */
+    border: 1px solid rgba(230, 0, 38, 0.15);
+    border-radius: 6px;
+}
+
+progressbar progress {
+    background: linear-gradient(to right, #e60026, #ff3b5c); /* Spiderman Gradient red */
+    border-radius: 6px;
+}

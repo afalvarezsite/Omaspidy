@@ -272,7 +272,19 @@ if [ "$(findmnt -n -o FSTYPE /)" = "btrfs" ]; then
 fi
 
 if [[ ! -f /etc/snapper/configs/root ]]; then
-    sudo snapper -c root create-config / || msg_warn "Snapper config 'root' ya existe o hubo un error."
+    # Snapper exige que /.snapshots NO exista para poder crear la configuración inicial.
+    # Si existe (por ejemplo, de una ejecución fallida anterior del script), lo eliminamos.
+    if [ -e "/.snapshots" ]; then
+        msg "Limpiando /.snapshots existente para permitir la configuración de snapper..."
+        sudo umount /.snapshots 2>/dev/null || true
+        if sudo btrfs subvolume show /.snapshots &>/dev/null; then
+            sudo btrfs subvolume delete /.snapshots
+        else
+            sudo rm -rf /.snapshots
+        fi
+    fi
+
+    sudo snapper -c root create-config /
     
     # Aplicar limites estrictos para no llenar el disco duro
     msg "Aplicando limites de retención de Snapshots..."

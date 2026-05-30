@@ -140,7 +140,28 @@ msg "Actualizando librerías del sistema al nivel de instrucciones óptimo de tu
 sudo pacman -Syu --noconfirm || { msg_err "Error actualizando el sistema"; exit 1; }
 
 # Instalar dependencias para compilar Paru e instalar el kernel optimizado
-sudo pacman -S --needed --noconfirm base-devel git curl wget linux-cachyos linux-cachyos-headers || { msg_err "Error al instalar dependencias base y kernel"; exit 1; }
+# NOTA: Se usa --overwrite '*' para garantizar que los archivos del kernel se escriben
+# correctamente aunque pacman ya tenga el paquete marcado como instalado (estado corrupto).
+# NO se usa --needed para el kernel por esta misma razón.
+sudo pacman -S --noconfirm --overwrite '*' base-devel git curl wget linux-cachyos linux-cachyos-headers || { msg_err "Error al instalar dependencias base y kernel"; exit 1; }
+
+# Verificar que el kernel se instaló y no está vacío
+if [ ! -s /boot/vmlinuz-linux-cachyos ]; then
+    msg_err "El archivo /boot/vmlinuz-linux-cachyos no existe o está vacío tras la instalación."
+    msg_err "Prueba: sudo pacman -S --overwrite '*' linux-cachyos linux-cachyos-headers"
+    exit 1
+fi
+
+# Regenerar el initramfs explícitamente (no depender solo del hook de pacman)
+msg "Regenerando initramfs para linux-cachyos..."
+sudo mkinitcpio -p linux-cachyos || { msg_err "Error al generar el initramfs de linux-cachyos"; exit 1; }
+
+# Verificar que el initramfs se generó y no está vacío
+if [ ! -s /boot/initramfs-linux-cachyos.img ]; then
+    msg_err "El initramfs /boot/initramfs-linux-cachyos.img no existe o está vacío."
+    exit 1
+fi
+msg_ok "Kernel linux-cachyos e initramfs generados correctamente."
 
 if ! command -v paru &> /dev/null; then
     msg "Instalando Paru (AUR Helper)..."
@@ -397,13 +418,13 @@ if [ -d "/boot/loader/entries" ]; then
             kernel_options="$kernel_options intel_pstate=active"
         fi
 
-        cat << EOF | sudo tee /boot/loader/entries/arch-cachyos.conf > /dev/null
-title   Arch Linux (Kernel CachyOS)
-linux   /vmlinuz-linux-cachyos
-${ucode_initrd:+$ucode_initrd
-}initrd  /initramfs-linux-cachyos.img
-options $kernel_options
-EOF
+        {
+            echo "title   Arch Linux (Kernel CachyOS)"
+            echo "linux   /vmlinuz-linux-cachyos"
+            [ -n "$ucode_initrd" ] && echo "$ucode_initrd"
+            echo "initrd  /initramfs-linux-cachyos.img"
+            echo "options $kernel_options"
+        } | sudo tee /boot/loader/entries/arch-cachyos.conf > /dev/null
         # Establecer la entrada cachyos por defecto
         sudo sed -i 's/^default.*/default arch-cachyos.conf/' /boot/loader/loader.conf 2>/dev/null || \
         echo "default arch-cachyos.conf" | sudo tee -a /boot/loader/loader.conf >/dev/null

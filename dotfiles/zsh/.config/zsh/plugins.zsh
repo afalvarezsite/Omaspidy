@@ -47,3 +47,18 @@ zstyle ':fzf-tab:*' fzf-flags \
     --color="fg:#f8f9fa,header:#ff3b5c,info:#d500f9,pointer:#00e676" \
     --color="marker:#e60026,fg+:#ffffff,prompt:#e60026,hl+:#00e5ff,border:#ff1e43"
 zstyle ':fzf-tab:*' fzf-pad 4
+
+# --- Personalizar resaltado de sintaxis (Ecosistema Spider-Man) ---
+typeset -A ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]='fg=cyan,bold'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=red,bold'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=green,bold'
+ZSH_HIGHLIGHT_STYLES[function]='fg=green,bold'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=magenta,bold'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=blue,bold'
+ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=magenta'
+ZSH_HIGHLIGHT_STYLES[path]='fg=cyan,underline'
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=blue'
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=blue'
+ZSH_HIGHLIGHT_STYLES[string]='fg=yellow'
+ZSH_HIGHLIGHT_STYLES[comment]='fg=black,bold'

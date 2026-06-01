@@ -268,7 +268,7 @@ vt = 1
 
 [default_session]
 # Lanzamos tuigreet con la estetica rojo y negro, apuntando directamente a Hyprland
-command = "tuigreet --cmd Hyprland --asterisks --time --theme 'border=red;text=white;prompt=red;time=white;action=red;button=red;container=black;input=red'"
+command = "tuigreet --cmd start-hyprland --asterisks --time --theme 'border=red;text=white;prompt=red;time=white;action=red;button=red;container=black;input=red'"
 user = "greeter"
 EOF
 sudo usermod -aG video greeter

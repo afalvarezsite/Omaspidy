@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-RESOURCES: MONITOR DE RECURSOS ULTRA-PREMIUM PARA WAYBAR (OH MY SPIDY)
+# Calcula CPU, RAM, Temperatura y SSD, formateado en JSON con marcado Pango.
+# ==============================================================================
+
+# --- 1. Obtener uso de CPU (Lectura instantánea de /proc/stat) ---
+read_stat() {
+    grep '^cpu ' /proc/stat
+}
+
+stat1=$(read_stat)
+sleep 0.15
+stat2=$(read_stat)
+
+vals1=($(echo "$stat1" | awk '{print $2,$3,$4,$5,$6,$7,$8,$9,$10,$11}'))
+vals2=($(echo "$stat2" | awk '{print $2,$3,$4,$5,$6,$7,$8,$9,$10,$11}'))
+
+total1=0; for val in "${vals1[@]}"; do total1=$((total1 + val)); done
+total2=0; for val in "${vals2[@]}"; do total2=$((total2 + val)); done
+
+idle1=${vals1[3]}
+idle2=${vals2[3]}
+
+diff_total=$((total2 - total1))
+diff_idle=$((idle2 - idle1))
+
+if [ "$diff_total" -gt 0 ]; then
+    cpu_usage=$(( (diff_total - diff_idle) * 100 / diff_total ))
+else
+    cpu_usage=0
+fi
+
+# --- 2. Obtener uso de RAM ---
+mem_total=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+mem_avail=$(grep MemAvailable /proc/meminfo | awk '{print $2}')
+mem_used=$((mem_total - mem_avail))
+mem_percent=$((mem_used * 100 / mem_total))
+mem_total_gb=$(awk "BEGIN {printf \"%.1f\", $mem_total/1048576}")
+mem_used_gb=$(awk "BEGIN {printf \"%.1f\", $mem_used/1048576}")
+
+# --- 3. Obtener Temperatura del CPU ---
+cpu_temp="N/A"
+for z in /sys/class/thermal/thermal_zone*; do
+    if [ -f "$z/type" ] && [ -f "$z/temp" ]; then
+        type=$(cat "$z/type")
+        if [ "$type" = "x86_pkg_temp" ] || [ "$type" = "cpu-thermal" ] || [ "$type" = "TCPU" ]; then
+            temp_raw=$(cat "$z/temp")
+            cpu_temp="$((temp_raw / 1000))°C"
+            break
+        fi
+    fi
+done
+
+if [ "$cpu_temp" = "N/A" ]; then
+    temp_raw=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null)
+    if [ -n "$temp_raw" ]; then
+        cpu_temp="$((temp_raw / 1000))°C"
+    fi
+fi
+
+# --- 4. Obtener espacio en Disco (SSD) ---
+disk_info=$(df -h / | tail -n 1)
+disk_used=$(echo "$disk_info" | awk '{print $3}')
+disk_total=$(echo "$disk_info" | awk '{print $2}')
+disk_percent=$(echo "$disk_info" | awk '{print $5}')
+
+# --- 5. Formatear colores según el tema de Spider-Man (Cian/Rojo) ---
+# Usamos cian (#00e5ff) para valores normales y rojo (#e60026) si están muy altos.
+if [ "$cpu_usage" -gt 80 ]; then
+    cpu_color="#e60026"
+else
+    cpu_color="#00e5ff"
+fi
+
+if [ "$mem_percent" -gt 85 ]; then
+    ram_color="#e60026"
+else
+    ram_color="#00e5ff"
+fi
+
+# --- 6. Formatear la salida JSON para Waybar ---
+# Formato Tooltip con Pango Markup para alineación perfecta y monospaciada
+TOOLTIP="<span size='11500' foreground='#ff3b5c'><b>󰨇  CENTRAL DE RECURSOS</b></span>\n"
+TOOLTIP+="<span foreground='#474b5c'>──────────────────────────────────</span>\n"
+TOOLTIP+="<tt>"
+TOOLTIP+="󰻠  CPU:   <span foreground='$cpu_color'><b>${cpu_usage}%</b></span> (${cpu_temp})\n"
+TOOLTIP+="󰍛  RAM:   <span foreground='$ram_color'><b>${mem_percent}%</b></span> (${mem_used_gb}/${mem_total_gb} GB)\n"
+TOOLTIP+="󰋊  SSD:   <span foreground='#00e5ff'><b>${disk_percent}</b></span> (${disk_used}/${disk_total} usados)"
+TOOLTIP+="</tt>"
+
+# Output JSON
+echo "{\"text\": \"󰍛\", \"tooltip\": \"$TOOLTIP\"}"

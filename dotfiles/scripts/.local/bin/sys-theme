@@ -194,6 +194,20 @@ rules = [
 YAZI_THEME_EOF
 fi
 
+# 6. Generar configuración de colores dinámica para Qt (Qt5ct y Qt6ct)
+msg "Actualizando tema dinámico de Qt (Qt5ct y Qt6ct)..."
+mkdir -p "$HOME/.config/qt5ct/colors"
+mkdir -p "$HOME/.config/qt6ct/colors"
+
+cat << QT_THEME_EOF > "$HOME/.config/qt5ct/colors/active.conf"
+[ColorScheme]
+active_colors=${COLOR_FG}, ${COLOR_BG_LIGHT}, ${COLOR_BG_LIGHT}, ${COLOR_BG_LIGHT}, ${COLOR_BG_DARK}, ${COLOR_BG_DARK}, ${COLOR_FG}, #ffffff, ${COLOR_FG}, ${COLOR_BG_DARK}, ${COLOR_BG_LIGHT}, #000000, ${COLOR_PRIMARY}, #ffffff, ${COLOR_SECONDARY}, ${COLOR_PRIMARY_GLOW}, ${COLOR_BG_DARK}, #000000, ${COLOR_BG_DARK}, ${COLOR_FG}
+disabled_colors=${COLOR_INACTIVE}, ${COLOR_BG_LIGHT}, ${COLOR_BG_LIGHT}, ${COLOR_BG_LIGHT}, ${COLOR_BG_DARK}, ${COLOR_BG_DARK}, ${COLOR_INACTIVE}, ${COLOR_INACTIVE}, ${COLOR_INACTIVE}, ${COLOR_BG_DARK}, ${COLOR_BG_LIGHT}, #000000, ${COLOR_BG_LIGHT}, ${COLOR_INACTIVE}, ${COLOR_INACTIVE}, ${COLOR_INACTIVE}, ${COLOR_BG_DARK}, #000000, ${COLOR_BG_DARK}, ${COLOR_INACTIVE}
+inactive_colors=${COLOR_FG}, ${COLOR_BG_LIGHT}, ${COLOR_BG_LIGHT}, ${COLOR_BG_LIGHT}, ${COLOR_BG_DARK}, ${COLOR_BG_DARK}, ${COLOR_FG}, #ffffff, ${COLOR_FG}, ${COLOR_BG_DARK}, ${COLOR_BG_LIGHT}, #000000, ${COLOR_PRIMARY}, #ffffff, ${COLOR_SECONDARY}, ${COLOR_PRIMARY_GLOW}, ${COLOR_BG_DARK}, #000000, ${COLOR_BG_DARK}, ${COLOR_FG}
+QT_THEME_EOF
+
+cp "$HOME/.config/qt5ct/colors/active.conf" "$HOME/.config/qt6ct/colors/active.conf"
+
 # --- Recargas al Vuelo ---
 
 # Recargar Hyprland

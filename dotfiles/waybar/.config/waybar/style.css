@@ -31,7 +31,8 @@ window#waybar {
 #custom-hyprsunset,
 #custom-sysrecord,
 #battery,
-#tray,
+#mpris,
+#custom-sysresources,
 #custom-power {
     background: @bg-light;
     color: @fg;
@@ -39,7 +40,7 @@ window#waybar {
     border-radius: 16px;
     padding: 2px 14px;
     margin: 4px 4px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4), inset 0px 1px 1px rgba(255, 255, 255, 0.05);
+    box-shadow: none;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -51,10 +52,11 @@ window#waybar {
 #custom-hyprsunset:hover,
 #battery:hover,
 #custom-power:hover,
+#mpris:hover,
+#custom-sysresources:hover,
 #clock:hover {
     background: rgba(230, 0, 38, 0.15);
     border-color: @red-glow;
-    box-shadow: 0px 0px 12px rgba(255, 59, 92, 0.45);
     color: #ffffff;
 }
 
@@ -69,7 +71,7 @@ window#waybar {
 
 #workspaces button {
     color: @inactive;
-    padding: 0 8px;
+    padding: 0 9px 0 7px;
     margin: 4px 2px;
     border-radius: 10px;
     background: transparent;
@@ -112,7 +114,7 @@ window#waybar {
     font-weight: 800;
     background: @bg-dark;
     border: 2px solid @red;
-    box-shadow: 0px 0px 15px rgba(230, 0, 38, 0.4);
+    box-shadow: none;
     padding: 2px 18px;
 }
 
@@ -160,6 +162,7 @@ window#waybar {
     color: #ffffff;
     border-color: @red;
     animation: recording-glow 0.8s ease-in-out infinite alternate;
+    padding: 2px 11px 2px 9px;
 }
 
 #custom-sysrecord.inactive {
@@ -175,6 +178,7 @@ window#waybar {
     color: #ffd600;
     border-color: rgba(255, 214, 0, 0.3);
     text-shadow: 0px 0px 8px rgba(255, 214, 0, 0.4);
+    padding: 2px 11px 2px 9px;
 }
 
 /* PERFILES DE ENERGÍA */
@@ -190,25 +194,48 @@ window#waybar {
     text-shadow: 0px 0px 8px rgba(0, 230, 118, 0.3);
 }
 
-/* BANDEJA DEL SISTEMA (TRAY) */
-#tray {
-    padding: 0 12px;
-}
+
 
 /* BOTÓN DE APAGADO (Vibrante y agresivo rojinegro) */
 #custom-power {
     color: @red-glow;
     background: @bg-dark;
     border: 1px solid @red;
-    padding: 0 16px;
+    padding: 2px 11px 2px 9px;
 }
 
 #custom-power:hover {
     background: @red;
     color: @bg-dark;
     border-color: @red;
-    box-shadow: 0px 0px 15px @red;
 }
+
+/* REPRODUCTOR DE SONIDO (MPRIS) */
+#mpris {
+    padding: 2px 14px;
+}
+
+/* MONITOR DE RECURSOS (SYS-RESOURCES) */
+#custom-sysresources {
+    padding: 2px 11px 2px 9px;
+}
+
+#mpris.playing {
+    color: @secondary;
+    border-color: rgba(0, 229, 255, 0.35);
+    background: @bg-light;
+    text-shadow: 0px 0px 6px rgba(0, 229, 255, 0.4);
+}
+
+#mpris.paused {
+    color: @inactive;
+    border-color: rgba(71, 75, 92, 0.3);
+    background: rgba(22, 23, 31, 0.55);
+}
+
+
+
+
 
 /* ------------------------------------------------------------------------------
  * ANIMACIONES KEYFRAMES (Efectos visuales fluidos)
@@ -226,16 +253,11 @@ window#waybar {
         background-color: @bg-dark;
         color: @red;
         border-color: @red;
-        box-shadow: 0px 0px 12px @red;
     }
 }
 
 @keyframes recording-glow {
-    from {
-        box-shadow: 0px 0px 4px rgba(230, 0, 38, 0.3);
-    }
     to {
-        box-shadow: 0px 0px 14px rgba(230, 0, 38, 0.85);
         background-color: rgba(230, 0, 38, 0.55);
     }
 }

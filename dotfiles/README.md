@@ -73,6 +73,7 @@ Para cambiar de tema: ejecuta `sys-theme` o presiona `Super + M` para abrir el C
 |---|---|---|
 | `sys-spidey` | `Super+M` | Centro de control general |
 | `sys-theme` | vía sys-spidey | Selector de skins dinámico |
+| `sys-wallpaper` | vía terminal | Selector y gestor permanente de fondos de pantalla |
 | `sys-update` | `update` | Actualización completa del ecosistema |
 | `sys-health` | `health` | Diagnóstico de servicios del entorno |
 | `sys-record` | `Super+Alt+R` | Grabador de pantalla con VA-API |

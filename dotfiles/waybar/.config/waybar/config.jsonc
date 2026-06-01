@@ -9,7 +9,8 @@
 
     "modules-left": [
         "hyprland/workspaces",
-        "hyprland/window"
+        "hyprland/window",
+        "mpris"
     ],
     "modules-center": [
         "clock"
@@ -22,7 +23,7 @@
         "custom/sysrecord",
         "custom/powerprofile",
         "battery",
-        "tray",
+        "custom/sysresources",
         "custom/power"
     ],
 
@@ -61,20 +62,20 @@
     },
 
     "network": {
-        "format-wifi": "   {signalStrength}%",
-        "format-ethernet": "󰈀   Conectado",
-        "tooltip-format": "{essid} vía {gwaddr} ",
-        "format-linked": "󰈀   (Sin IP)",
-        "format-disconnected": "⚠   Desconectado",
+        "format-wifi": "  {signalStrength}%",
+        "format-ethernet": "󰈀  Conectado",
+        "tooltip-format": "{essid} vía {gwaddr} 󰈀",
+        "format-linked": "󰈀  (Sin IP)",
+        "format-disconnected": "⚠  Desconectado",
         "format-alt": "{ifname}: {ipaddr}/{cidr}",
         "on-click-right": "alacritty --class floating_tui -e nmtui"
     },
 
     "pulseaudio": {
-        "format": "{icon}   {volume}%",
-        "format-bluetooth": "󰂰   {volume}%",
-        "format-bluetooth-muted": "󰂲   Mute",
-        "format-muted": "󰝟   Mute",
+        "format": "{icon}  {volume}%",
+        "format-bluetooth": "󰂰  {volume}%",
+        "format-bluetooth-muted": "󰂲  Mute",
+        "format-muted": "󰝟  Mute",
         "format-icons": {
             "headphone": "",
             "hands-free": "",
@@ -91,7 +92,7 @@
     },
 
     "backlight": {
-        "format": "{icon}   {percent}%",
+        "format": "{icon}  {percent}%",
         "format-icons": ["󰃞", "󰃟", "󰃠"],
         "on-scroll-up": "swayosd-client --brightness raise",
         "on-scroll-down": "swayosd-client --brightness lower"
@@ -103,18 +104,15 @@
             "critical": 15
         },
         "interval": 10,
-        "format": "{icon}   {capacity}%",
-        "format-charging": "󰂄   {capacity}%",
-        "format-plugged": "   {capacity}%",
-        "format-alt": "{time}   {icon}",
+        "format": "{icon}  {capacity}%",
+        "format-charging": "󰂄  {capacity}%",
+        "format-plugged": "  {capacity}%",
+        "format-alt": "{time}  {icon}",
         "tooltip-format": "{capacity}% | Tiempo restante: {time}",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
     },
 
-    "tray": {
-        "icon-size": 18,
-        "spacing": 10
-    },
+
 
     "custom/hyprsunset": {
         "format": "{text}",
@@ -135,7 +133,7 @@
     },
 
     "custom/powerprofile": {
-        "format": "{icon}   {text}",
+        "format": "{icon}  {text}",
         "format-icons": {
             "performance": "",
             "balanced": "󰾆",
@@ -146,6 +144,36 @@
         "interval": 30,
         "signal": 8,
         "on-click": "alacritty --class floating_tui -e sys-power-profile"
+    },
+
+    "mpris": {
+        "format": "{player_icon} {dynamic}",
+        "format-paused": "{status_icon} <i>{dynamic}</i>",
+        "player-icons": {
+            "default": "󰎆",
+            "spotify": "",
+            "firefox": "󰈹",
+            "chrome": "󰊯",
+            "chromium": "󰊯",
+            "mpv": "󰝚"
+        },
+        "status-icons": {
+            "paused": "󰏤"
+        },
+        "dynamic-len": 40,
+        "ellipsis": "...",
+        "on-click": "playerctl play-pause",
+        "on-click-right": "playerctl next",
+        "on-click-middle": "playerctl previous",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous"
+    },
+
+    "custom/sysresources": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "sys-resources",
+        "interval": 2
     },
 
     "custom/power": {

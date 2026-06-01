@@ -71,7 +71,10 @@ window#waybar {
 
 #workspaces button {
     color: @inactive;
-    padding: 0 9px 0 7px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 5px;   /* Reducido para tirar del icono hacia la izquierda */
+    padding-right: 11px;  /* Aumentado para equilibrar la asimetría */
     margin: 4px 2px;
     border-radius: 10px;
     background: transparent;
@@ -218,7 +221,10 @@ window#waybar {
     color: @red-glow;
     background: @bg-dark;
     border: 1px solid @red;
-    padding: 4px 11px 4px 9px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 14px;  /* Ajustado para tirar muy levemente a la izquierda */
+    padding-right: 18px; /* Compensado para mantener el ancho de la píldora */
 }
 
 #custom-power:hover {
@@ -252,7 +258,11 @@ window#waybar {
 
 /* MONITOR DE RECURSOS (SYS-RESOURCES) */
 #custom-sysresources {
-    padding: 4px 11px 4px 9px;
+    font-size: 16px; /* Icono un poco más grande */
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 14px;  /* Ajustado para tirar muy levemente a la izquierda */
+    padding-right: 18px; /* Compensado para mantener el ancho de la píldora */
 }
 
 #mpris.playing {

@@ -77,3 +77,8 @@ alias http="xh"
 alias lg="lazygit"
 alias traceroute="trip"
 alias bandwidth="sudo bandwhich"
+
+# --- Terminal Opaca (Desactivar transparencias al vuelo para multimedia y TUI) ---
+opaque-term() {
+    alacritty --class opaque_tui -o "window.opacity=1.0" -o "window.blur=false" "$@" & disown
+}

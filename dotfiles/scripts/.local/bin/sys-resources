@@ -4,6 +4,20 @@
 # Calcula CPU, RAM, Temperatura y SSD, formateado en JSON con marcado Pango.
 # ==============================================================================
 
+# --- 0. Controlador de Alternancia (Toggle) ---
+STATUS_FILE="/tmp/sysresources.status"
+
+if [ "$1" = "--toggle" ]; then
+    if [ -f "$STATUS_FILE" ] && [ "$(cat "$STATUS_FILE")" = "detailed" ]; then
+        echo "icon" > "$STATUS_FILE"
+    else
+        echo "detailed" > "$STATUS_FILE"
+    fi
+    # Actualizar Waybar inmediatamente mediante la señal RTMIN+11
+    pkill -RTMIN+11 waybar
+    exit 0
+fi
+
 # --- 1. Obtener uso de CPU (Lectura instantánea de /proc/stat) ---
 read_stat() {
     grep '^cpu ' /proc/stat
@@ -89,5 +103,17 @@ TOOLTIP+="󰍛  RAM:   <span foreground='$ram_color'><b>${mem_percent}%</b></spa
 TOOLTIP+="󰋊  SSD:   <span foreground='#00e5ff'><b>${disk_percent}</b></span> (${disk_used}/${disk_total} usados)"
 TOOLTIP+="</tt>"
 
+# Determinar el texto de salida según el modo
+SHOW_MODE="icon"
+if [ -f "$STATUS_FILE" ]; then
+    SHOW_MODE=$(cat "$STATUS_FILE")
+fi
+
+if [ "$SHOW_MODE" = "detailed" ]; then
+    TEXT="󰻠 <span foreground='$cpu_color'>${cpu_usage}%</span>  󰍛 <span foreground='$ram_color'>${mem_percent}%</span>  󰋊 <span foreground='#00e5ff'>${disk_percent}</span>"
+else
+    TEXT="󰍛"
+fi
+
 # Output JSON
-echo "{\"text\": \"󰍛\", \"tooltip\": \"$TOOLTIP\"}"
+echo "{\"text\": \"$TEXT\", \"tooltip\": \"$TOOLTIP\"}"

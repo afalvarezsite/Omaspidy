@@ -23,7 +23,6 @@ window#waybar {
  * ------------------------------------------------------------------------------ */
 #workspaces,
 #window,
-#clock,
 #network,
 #pulseaudio,
 #backlight,
@@ -33,13 +32,14 @@ window#waybar {
 #battery,
 #mpris,
 #custom-sysresources,
-#custom-power {
+#custom-power,
+#custom-arch {
     background: @bg-light;
     color: @fg;
     border: 1px solid rgba(230, 0, 38, 0.25); /* Bordes rojizos semitransparentes */
     border-radius: 16px;
-    padding: 2px 14px;
-    margin: 4px 4px;
+    padding: 4px 14px;
+    margin: 2px 4px;
     box-shadow: none;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -54,7 +54,7 @@ window#waybar {
 #custom-power:hover,
 #mpris:hover,
 #custom-sysresources:hover,
-#clock:hover {
+#clock-dnd:hover {
     background: rgba(230, 0, 38, 0.15);
     border-color: @red-glow;
     color: #ffffff;
@@ -107,15 +107,24 @@ window#waybar {
     padding: 0 10px;
 }
 
-/* RELOJ CENTRAL DESTACADO (Cápsula de Poder) */
-#clock {
+/* GRUPO RELOJ CENTRAL DESTACADO (Cápsula de Poder) */
+#clock-dnd {
+    background: @bg-dark;
+    border: 2px solid @red;
+    border-radius: 16px;
+    padding: 4px 18px; /* Punto de equilibrio perfecto para la píldora del reloj */
+    margin: 2px 4px;
+    box-shadow: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#clock-dnd #clock {
     color: @fg;
     font-size: 14.5px;
     font-weight: 800;
-    background: @bg-dark;
-    border: 2px solid @red;
-    box-shadow: none;
-    padding: 2px 18px;
+    background: transparent;
+    border: none;
+    padding: 0;
 }
 
 /* BATERÍA DILIGENTE */
@@ -162,7 +171,7 @@ window#waybar {
     color: #ffffff;
     border-color: @red;
     animation: recording-glow 0.8s ease-in-out infinite alternate;
-    padding: 2px 11px 2px 9px;
+    padding: 4px 11px 4px 9px;
 }
 
 #custom-sysrecord.inactive {
@@ -178,7 +187,15 @@ window#waybar {
     color: #ffd600;
     border-color: rgba(255, 214, 0, 0.3);
     text-shadow: 0px 0px 8px rgba(255, 214, 0, 0.4);
-    padding: 2px 11px 2px 9px;
+    padding: 4px 11px 4px 9px;
+}
+
+#custom-hyprsunset.inactive {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
 }
 
 /* PERFILES DE ENERGÍA */
@@ -201,7 +218,7 @@ window#waybar {
     color: @red-glow;
     background: @bg-dark;
     border: 1px solid @red;
-    padding: 2px 11px 2px 9px;
+    padding: 4px 11px 4px 9px;
 }
 
 #custom-power:hover {
@@ -212,12 +229,30 @@ window#waybar {
 
 /* REPRODUCTOR DE SONIDO (MPRIS) */
 #mpris {
-    padding: 2px 14px;
+    padding: 4px 14px;
+}
+
+/* LOGO DE ARCH LINUX */
+#custom-arch {
+    color: @red;
+    font-size: 16.5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 9px;  /* Reducido para tirar del icono hacia la izquierda */
+    padding-right: 15px; /* Aumentado para equilibrar el espacio a la derecha */
+    border-color: rgba(230, 0, 38, 0.25);
+}
+
+#custom-arch:hover {
+    background: rgba(230, 0, 38, 0.15);
+    border-color: @red-glow;
+    color: #ffffff;
+    text-shadow: 0px 0px 8px @red-glow;
 }
 
 /* MONITOR DE RECURSOS (SYS-RESOURCES) */
 #custom-sysresources {
-    padding: 2px 11px 2px 9px;
+    padding: 4px 11px 4px 9px;
 }
 
 #mpris.playing {
@@ -260,4 +295,30 @@ window#waybar {
     to {
         background-color: rgba(230, 0, 38, 0.55);
     }
+}
+
+/* MODO NO MOLESTAR DENTRO DE LA CÁPSULA DEL RELOJ */
+#clock-dnd #custom-dnd {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+
+#clock-dnd #custom-dnd.active {
+    color: #64748b; /* Gris azulado apagado y discreto */
+    font-size: 14px;
+    padding-left: 8px;  /* Separación óptima con el reloj */
+    padding-right: 4px; /* Pequeño colchón derecho de seguridad */
+}
+
+#clock-dnd #custom-dnd.active:hover {
+    color: #ff3b5c; /* Ilumina en rojo al pasar el cursor para apagarlo */
+    text-shadow: 0px 0px 8px @red-glow;
+}
+
+#clock-dnd #custom-dnd.inactive {
+    padding: 0;
 }

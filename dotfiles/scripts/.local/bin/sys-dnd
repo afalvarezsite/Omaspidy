@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# SYS-DND: GESTOR DE MODO NO MOLESTAR PARA WAYBAR (OH MY SPIDY)
+# Desactiva notificaciones usando los modos nativos de Mako (invisible=1).
+# Mantiene persistencia real después de reiniciar mediante sincronización auto-curativa.
+# ==============================================================================
+
+STATUS_DIR="$HOME/.local/state"
+STATUS_FILE="$STATUS_DIR/sysdnd.status"
+
+# Asegurar que el directorio de estado existe
+mkdir -p "$STATUS_DIR"
+
+# Inicializar estado si no existe
+if [ ! -f "$STATUS_FILE" ]; then
+    echo "inactive" > "$STATUS_FILE"
+fi
+
+CURRENT_STATE=$(cat "$STATUS_FILE")
+
+# Asegurar que mako esté activo en segundo plano
+ensure_mako() {
+    if ! pgrep -x "mako" >/dev/null; then
+        mako & disown
+        sleep 0.2
+    fi
+}
+
+# Sincronizar el estado interno de Mako con el estado guardado de forma persistente
+sync_mako_state() {
+    if pgrep -x "mako" >/dev/null; then
+        local mako_modes=$(makoctl mode 2>/dev/null)
+        if [ "$CURRENT_STATE" = "active" ]; then
+            if ! echo "$mako_modes" | grep -q "dnd"; then
+                makoctl mode -a dnd >/dev/null 2>&1
+            fi
+        else
+            if echo "$mako_modes" | grep -q "dnd"; then
+                makoctl mode -r dnd >/dev/null 2>&1
+            fi
+        fi
+    fi
+}
+
+# Ejecutar sincronización al inicio para garantizar auto-curación y persistencia
+sync_mako_state
+
+# Si se solicita el estado para Waybar
+if [ "$1" = "--waybar" ]; then
+    if [ "$CURRENT_STATE" = "active" ]; then
+        echo '{"text": "󰂛", "alt": "active", "class": "active", "tooltip": "Modo No Molestar: Activo\nNotificaciones silenciadas a través de Mako."}'
+    else
+        echo '{"text": "", "alt": "inactive", "class": "inactive", "tooltip": ""}'
+    fi
+    exit 0
+fi
+
+# Si se solicita conmutar (toggle)
+if [ "$1" = "--toggle" ]; then
+    ensure_mako
+    if [ "$CURRENT_STATE" = "active" ]; then
+        # Desactivar modo DND en Mako
+        makoctl mode -r dnd
+        echo "inactive" > "$STATUS_FILE"
+        notify-send -t 2000 -i notifications-active "Modo No Molestar" "Notificaciones activadas (Mako activo)"
+    else
+        # Activar modo DND en Mako
+        notify-send -t 2000 -i notifications-disabled "Modo No Molestar" "Entrando en silencio..."
+        sleep 1.2 # Dar tiempo a que se muestre la notificación de aviso
+        makoctl mode -a dnd
+        echo "active" > "$STATUS_FILE"
+    fi
+    # Actualizar Waybar usando la señal RTMIN+12
+    pkill -RTMIN+12 waybar
+    exit 0
+fi
+
+echo "Uso: sys-dnd [--toggle | --waybar]"
+exit 1

@@ -33,6 +33,8 @@ OPTIONS="  sys-distrobox      (Gestor de Contenedores TUI - dbs)
   sys-record         (Grabación de Pantalla con VA-API)
   sys-health         (Diagnóstico de Servicios del Sistema)
 󰖔  sys-sunset         (Alternar Filtro Nocturno / Luz Azul)
+󰂛  sys-dnd            (Alternar Modo No Molestar - Silenciar)
+󰍛  sys-resources      (Alternar Vista del Monitor de Recursos)
   hypr-keys          (Catálogo de Atajos Interactivos)
 󰍺  hypr-mirror        (Duplicador de Pantalla en Espejo)
 󱄽  wl-ocr             (Captura de Pantalla a Texto - OCR)
@@ -52,6 +54,12 @@ case "$CMD_NAME" in
     "sys-sunset")
         hyprctl dispatch -- exec sys-sunset --toggle
         exit 0
+        ;;
+    "sys-dnd")
+        exec sys-dnd --toggle
+        ;;
+    "sys-resources")
+        exec sys-resources --toggle
         ;;
     "wl-ocr")
         hyprctl dispatch -- exec wl-ocr

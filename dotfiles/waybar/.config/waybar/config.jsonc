@@ -8,12 +8,13 @@
     "spacing": 5,
 
     "modules-left": [
+        "custom/arch",
         "hyprland/workspaces",
         "hyprland/window",
         "mpris"
     ],
     "modules-center": [
-        "clock"
+        "group/clock-dnd"
     ],
     "modules-right": [
         "network",
@@ -54,11 +55,20 @@
         }
     },
 
+    "group/clock-dnd": {
+        "orientation": "horizontal",
+        "modules": [
+            "clock",
+            "custom/dnd"
+        ]
+    },
+
     "clock": {
         "locale": "es_ES.UTF-8",
         "format": "{:%H:%M}",
         "format-alt": "{:%A, %d de %B}",
-        "tooltip-format": "<tt><small>{calendar}</small></tt>"
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "on-click-right": "sys-dnd --toggle"
     },
 
     "network": {
@@ -95,7 +105,8 @@
         "format": "{icon}  {percent}%",
         "format-icons": ["󰃞", "󰃟", "󰃠"],
         "on-scroll-up": "swayosd-client --brightness raise",
-        "on-scroll-down": "swayosd-client --brightness lower"
+        "on-scroll-down": "swayosd-client --brightness lower",
+        "on-click": "sys-sunset --toggle"
     },
 
     "battery": {
@@ -173,7 +184,24 @@
         "format": "{}",
         "return-type": "json",
         "exec": "sys-resources",
-        "interval": 2
+        "interval": 2,
+        "signal": 11,
+        "on-click": "sys-resources --toggle"
+    },
+
+    "custom/arch": {
+        "format": "",
+        "tooltip": false,
+        "on-click": "anyrun -c ~/.config/anyrun"
+    },
+
+    "custom/dnd": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "sys-dnd --waybar",
+        "interval": 5,
+        "signal": 12,
+        "on-click": "sys-dnd --toggle"
     },
 
     "custom/power": {

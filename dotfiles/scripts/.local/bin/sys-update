@@ -22,10 +22,10 @@ WHITE='\033[1;37m'
 NC='\033[0m'
 BOLD='\033[1m'
 
-msg()      { echo -e "${BLUE}::${NC} $1"; }
-msg_ok()   { echo -e "${GREEN}==>${NC} $1"; }
-msg_err()  { echo -e "${RED}[ERROR]${NC} $1"; }
-msg_warn() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+msg()      { echo -e "${BLUE}󰋽${NC} $1"; }
+msg_ok()   { echo -e "${GREEN}󰄬${NC} $1"; }
+msg_err()  { echo -e "${RED}󰅙${NC} $1"; }
+msg_warn() { echo -e "${YELLOW}󰀪${NC} $1"; }
 msg_step() { echo -e "\n${RED}┌─[ PASO $1 / $2 ]${NC} ${BOLD}$3${NC}\n${WHITE}└──────────────────────────────────────────────${NC}"; }
 
 show_banner() {
@@ -155,7 +155,7 @@ ORPHANS=$(pacman -Qtdq 2>/dev/null || true)
 if [ -n "$ORPHANS" ]; then
     ORPHAN_COUNT=$(echo "$ORPHANS" | wc -l)
     msg "Se encontraron $ORPHAN_COUNT paquete(s) huérfano(s):"
-    echo "$ORPHANS" | while read -r pkg; do echo -e "  ${YELLOW}·${NC} $pkg"; done
+    echo "$ORPHANS" | while read -r pkg; do echo -e "  ${YELLOW}${NC} $pkg"; done
     read -r -p "  ¿Eliminar todos los huérfanos? [S/n]: " del_confirm
     if [[ ! "$del_confirm" =~ ^[nN]$ ]]; then
         # shellcheck disable=SC2086
@@ -182,11 +182,11 @@ echo -e "${RED}║${NC}   ${BOLD}󰚰  ACTUALIZACIÓN DEL ECOSISTEMA COMPLETADA$
 echo -e "${RED}║${NC}   Tiempo total: ${WHITE}${MINS}m ${SECS}s${NC}                                 ${RED}║${NC}"
 
 if [ ${#ERRORS[@]} -eq 0 ]; then
-    echo -e "${RED}║${NC}   Estado:      ${GREEN}✓ Todo actualizado sin errores${NC}            ${RED}║${NC}"
+    echo -e "${RED}║${NC}   Estado:      ${GREEN}󰄬 Todo actualizado sin errores${NC}            ${RED}║${NC}"
 else
-    echo -e "${RED}║${NC}   Estado:      ${YELLOW}⚠ Completado con advertencias:${NC}            ${RED}║${NC}"
+    echo -e "${RED}║${NC}   Estado:      ${YELLOW}󰀪 Completado con advertencias:${NC}            ${RED}║${NC}"
     for err in "${ERRORS[@]}"; do
-        echo -e "${RED}║${NC}     ${YELLOW}·${NC} $err                                          ${RED}║${NC}"
+        echo -e "${RED}║${NC}     ${YELLOW}${NC} $err                                          ${RED}║${NC}"
     done
 fi
 

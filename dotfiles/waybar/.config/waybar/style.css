@@ -258,7 +258,7 @@ window#waybar {
 
 /* MONITOR DE RECURSOS (SYS-RESOURCES) */
 #custom-sysresources {
-    font-size: 16px; /* Icono un poco más grande */
+    font-size: 19px; /* Icono un poco más grande */
     padding-top: 4px;
     padding-bottom: 4px;
     padding-left: 14px;  /* Ajustado para tirar muy levemente a la izquierda */
@@ -331,4 +331,20 @@ window#waybar {
 
 #clock-dnd #custom-dnd.inactive {
     padding: 0;
+}
+
+/* ------------------------------------------------------------------------------
+ * TOOLTIPS & CALENDAR (Estilo premium para la ventana flotante del calendario)
+ * ------------------------------------------------------------------------------ */
+tooltip {
+    background: @bg-light;
+    border: 1px solid rgba(230, 0, 38, 0.45);
+    border-radius: 12px;
+}
+
+tooltip label {
+    color: @fg;
+    font-family: "Hack Nerd Font", "Outfit", "Inter", sans-serif;
+    font-size: 13.5px;
+    padding: 8px;
 }

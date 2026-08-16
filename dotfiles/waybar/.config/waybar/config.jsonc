@@ -68,6 +68,23 @@
         "format": "{:%H:%M}",
         "format-alt": "{:%A, %d de %B}",
         "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode"          : "month",
+            "mode-mon-col"  : 3,
+            "weeks-pos"     : "right",
+            "on-scroll"     : 1,
+            "format": {
+                "months":     "<span color='#ff3b5c'><b>{}</b></span>",
+                "days":       "<span color='#f8f9fa'>{}</span>",
+                "weeks":      "<span color='#00e5ff'><b>W{}</b></span>",
+                "weekdays":   "<span color='#00e5ff'><b>{}</b></span>",
+                "today":      "<span color='#ff3b5c'><b><u>{}</u></b></span>"
+            }
+        },
+        "actions": {
+            "on-scroll-up": "shift_up",
+            "on-scroll-down": "shift_down"
+        },
         "on-click-right": "sys-dnd --toggle"
     },
 
@@ -115,10 +132,10 @@
             "critical": 15
         },
         "interval": 10,
-        "format": "{icon}  {capacity}%",
-        "format-charging": "󰂄  {capacity}%",
-        "format-plugged": "  {capacity}%",
-        "format-alt": "{time}  {icon}",
+        "format": "<span size='large'>{icon}</span>  {capacity}%",
+        "format-charging": "<span size='large'>󰂄</span>  {capacity}%",
+        "format-plugged": "<span size='large'></span>  {capacity}%",
+        "format-alt": "{time}  <span size='large'>{icon}</span>",
         "tooltip-format": "{capacity}% | Tiempo restante: {time}",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
     },
@@ -158,6 +175,7 @@
     },
 
     "mpris": {
+        "interval": 1,
         "format": "{player_icon} {dynamic}",
         "format-paused": "{status_icon} <i>{dynamic}</i>",
         "player-icons": {

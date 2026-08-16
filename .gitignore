@@ -1,0 +1,4 @@
+# Runtime cache & system state
+*.zcompdump
+dotfiles/scripts/.local/share/*
+!dotfiles/scripts/.local/share/applications/
